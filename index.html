@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Market Intelligence — 3 Pilot Accounts</title>
+<style>
+  :root {
+    --bg: #0f0f14;
+    --panel: #1a1a23;
+    --surface: #1a1a23;
+    --panel2: #232330;
+    --surface-2: #232330;
+    --surface-3: #2a2a3a;
+    --border: #2e2e3e;
+    --border-strong: #3d3d52;
+    --text: #ececf1;
+    --muted: #9494a8;
+    --text-dim: #9494a8;
+    --text-faint: #5a5a72;
+    --accent: #8b7cf6;
+    --accent-soft: rgba(139,124,246,0.15);
+    --good: #4ade80;
+    --green: #4ade80;
+    --good-soft: rgba(74,222,128,0.14);
+    --danger: #f87171;
+    --red: #f87171;
+    --danger-soft: rgba(248,113,113,0.14);
+    --warn: #fbbf24;
+    --yellow: #facc15;
+    --warn-soft: rgba(251,191,36,0.14);
+    --radius: 16px;
+    --radius-pill: 999px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f7f7fb; --panel: #ffffff; --surface: #ffffff; --panel2: #f0f0f6; --surface-2: #f0f0f6; --surface-3: #e7e7f0;
+      --border: #e3e3ec; --border-strong: #c9c9dc;
+      --text: #17171f; --muted: #6b6b7d; --text-dim: #6b6b7d; --text-faint: #8f8fa3;
+      --accent: #7c6cf0; --accent-soft: rgba(124,108,240,0.12);
+      --good: #16a34a; --green: #16a34a; --good-soft: rgba(22,163,74,0.12);
+      --danger: #dc4a4a; --red: #dc4a4a; --danger-soft: rgba(220,74,74,0.1);
+      --warn: #b45309; --yellow: #b45309; --warn-soft: rgba(180,83,9,0.12);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #f7f7fb; --panel: #ffffff; --surface: #ffffff; --panel2: #f0f0f6; --surface-2: #f0f0f6; --surface-3: #e7e7f0;
+    --border: #e3e3ec; --border-strong: #c9c9dc;
+    --text: #17171f; --muted: #6b6b7d; --text-dim: #6b6b7d; --text-faint: #8f8fa3;
+    --accent: #7c6cf0; --accent-soft: rgba(124,108,240,0.12);
+    --good: #16a34a; --green: #16a34a; --good-soft: rgba(22,163,74,0.12);
+    --danger: #dc4a4a; --red: #dc4a4a; --danger-soft: rgba(220,74,74,0.1);
+    --warn: #b45309; --yellow: #b45309; --warn-soft: rgba(180,83,9,0.12);
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f0f14; --panel: #1a1a23; --surface: #1a1a23; --panel2: #232330; --surface-2: #232330; --surface-3: #2a2a3a;
+    --border: #2e2e3e; --border-strong: #3d3d52;
+    --text: #ececf1; --muted: #9494a8; --text-dim: #9494a8; --text-faint: #5a5a72;
+    --accent: #8b7cf6; --accent-soft: rgba(139,124,246,0.15);
+    --good: #4ade80; --green: #4ade80; --good-soft: rgba(74,222,128,0.14);
+    --danger: #f87171; --red: #f87171; --danger-soft: rgba(248,113,113,0.14);
+    --warn: #fbbf24; --yellow: #facc15; --warn-soft: rgba(251,191,36,0.14);
+  }
+
+  /* Fixed categorical colors for the two signal channels — constant across themes */
+  .c-newstype { color: #14b8a6; } .bg-newstype { background: #5eead4; }
+  .c-socialtype { color: #7c3aed; } .bg-socialtype { background: #a78bfa; }
+  @media (prefers-color-scheme: dark) {
+    .c-newstype { color: #5eead4; } .c-socialtype { color: #a78bfa; }
+  }
+  :root[data-theme="dark"] .c-newstype { color: #5eead4; }
+  :root[data-theme="dark"] .c-socialtype { color: #a78bfa; }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--accent-soft); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  button { font: inherit; color: inherit; }
+  @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; } }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 40px 32px 80px; }
+
+  .app-title { display: flex; align-items: baseline; gap: 10px; margin: 0 0 8px; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+  .app-title .spark { color: var(--accent); }
+  .app-title .pilot-tag { font-weight: 500; color: var(--muted); font-size: 16px; }
+  .app-sub { color: var(--muted); font-size: 13.5px; max-width: 76ch; margin: 0 0 18px; }
+
+  .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--text-faint); margin-bottom: 14px; flex-wrap: wrap; }
+  .breadcrumb button { background: none; border: none; cursor: pointer; padding: 1px 3px; color: var(--muted); font-size: 12.5px; border-radius: 4px; }
+  .breadcrumb button:hover { color: var(--accent); }
+  .breadcrumb .current { color: var(--text); font-weight: 600; }
+  .breadcrumb .sep { color: var(--border-strong); }
+
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 13px; border-radius: var(--radius-pill); font-size: 12.5px; border: 1px solid var(--border); white-space: nowrap; }
+  .pill.outline { color: var(--muted); background: transparent; }
+  .pill.primary-btn { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; cursor: pointer; }
+  .pill.primary-btn:hover { filter: brightness(1.08); }
+  .pill.live-pill { color: var(--good); background: var(--good-soft); border-color: transparent; font-weight: 500; }
+  .pill.live-pill b { background: var(--good); color: #06280f; font-size: 10px; font-weight: 800; letter-spacing: 0.03em; padding: 1px 6px; border-radius: var(--radius-pill); margin-left: 2px; }
+
+  .action-row { display: flex; gap: 10px; align-items: center; margin-bottom: 22px; flex-wrap: wrap; }
+
+  /* Account switcher */
+  .account-switch-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+  .account-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--panel); border: 1px solid var(--border); color: var(--text);
+    padding: 9px 16px; border-radius: var(--radius-pill); font-size: 13.5px; font-weight: 600; cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .account-pill:hover { border-color: var(--border-strong); }
+  .account-pill .ind-tag { font-weight: 500; color: var(--text-faint); font-size: 11.5px; }
+  .account-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .account-pill.active .ind-tag { color: rgba(255,255,255,0.75); }
+
+  hr.divider { border: none; border-top: 1px solid var(--border); margin: 18px 0 22px; }
+
+  .callout {
+    background: var(--panel2); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 18px; margin-bottom: 26px; font-size: 13px; color: var(--text); line-height: 1.6;
+  }
+  .callout b.label { color: var(--warn); }
+  .callout.accent b.label { color: var(--accent); }
+
+  .section-head { display: flex; align-items: baseline; gap: 10px; margin: 30px 0 4px; }
+  .section-head h2 { font-size: 17px; margin: 0; font-weight: 700; }
+  .section-sub { color: var(--muted); font-size: 13px; margin: 0 0 16px; }
+
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px 22px; cursor: pointer; transition: border-color .15s, transform .15s;
+  }
+  .card:hover { border-color: var(--border-strong); }
+  .card h3 { margin: 0; font-size: 15.5px; font-weight: 700; letter-spacing: -0.005em; }
+  .card-title-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+  .badge-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .tag-pill { font-size: 11px; color: var(--muted); background: var(--panel2); border: 1px solid var(--border); padding: 3px 9px; border-radius: var(--radius-pill); }
+  .card-desc { color: var(--muted); font-size: 12.8px; line-height: 1.55; margin: 0 0 14px; }
+
+  .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 12px; font-size: 12.5px; }
+  .foot-meta { color: var(--muted); font-family: var(--mono); }
+  .foot-link { color: var(--accent); font-weight: 700; }
+
+  .conf-pill.high { color: var(--good); background: var(--good-soft); border-color: transparent; }
+  .conf-pill.medium { color: var(--warn); background: var(--warn-soft); border-color: transparent; }
+  .conf-pill.low { color: var(--danger); background: var(--danger-soft); border-color: transparent; }
+
+  /* Account profile strip */
+  .account-strip {
+    background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px 24px; margin-bottom: 24px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  }
+  .avatar { width: 46px; height: 46px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; font-family: var(--mono); flex-shrink: 0; }
+  .account-strip h2 { margin: 0; font-size: 17px; }
+  .account-strip .sector-line { color: var(--text-faint); font-size: 12px; margin-top: 2px; }
+  .account-facts { display: flex; gap: 26px; margin-left: auto; flex-wrap: wrap; }
+  .account-facts .fact-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-faint); }
+  .account-facts .fact-value { font-size: 13px; margin-top: 3px; font-family: var(--mono); }
+
+  /* Two-column signal feed */
+  .signal-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 8px; }
+  .signal-col { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 24px; }
+  .signal-col-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 2px; }
+  .signal-col-head h3 { margin: 0; font-size: 15px; }
+  .signal-col .col-sub { color: var(--muted); font-size: 12px; margin: 2px 0 16px; }
+
+  .timeline-item { display: grid; grid-template-columns: 78px 1fr; gap: 14px; padding: 12px 0; }
+  .timeline-item:not(:last-child) { border-bottom: 1px dashed var(--border); }
+  .timeline-date { font-family: var(--mono); font-size: 11px; color: var(--text-faint); padding-top: 2px; }
+  .evidence-type { display: inline-block; font-size: 10.5px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 5px; background: var(--panel2); padding: 2px 8px; border-radius: var(--radius-pill); }
+  .timeline-item p { margin: 0; font-size: 12.8px; color: var(--text); line-height: 1.55; }
+
+  .sig-ref-pill { font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: var(--radius-pill); background: var(--panel2); border: 1px solid var(--border); }
+
+  /* Detail / scenario view */
+  .detail-grid { display: grid; grid-template-columns: 1fr 1.05fr; gap: 20px; align-items: start; margin-top: 6px; }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 26px; }
+  .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-faint); margin: 0 0 14px; }
+
+  .opp-eyebrow { font-size: 11.5px; color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+  .opp-title { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 10px; }
+  .opp-summary { color: var(--muted); font-size: 13.5px; line-height: 1.6; margin: 0 0 20px; }
+
+  .conf-row { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+  .conf-number { font-family: var(--mono); font-size: 30px; font-weight: 800; line-height: 1; }
+  .conf-number.high { color: var(--good); } .conf-number.medium { color: var(--warn); } .conf-number.low { color: var(--danger); }
+  .conf-fill-track { width: 100%; height: 6px; background: var(--panel2); border-radius: var(--radius-pill); overflow: hidden; margin-top: 8px; }
+  .conf-fill { height: 100%; border-radius: var(--radius-pill); }
+  .conf-fill.high { background: var(--good); } .conf-fill.medium { background: var(--warn); } .conf-fill.low { background: var(--danger); }
+  .conf-sub { font-size: 11.5px; color: var(--text-faint); margin-top: 4px; }
+
+  .cap-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+  .cap-pill { display: inline-flex; align-items: center; gap: 6px; background: var(--panel2); border: 1px solid var(--border); color: var(--text); font-size: 12.5px; padding: 7px 13px; border-radius: var(--radius-pill); }
+  .cap-pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+  .cta-row { display: flex; gap: 10px; margin-top: 4px; }
+  .btn { border-radius: var(--radius-pill); padding: 10px 18px; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid var(--border); background: var(--panel); color: var(--text); }
+  .btn:hover { border-color: var(--border-strong); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { filter: brightness(1.08); }
+
+  .toast {
+    position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--text); color: var(--bg);
+    padding: 11px 20px; border-radius: 10px; font-size: 13px; font-weight: 700;
+    opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 50;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 900px) {
+    .wrap { padding: 26px 18px 60px; }
+    .signal-columns { grid-template-columns: 1fr; }
+    .detail-grid { grid-template-columns: 1fr; }
+    .account-facts { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="main"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+
+  var ACCOUNTS = [
+    {
+      id: 'vw',
+      name: 'Volkswagen Group',
+      industry: 'Automotive',
+      icon: '🚗',
+      avatar: 'VW',
+      hq: 'Wolfsburg, Germany',
+      revenue: '$322B (FY2025)',
+      sector: 'Automotive OEM — Multi-Brand · software unit: CARIAD',
+      signals: [
+        { id:'n1', channel:'news', subtype:'Law', date:'2026-07-05', text:'New EU law says AI used in driver assistance and cabin monitoring must pass a safety check within 12 months.' },
+        { id:'n2', channel:'news', subtype:'Law', date:'2026-05-14', text:'New EU rule says car makers must let owners and approved apps access their vehicle’s data.' },
+        { id:'n3', channel:'news', subtype:'Law', date:'2026-03-02', text:'Germany’s supply-chain law now also covers where a company’s AI training data comes from.' },
+        { id:'n4', channel:'news', subtype:'Collaboration', date:'2026-06-18', text:'CARIAD, Volkswagen’s software unit, signs a major cloud and AI deal to power its next in-car assistant.' },
+        { id:'n5', channel:'news', subtype:'Collaboration', date:'2026-04-09', text:'Volkswagen and Rivian’s shared software project hits its first milestone — both companies’ new EVs will run it.' },
+        { id:'n6', channel:'news', subtype:'Collaboration', date:'2026-02-20', text:'Volkswagen deepens its partnership with Xpeng, sharing software and AI for two new electric models in China.' },
+        { id:'s1', channel:'social', subtype:'Hiring', date:'2026-06-25', text:'Volkswagen posts three senior roles at once — "Head of AI Governance", "Data Trust & Privacy Lead", and "Responsible AI Program Manager".' },
+        { id:'s2', channel:'social', subtype:'Hiring', date:'2026-05-30', text:'CARIAD opens its first role focused purely on AI quality: "Staff Engineer — AI Observability & Monitoring".' },
+        { id:'s3', channel:'social', subtype:'Migration', date:'2026-06-10', text:'Three senior AI engineers leave a major AI lab to join CARIAD, all within the same month.' },
+        { id:'s4', channel:'social', subtype:'Migration', date:'2026-01-22', text:'CARIAD’s new Chief Digital Officer joins from a Silicon Valley self-driving startup, bringing former colleagues along.' },
+        { id:'s5', channel:'social', subtype:'Event', date:'2026-07-01', text:'Volkswagen’s CTO will keynote the Munich Auto-AI Summit on "Trustworthy AI in Vehicles".' },
+        { id:'s6', channel:'social', subtype:'Event', date:'2026-04-25', text:'CARIAD holds a developer day to preview its in-car assistant roadmap to press and analysts.' },
+        { id:'s7', channel:'social', subtype:'Social Post', date:'2026-07-10', text:'Drivers on social media say the ID. software assistant gives wrong or confusing answers about charging and range.' },
+        { id:'s8', channel:'social', subtype:'Social Post', date:'2026-03-15', text:'CARIAD’s digital lead posts on LinkedIn about building real AI skills in-house instead of relying on vendors.' }
+      ],
+      scenarios: [
+        {
+          id: 'ai-governance', title: 'AI Governance & Observability Build-Out Partner', domainTag: 'AI Regulation & Governance', confidence: 86,
+          signalIds: ['n1','s1','s2','s7'],
+          summary: 'Volkswagen just started hiring for the AI oversight team the new EU safety law will require — and its own customers are already complaining about a live assistant giving wrong answers. We can deliver the monitoring system their new hires are meant to own, working before the 12-month deadline instead of after a slow internal build.',
+          capabilities: ['Hallucination & response-quality monitoring', 'Support passing the new EU AI safety check', 'Customer-complaint triage & root-cause tagging', 'Governance framework & policy templates', 'Extra hands while the new governance team ramps up'],
+          nextStep: 'Approach the "Head of AI Governance" and "Staff Engineer — AI Observability" hiring managers directly — offer to have the monitoring system ready before their own hires are even onboarded.'
+        },
+        {
+          id: 'data-compliance', title: 'Data-Sharing Compliance Layer for the CARIAD Cloud Partnership', domainTag: 'Connected-Vehicle Data Regulation', confidence: 71,
+          signalIds: ['n2','n4'],
+          summary: 'The new cloud partnership gives CARIAD the infrastructure; the new EU data-access law gives them a deadline. Nobody on the cloud provider’s side owns making sure that data-sharing actually works safely and legally — that is the opening.',
+          capabilities: ['Customer data-access & consent tools', 'Third-party data-sharing audit trail', 'Cross-cloud data governance mapping', 'Regulatory reporting automation'],
+          nextStep: 'Reach CARIAD’s cloud partnership team, framed around the new data-access law the cloud deal alone doesn’t solve.'
+        },
+        {
+          id: 'delivery-augmentation', title: 'Embedded AI Delivery Team During the Talent Ramp', domainTag: 'Talent Migration into Auto-Tech', confidence: 64,
+          signalIds: ['s3','s4','s5','s1'],
+          summary: 'CARIAD is visibly building an AI team — new hires, engineers moving over from AI labs, a new digital chief — but a new team takes months to become productive, and the CTO is about to make public "trustworthy AI" promises at a major event. An outside team can deliver a fast, visible win while the internal team ramps up.',
+          capabilities: ['Embedded delivery team (2–4 consultants)', 'Fast working pilot in 4–6 weeks', 'Hands-on training for the incoming hires', 'Fact-check of public claims before the keynote'],
+          nextStep: 'Offer a short, fixed-scope pilot timed right after the CTO’s keynote, while attention and budget appetite are highest.'
+        },
+        {
+          id: 'cross-border-advisory', title: 'Cross-Border AI Governance Advisory for the Xpeng Co-Development', domainTag: 'Cross-Border AI Collaboration', confidence: 54,
+          signalIds: ['n6','n1'],
+          summary: 'Sharing software and AI between an EU-regulated company and a Chinese partner creates a gap between EU rules and China’s rules — worth sorting out before the two platforms are more deeply connected.',
+          capabilities: ['Cross-border data-flow risk mapping', 'EU vs. China AI-rule gap analysis', 'Shared-IP governance framework', 'Joint-venture compliance playbook'],
+          nextStep: 'Engage through Volkswagen’s international legal/compliance team before deeper technical integration with Xpeng moves forward.'
+        }
+      ]
+    },
+    {
+      id: 'rwe',
+      name: 'RWE AG',
+      industry: 'Energy',
+      icon: '⚡',
+      avatar: 'RWE',
+      hq: 'Essen, Germany',
+      revenue: '$36B (FY2025)',
+      sector: 'Energy & Utilities — Power Generation, Grids & Renewables · digital unit: RWE Digital',
+      signals: [
+        { id:'n1', channel:'news', subtype:'Law', date:'2026-06-22', text:'New EU rule: if AI helps set a customer’s energy price or contract, the company must be able to explain that decision in plain language.' },
+        { id:'n2', channel:'news', subtype:'Law', date:'2026-04-11', text:'Germany sets a 2027 deadline for power grids to handle much more solar and wind — grid operators must upgrade their forecasting systems by then.' },
+        { id:'n3', channel:'news', subtype:'Law', date:'2026-02-08', text:'New rule: smart-meter data must be shared with customers and approved apps, not just kept by the energy company.' },
+        { id:'n4', channel:'news', subtype:'Collaboration', date:'2026-06-01', text:'RWE partners with a cloud provider to use AI for predicting how much power its wind and solar sites will produce.' },
+        { id:'n5', channel:'news', subtype:'Collaboration', date:'2026-03-19', text:'RWE teams up with a battery-storage startup to balance power supply and demand using AI forecasts.' },
+        { id:'s1', channel:'social', subtype:'Hiring', date:'2026-06-28', text:'RWE posts a brand-new role: "Head of AI & Data Ethics" — its first of this kind.' },
+        { id:'s2', channel:'social', subtype:'Hiring', date:'2026-05-16', text:'RWE is hiring a "Grid AI Forecasting Lead" to help predict power supply and demand.' },
+        { id:'s3', channel:'social', subtype:'Migration', date:'2026-05-02', text:'Several data scientists from a large tech company join RWE’s new digital energy team this year.' },
+        { id:'s4', channel:'social', subtype:'Event', date:'2026-07-08', text:'RWE’s CEO is confirmed to speak at Berlin Energy Week on "Trustworthy AI for the Power Grid".' },
+        { id:'s5', channel:'social', subtype:'Event', date:'2026-03-27', text:'RWE hosts an open house for its new digital energy control room, showing off its AI forecasting tools.' },
+        { id:'s6', channel:'social', subtype:'Social Post', date:'2026-07-14', text:'Customers on social media complain that RWE’s new smart-pricing app gives confusing or wrong price predictions.' },
+        { id:'s7', channel:'social', subtype:'Social Post', date:'2026-04-30', text:'RWE’s digital lead posts on LinkedIn about wanting AI that customers can "actually trust with their energy bill".' }
+      ],
+      scenarios: [
+        {
+          id: 'pricing-transparency', title: 'AI Pricing Transparency & Fairness Check', domainTag: 'AI Regulation & Consumer Trust', confidence: 84,
+          signalIds: ['n1','s1','s6'],
+          summary: 'RWE must soon be able to explain any AI decision that affects a customer’s bill — and customers are already complaining that the pricing app is confusing. We can build the plain-language explanations and fairness checks the new Ethics hire will need, and fix the trust problem the complaints already reveal.',
+          capabilities: ['Plain-language explanations for AI billing decisions', 'Bias & fairness testing for pricing models', 'Customer-complaint pattern analysis', 'Regulatory-readiness documentation'],
+          nextStep: 'Reach out to the new Head of AI & Data Ethics — offer to fast-track the explanation tooling before regulators start asking questions.'
+        },
+        {
+          id: 'grid-forecasting', title: 'Smart Grid Forecasting Accuracy Partner', domainTag: 'Renewable Grid Readiness', confidence: 73,
+          signalIds: ['n2','n4','s2'],
+          summary: 'RWE has a hard 2027 deadline to handle much more solar and wind power, just signed a cloud partnership for forecasting, and is hiring for exactly this. We can help make those forecasts accurate faster than building the skill from scratch.',
+          capabilities: ['Forecast accuracy monitoring & benchmarking', 'Weather & demand data-quality checks', 'Performance dashboards for the new hire’s team', 'Grid-readiness reporting for the 2027 deadline'],
+          nextStep: 'Offer to partner on forecast accuracy alongside the new cloud deal, timed to the 2027 grid deadline.'
+        },
+        {
+          id: 'meter-data-compliance', title: 'Smart Meter Data-Sharing Compliance', domainTag: 'Connected-Energy Data Regulation', confidence: 60,
+          signalIds: ['n3','n5'],
+          summary: 'The new rule means RWE must safely open up smart-meter data to customers and approved apps, right as it pilots a new AI-driven storage partnership. Someone needs to make sure that data goes out safely and correctly.',
+          capabilities: ['Secure data-sharing access layer', 'Customer consent management', 'Third-party app compliance checks'],
+          nextStep: 'Approach the digital energy team behind the storage partnership, framed around getting data-sharing compliant before the deadline.'
+        },
+        {
+          id: 'trust-campaign', title: 'Public Trust Review Ahead of the CEO’s Keynote', domainTag: 'Executive Communications Risk', confidence: 52,
+          signalIds: ['s4','s3','s7'],
+          summary: 'The CEO is about to publicly promise "trustworthy AI" at a major industry event — a good moment to make sure the systems behind that promise can actually back it up.',
+          capabilities: ['Pre-keynote AI trust & safety review', 'Fact-check of talking points against real system behavior', 'Quick-win pilot to showcase ahead of the event'],
+          nextStep: 'Offer a fast pre-event review so the CEO’s keynote claims are backed by real, checked systems.'
+        }
+      ]
+    },
+    {
+      id: 'bayer',
+      name: 'Bayer AG',
+      industry: 'Pharma',
+      icon: '💊',
+      avatar: 'BAY',
+      hq: 'Leverkusen, Germany',
+      revenue: '$47B (FY2025)',
+      sector: 'Pharmaceuticals & Life Sciences · digital unit: Bayer R&D Digital',
+      signals: [
+        { id:'n1', channel:'news', subtype:'Law', date:'2026-06-30', text:'New EU rule says AI used to help discover or test new medicines must be checked and documented, just like lab equipment.' },
+        { id:'n2', channel:'news', subtype:'Law', date:'2026-04-17', text:'Germany updates patient-data privacy rules — drug companies must prove how each AI tool uses patient data before rolling it out.' },
+        { id:'n3', channel:'news', subtype:'Law', date:'2026-02-25', text:'New EU rule requires drug companies to explain any AI-assisted decision that affects who gets into a clinical trial.' },
+        { id:'n4', channel:'news', subtype:'Collaboration', date:'2026-06-09', text:'Bayer partners with an AI drug-discovery company to speed up finding new medicines.' },
+        { id:'n5', channel:'news', subtype:'Collaboration', date:'2026-03-14', text:'Bayer signs a deal with a cloud provider to run AI models across its research labs worldwide.' },
+        { id:'s1', channel:'social', subtype:'Hiring', date:'2026-07-02', text:'Bayer posts a brand-new role: "Head of Responsible AI in R&D" — its first role focused only on AI oversight in drug research.' },
+        { id:'s2', channel:'social', subtype:'Hiring', date:'2026-05-21', text:'Bayer is hiring a "Clinical AI Data Quality Manager" to check AI results used in clinical trials.' },
+        { id:'s3', channel:'social', subtype:'Migration', date:'2026-05-06', text:'Several AI scientists leave large tech and pharma companies to join Bayer’s new digital research unit this year.' },
+        { id:'s4', channel:'social', subtype:'Event', date:'2026-07-12', text:'Bayer’s Head of R&D is confirmed to speak at a major health-tech conference on "Can We Trust AI to Help Find New Medicines?".' },
+        { id:'s5', channel:'social', subtype:'Social Post', date:'2026-07-16', text:'Patients and doctors on social media question how an AI tool Bayer uses picks candidates for a clinical trial.' },
+        { id:'s6', channel:'social', subtype:'Social Post', date:'2026-03-20', text:'Bayer’s digital research lead posts on LinkedIn about wanting every AI decision in drug discovery to be fully explainable.' }
+      ],
+      scenarios: [
+        {
+          id: 'discovery-documentation', title: 'AI Documentation & Oversight for Drug Discovery', domainTag: 'AI Regulation in R&D', confidence: 82,
+          signalIds: ['n1','s1','n4'],
+          summary: 'Bayer must now document and check its AI research tools like any other lab equipment, right as it scales up an AI drug-discovery partnership and hires its first Responsible AI lead. We can build the documentation and monitoring system before regulators come asking.',
+          capabilities: ['AI model documentation & audit trail', 'Ongoing quality checks for AI research tools', 'Regulatory-readiness reporting', 'Support for the new Responsible AI lead'],
+          nextStep: 'Reach the new Head of Responsible AI in R&D directly — offer to have the documentation system ready before the next regulatory review.'
+        },
+        {
+          id: 'trial-fairness', title: 'Clinical Trial AI Fairness & Explainability Review', domainTag: 'Clinical AI Regulation', confidence: 79,
+          signalIds: ['n3','s2','s5'],
+          summary: 'Patients and doctors are already asking how an AI tool picks clinical trial candidates, and a new law will soon require Bayer to explain exactly that. We can build the fairness checks and plain-language explanations before it becomes a bigger public issue.',
+          capabilities: ['Clinical AI fairness & bias testing', 'Plain-language explanation reports for trial decisions', 'Data-quality checks for trial-matching AI', 'Regulatory documentation support'],
+          nextStep: 'Approach the new Clinical AI Data Quality Manager, using the public questions already circulating as the reason to act now.'
+        },
+        {
+          id: 'patient-data-compliance', title: 'Patient-Data Compliance for New AI Tools', domainTag: 'Patient Data Regulation', confidence: 62,
+          signalIds: ['n2','n5'],
+          summary: 'Before rolling AI out more broadly across global research labs through the new cloud deal, Bayer must prove how each tool uses patient data — an easy step to underestimate at global scale.',
+          capabilities: ['Patient-data usage mapping per AI tool', 'Consent & privacy compliance checks', 'Global rollout compliance playbook'],
+          nextStep: 'Engage the cloud partnership team early, before the AI tools are rolled out lab by lab worldwide.'
+        },
+        {
+          id: 'research-talent-ramp', title: 'Talent Ramp Support for the New Digital Research Unit', domainTag: 'Talent Migration into Pharma R&D', confidence: 55,
+          signalIds: ['s3','s4','s1'],
+          summary: 'Bayer is visibly building a digital AI research team, and its R&D leader is about to make public claims about trustworthy AI at a major conference. An outside team can help the new unit deliver a fast, credible result while it ramps up.',
+          capabilities: ['Embedded AI delivery support', 'Quick-win pilot ahead of the conference', 'Hands-on training for the growing research team'],
+          nextStep: 'Offer a short pilot timed before the Head of R&D’s conference talk, so there’s a real result to point to.'
+        }
+      ]
+    }
+  ];
+
+  var state = { accountId: 'vw', view: 'overview', scenarioId: null };
+
+  function byId(id){ return document.getElementById(id); }
+  function findAccount(id){ return ACCOUNTS.filter(function(a){ return a.id === id; })[0]; }
+  function currentAccount(){ return findAccount(state.accountId); }
+  function findSignal(account, id){ return account.signals.filter(function(s){ return s.id === id; })[0]; }
+  function findScenario(account, id){ return account.scenarios.filter(function(s){ return s.id === id; })[0]; }
+
+  function tier(score){ return score >= 75 ? 'high' : score >= 55 ? 'medium' : 'low'; }
+  function tierLabel(t){ return t === 'high' ? 'High confidence' : t === 'medium' ? 'Medium confidence' : 'Low confidence'; }
+  function monthShort(dateStr){
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var parts = dateStr.split('-');
+    return months[parseInt(parts[1],10)-1] + ' ' + parts[0];
+  }
+
+  function navigate(accountId, view, scenarioId){
+    state.accountId = accountId; state.view = view; state.scenarioId = scenarioId || null;
+    window.scrollTo(0,0);
+    render();
+  }
+
+  function accountSwitcher(){
+    return '<div class="account-switch-row">' + ACCOUNTS.map(function(a){
+      return '<button class="account-pill' + (a.id === state.accountId ? ' active' : '') + '" data-account="' + a.id + '">' + a.icon + ' ' + a.name + ' <span class="ind-tag">' + a.industry + '</span></button>';
+    }).join('') + '</div>';
+  }
+
+  function renderBreadcrumb(account){
+    var parts = ['<button data-nav="overview" data-account-nav="' + account.id + '">' + account.name + ' Signal Feed</button>'];
+    if (state.scenarioId){
+      var sc = findScenario(account, state.scenarioId);
+      parts.push('<span class="sep">/</span><span class="current">' + sc.title + '</span>');
+    }
+    return '<div class="breadcrumb">' + parts.join('') + '</div>';
+  }
+
+  function header(){
+    return '<h1 class="app-title"><span class="spark">✦</span> Market Intelligence <span class="pilot-tag">&mdash; 3 Pilot Accounts</span></h1>' +
+      '<p class="app-sub">Two signal channels tracked per account — news (laws &amp; collaborations) and social/workforce movements — surfaced as concrete AI &amp; data consulting offers for the sales team to review.</p>' +
+      '<div class="action-row">' +
+        '<span class="pill outline">✓ Mocked data — concept demo</span>' +
+        '<button class="pill primary-btn" data-toast="Signals refreshed (demo)">↻ Rescan Signals</button>' +
+        '<span class="pill live-pill">✓ Snapshot generated<b>2026-07-23</b></span>' +
+      '</div>';
+  }
+
+  function signalListHtml(account, channel){
+    return account.signals.filter(function(s){ return s.channel === channel; }).map(function(s){
+      var cls = channel === 'news' ? 'c-newstype' : 'c-socialtype';
+      return '<div class="timeline-item"><div class="timeline-date">' + monthShort(s.date) + '</div>' +
+        '<div><span class="evidence-type ' + cls + '">' + s.subtype + '</span><p>' + s.text + '</p></div></div>';
+    }).join('');
+  }
+
+  function renderOverview(){
+    var account = currentAccount();
+    var newsCount = account.signals.filter(function(s){ return s.channel === 'news'; }).length;
+    var socialCount = account.signals.filter(function(s){ return s.channel === 'social'; }).length;
+
+    var scenarioCards = account.scenarios.map(function(sc){
+      var t = tier(sc.confidence);
+      var refPills = sc.signalIds.map(function(id){
+        var s = findSignal(account, id);
+        var cls = s.channel === 'news' ? 'c-newstype' : 'c-socialtype';
+        return '<span class="sig-ref-pill ' + cls + '">' + s.subtype + ' &middot; ' + monthShort(s.date) + '</span>';
+      }).join(' ');
+      return '<div class="card" data-scenario-card="' + sc.id + '">' +
+        '<div class="card-title-row"><h3>' + sc.title + '</h3><span class="pill conf-pill ' + t + '">' + sc.confidence + '</span></div>' +
+        '<div class="badge-row"><span class="tag-pill">' + sc.domainTag + '</span></div>' +
+        '<p class="card-desc">' + sc.summary + '</p>' +
+        '<div class="badge-row">' + refPills + '</div>' +
+        '<div class="card-footer"><span class="foot-meta">' + tierLabel(t) + '</span><span class="foot-link">View offer &rarr;</span></div>' +
+        '</div>';
+    }).join('');
+
+    return header() + accountSwitcher() +
+      '<div class="account-strip">' +
+        '<div class="avatar">' + account.avatar + '</div>' +
+        '<div><h2>' + account.name + '</h2><div class="sector-line">' + account.sector + '</div></div>' +
+        '<div class="account-facts">' +
+          '<div><div class="fact-label">Headquarters</div><div class="fact-value">' + account.hq + '</div></div>' +
+          '<div><div class="fact-label">Revenue</div><div class="fact-value">' + account.revenue + '</div></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="callout"><b class="label">News signals:</b> ' + newsCount + ' &middot; <b class="label">Social &amp; workforce signals:</b> ' + socialCount + ' &middot; <b class="label">Offer scenarios identified:</b> ' + account.scenarios.length + '</div>' +
+      '<div class="signal-columns">' +
+        '<div class="signal-col">' +
+          '<div class="signal-col-head"><span class="c-newstype">●</span><h3>News</h3></div>' +
+          '<p class="col-sub">Laws that can impact the domain, and collaborations published in the news.</p>' +
+          signalListHtml(account, 'news') +
+        '</div>' +
+        '<div class="signal-col">' +
+          '<div class="signal-col-head"><span class="c-socialtype">●</span><h3>Social &amp; Workforce Movements</h3></div>' +
+          '<p class="col-sub">Social media activity, published events, hires, and talent migration.</p>' +
+          signalListHtml(account, 'social') +
+        '</div>' +
+      '</div>' +
+      '<div class="section-head"><h2>🎯 Offer Scenarios for ' + account.name + '</h2></div>' +
+      '<p class="section-sub">Where combinations of the signals above point to a concrete AI &amp; data consulting offer worth raising with the account.</p>' +
+      '<div class="grid-3">' + scenarioCards + '</div>';
+  }
+
+  function renderScenario(){
+    var account = currentAccount();
+    var sc = findScenario(account, state.scenarioId);
+    var t = tier(sc.confidence);
+    var evidence = sc.signalIds.map(function(id){
+      var s = findSignal(account, id);
+      var cls = s.channel === 'news' ? 'c-newstype' : 'c-socialtype';
+      return '<div class="timeline-item"><div class="timeline-date">' + s.date + '</div>' +
+        '<div><span class="evidence-type ' + cls + '">' + (s.channel === 'news' ? 'News' : 'Social') + ' · ' + s.subtype + '</span><p>' + s.text + '</p></div></div>';
+    }).join('');
+    var capabilities = sc.capabilities.map(function(cap){
+      return '<span class="cap-pill"><span class="dot"></span>' + cap + '</span>';
+    }).join('');
+
+    return header() + renderBreadcrumb(account) +
+      '<div class="detail-grid">' +
+        '<div class="panel">' +
+          '<div class="account-strip" style="margin-bottom:22px;padding:16px 18px;">' +
+            '<div class="avatar">' + account.avatar + '</div><div><h2 style="font-size:15px">' + account.name + '</h2><div class="sector-line">' + account.sector + '</div></div>' +
+          '</div>' +
+          '<p class="section-label">Signals behind this offer</p>' +
+          evidence +
+        '</div>' +
+        '<div class="panel">' +
+          '<div class="opp-eyebrow">Recommended offer &middot; ' + sc.domainTag + '</div>' +
+          '<h2 class="opp-title">' + sc.title + '</h2>' +
+          '<p class="opp-summary">' + sc.summary + '</p>' +
+          '<div class="conf-row">' +
+            '<div style="flex:1"><div class="conf-number ' + t + '">' + sc.confidence + '</div><div class="conf-fill-track"><div class="conf-fill ' + t + '" style="width:' + sc.confidence + '%"></div></div><div class="conf-sub">' + tierLabel(t) + ' &middot; based on ' + sc.signalIds.length + ' signals across both channels</div></div>' +
+          '</div>' +
+          '<p class="section-label">Included deliverables</p>' +
+          '<div class="cap-row">' + capabilities + '</div>' +
+          '<div class="callout accent"><b class="label">Recommended next step:</b> ' + sc.nextStep + '</div>' +
+          '<div class="cta-row"><button class="btn primary" data-toast="Added to sales pipeline (demo)">Send to CRM</button><button class="btn" data-toast="Marked as reviewed (demo)">Mark as reviewed</button></div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function render(){
+    var html = state.view === 'overview' ? renderOverview() : renderScenario();
+    byId('main').innerHTML = html;
+  }
+
+  var toastTimer;
+  function showToast(msg){
+    var el = byId('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 2200);
+  }
+
+  document.addEventListener('click', function(e){
+    var accountBtn = e.target.closest('[data-account]');
+    if (accountBtn){ navigate(accountBtn.getAttribute('data-account'), 'overview'); return; }
+
+    var scenarioCard = e.target.closest('[data-scenario-card]');
+    if (scenarioCard){ navigate(state.accountId, 'scenario', scenarioCard.getAttribute('data-scenario-card')); return; }
+
+    var navBtn = e.target.closest('[data-nav]');
+    if (navBtn){
+      var nav = navBtn.getAttribute('data-nav');
+      if (nav === 'overview') navigate(navBtn.getAttribute('data-account-nav') || state.accountId, 'overview');
+      return;
+    }
+
+    var toastBtn = e.target.closest('[data-toast]');
+    if (toastBtn){ showToast(toastBtn.getAttribute('data-toast')); return; }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

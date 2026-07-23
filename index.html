@@ -3,7 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <title>Market Intelligence — 3 Pilot Accounts</title>
+<script>
+  // Apply saved theme before first paint to avoid a flash of the wrong theme.
+  (function () {
+    try {
+      var stored = localStorage.getItem('theme');
+      if (stored === 'dark' || stored === 'light') {
+        document.documentElement.setAttribute('data-theme', stored);
+      }
+    } catch (e) {}
+  })();
+</script>
 <style>
   :root {
     --bg: #0f0f14;
@@ -31,11 +43,12 @@
     --warn-soft: rgba(251,191,36,0.14);
     --radius: 16px;
     --radius-pill: 999px;
+    --card-shadow: 0 4px 24px rgba(0,0,0,0.25);
     --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   }
   @media (prefers-color-scheme: light) {
-    :root {
+    :root:not([data-theme="dark"]) {
       --bg: #f7f7fb; --panel: #ffffff; --surface: #ffffff; --panel2: #f0f0f6; --surface-2: #f0f0f6; --surface-3: #e7e7f0;
       --border: #e3e3ec; --border-strong: #c9c9dc;
       --text: #17171f; --muted: #6b6b7d; --text-dim: #6b6b7d; --text-faint: #8f8fa3;
@@ -43,6 +56,7 @@
       --good: #16a34a; --green: #16a34a; --good-soft: rgba(22,163,74,0.12);
       --danger: #dc4a4a; --red: #dc4a4a; --danger-soft: rgba(220,74,74,0.1);
       --warn: #b45309; --yellow: #b45309; --warn-soft: rgba(180,83,9,0.12);
+      --card-shadow: 0 4px 24px rgba(0,0,0,0.08);
     }
   }
   :root[data-theme="light"] {
@@ -53,6 +67,7 @@
     --good: #16a34a; --green: #16a34a; --good-soft: rgba(22,163,74,0.12);
     --danger: #dc4a4a; --red: #dc4a4a; --danger-soft: rgba(220,74,74,0.1);
     --warn: #b45309; --yellow: #b45309; --warn-soft: rgba(180,83,9,0.12);
+    --card-shadow: 0 4px 24px rgba(0,0,0,0.08);
   }
   :root[data-theme="dark"] {
     --bg: #0f0f14; --panel: #1a1a23; --surface: #1a1a23; --panel2: #232330; --surface-2: #232330; --surface-3: #2a2a3a;
@@ -62,7 +77,22 @@
     --good: #4ade80; --green: #4ade80; --good-soft: rgba(74,222,128,0.14);
     --danger: #f87171; --red: #f87171; --danger-soft: rgba(248,113,113,0.14);
     --warn: #fbbf24; --yellow: #facc15; --warn-soft: rgba(251,191,36,0.14);
+    --card-shadow: 0 4px 24px rgba(0,0,0,0.25);
   }
+
+  /* Theme toggle (light / dark) */
+  .theme-toggle { position: fixed; top: 14px; right: 16px; z-index: 200; width: 36px; height: 36px; border-radius: 999px; background: var(--panel); border: 1px solid var(--border); box-shadow: var(--card-shadow); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; line-height: 1; transition: border-color .15s, background .15s; }
+  .theme-toggle:hover { border-color: var(--accent); }
+  .theme-toggle .icon-moon { display: none; }
+  .theme-toggle .icon-sun { display: block; }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) .theme-toggle .icon-moon { display: block; }
+    :root:not([data-theme="dark"]) .theme-toggle .icon-sun { display: none; }
+  }
+  :root[data-theme="light"] .theme-toggle .icon-moon { display: block; }
+  :root[data-theme="light"] .theme-toggle .icon-sun { display: none; }
+  :root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+  :root[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
 
   /* Fixed categorical colors for the two signal channels — constant across themes */
   .c-newstype { color: #14b8a6; } .bg-newstype { background: #5eead4; }
@@ -229,6 +259,10 @@
 </style>
 </head>
 <body>
+<button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light / dark theme" title="Toggle light / dark theme">
+  <span class="icon-moon">🌙</span><span class="icon-sun">☀️</span>
+</button>
+
 <div class="wrap" id="main"></div>
 <div class="toast" id="toast"></div>
 
@@ -576,6 +610,19 @@
 
   render();
 })();
+</script>
+<script>
+// Toggle light / dark theme and remember the choice.
+function toggleTheme() {
+  const root = document.documentElement;
+  let current = root.getAttribute('data-theme');
+  if (!current) {
+    current = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  const next = current === 'dark' ? 'light' : 'dark';
+  root.setAttribute('data-theme', next);
+  try { localStorage.setItem('theme', next); } catch (e) {}
+}
 </script>
 </body>
 </html>

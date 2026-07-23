@@ -142,7 +142,7 @@
   .action-row { display: flex; gap: 10px; align-items: center; margin-bottom: 22px; flex-wrap: wrap; }
 
   /* Account switcher */
-  .account-switch-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+  .account-switch-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
   .account-pill {
     display: inline-flex; align-items: center; gap: 8px;
     background: var(--panel); border: 1px solid var(--border); color: var(--text);
@@ -153,6 +153,10 @@
   .account-pill .ind-tag { font-weight: 500; color: var(--text-faint); font-size: 11.5px; }
   .account-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
   .account-pill.active .ind-tag { color: rgba(255,255,255,0.75); }
+  .account-pill.add-new { background: transparent; border-style: dashed; color: var(--muted); }
+  .account-pill.add-new:hover { color: var(--accent); border-color: var(--accent); }
+
+  .config-note { color: var(--text-faint); font-size: 12px; margin: 0 0 20px; }
 
   hr.divider { border: none; border-top: 1px solid var(--border); margin: 18px 0 22px; }
 
@@ -191,7 +195,7 @@
   /* Account profile strip */
   .account-strip {
     background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 20px 24px; margin-bottom: 24px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+    padding: 20px 24px; margin-bottom: 20px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
   }
   .avatar { width: 46px; height: 46px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; font-family: var(--mono); flex-shrink: 0; }
   .account-strip h2 { margin: 0; font-size: 17px; }
@@ -199,6 +203,12 @@
   .account-facts { display: flex; gap: 26px; margin-left: auto; flex-wrap: wrap; }
   .account-facts .fact-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-faint); }
   .account-facts .fact-value { font-size: 13px; margin-top: 3px; font-family: var(--mono); }
+
+  /* View tabs (Signals & Offers / Client Setup) */
+  .view-tabs { display: flex; gap: 0; margin: 0 0 22px; border-bottom: 1px solid var(--border); }
+  .view-tab { background: none; border: none; padding: 10px 4px; margin-right: 22px; font-size: 13.5px; font-weight: 650; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; }
+  .view-tab:hover { color: var(--text); }
+  .view-tab.active { color: var(--text); border-bottom-color: var(--accent); }
 
   /* Two-column signal feed */
   .signal-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 8px; }
@@ -214,6 +224,38 @@
   .timeline-item p { margin: 0; font-size: 12.8px; color: var(--text); line-height: 1.55; }
 
   .sig-ref-pill { font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: var(--radius-pill); background: var(--panel2); border: 1px solid var(--border); }
+
+  /* Client Setup panels */
+  .setup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; margin-bottom: 8px; }
+  .setup-panel { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 24px; cursor: default; }
+  .setup-panel-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 2px; }
+  .setup-panel-head h3 { margin: 0; font-size: 15px; }
+  .setup-panel .col-sub { color: var(--muted); font-size: 12px; margin: 2px 0 16px; }
+
+  .list-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px dashed var(--border); }
+  .list-row:last-child { border-bottom: none; }
+  .list-row-main { flex: 1; min-width: 0; }
+  .list-row-name { font-weight: 650; font-size: 13px; }
+  .list-row-sub { color: var(--muted); font-size: 11.5px; margin-top: 2px; }
+  .list-row-meta { font-size: 10.5px; color: var(--text-faint); font-family: var(--mono); white-space: nowrap; text-align: right; flex-shrink: 0; }
+
+  .status-pill { font-size: 9.5px; font-weight: 800; padding: 2px 8px; border-radius: var(--radius-pill); text-transform: uppercase; letter-spacing: 0.04em; display: inline-block; margin-top: 4px; }
+  .status-pill.active { color: var(--good); background: var(--good-soft); }
+  .status-pill.planned { color: var(--warn); background: var(--warn-soft); }
+
+  .empty-note { color: var(--text-faint); font-size: 12.5px; padding: 4px 0 14px; }
+
+  .add-row-btn { background: none; border: 1px dashed var(--border-strong); color: var(--muted); font-size: 12px; font-weight: 650; padding: 9px 12px; border-radius: 10px; cursor: pointer; width: 100%; margin-top: 12px; }
+  .add-row-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+  .inline-form { margin-top: 12px; padding: 14px; background: var(--panel2); border: 1px solid var(--border); border-radius: 10px; display: flex; flex-direction: column; gap: 9px; }
+  .inline-form .form-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .inline-form input, .inline-form select {
+    flex: 1; min-width: 110px; background: var(--panel); border: 1px solid var(--border); color: var(--text);
+    font-size: 12.5px; padding: 8px 10px; border-radius: 8px; font-family: var(--font);
+  }
+  .inline-form input:focus, .inline-form select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .form-actions { display: flex; gap: 8px; justify-content: flex-end; }
 
   /* Detail / scenario view */
   .detail-grid { display: grid; grid-template-columns: 1fr 1.05fr; gap: 20px; align-items: start; margin-top: 6px; }
@@ -241,6 +283,7 @@
   .btn:hover { border-color: var(--border-strong); }
   .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
   .btn.primary:hover { filter: brightness(1.08); }
+  .btn.small { padding: 7px 13px; font-size: 12px; }
 
   .toast {
     position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%) translateY(20px);
@@ -253,6 +296,7 @@
   @media (max-width: 900px) {
     .wrap { padding: 26px 18px 60px; }
     .signal-columns { grid-template-columns: 1fr; }
+    .setup-grid { grid-template-columns: 1fr; }
     .detail-grid { grid-template-columns: 1fr; }
     .account-facts { margin-left: 0; }
   }
@@ -279,6 +323,23 @@
       hq: 'Wolfsburg, Germany',
       revenue: '$322B (FY2025)',
       sector: 'Automotive OEM — Multi-Brand · software unit: CARIAD',
+      departments: [
+        { name: 'CARIAD (Software & AI)', focus: 'Owns the in-car assistant, ADAS software, and the AI governance build-out.' },
+        { name: 'Legal & Compliance', focus: 'Tracks the EU AI Act, Data Act, and cross-border regulatory exposure.' },
+        { name: 'Procurement — Software & AI Sourcing', focus: 'Evaluates and onboards outside delivery and consulting partners.' }
+      ],
+      contacts: [
+        { name: 'Anna Reinhardt', role: 'Head of Digital Partnerships', department: 'CARIAD (Software & AI)', channel: 'anna.reinhardt@cariad.example', lastContact: '2026-06-30' },
+        { name: 'Marco Feld', role: 'Procurement Lead, Software & AI Sourcing', department: 'Procurement', channel: 'LinkedIn', lastContact: '2026-05-12' },
+        { name: 'Dr. Sabine Ott', role: 'Compliance Counsel, AI & Data', department: 'Legal & Compliance', channel: 'sabine.ott@vw.example', lastContact: '2026-04-02' }
+      ],
+      sources: [
+        { name: 'CARIAD Newsroom & Press Releases', type: 'Company News', channel: 'news', status: 'Active' },
+        { name: 'CARIAD Careers (LinkedIn Jobs)', type: 'Job Postings', channel: 'social', status: 'Active' },
+        { name: 'EUR-Lex — EU AI Act & Data Act updates', type: 'Regulatory Tracker', channel: 'news', status: 'Active' },
+        { name: 'LinkedIn — CARIAD & VW Group executives', type: 'Executive Social Activity', channel: 'social', status: 'Active' },
+        { name: 'Bundesanzeiger (German company filings)', type: 'Company Filings', channel: 'news', status: 'Planned' }
+      ],
       signals: [
         { id:'n1', channel:'news', subtype:'Law', date:'2026-07-05', text:'New EU law says AI used in driver assistance and cabin monitoring must pass a safety check within 12 months.' },
         { id:'n2', channel:'news', subtype:'Law', date:'2026-05-14', text:'New EU rule says car makers must let owners and approved apps access their vehicle’s data.' },
@@ -335,6 +396,22 @@
       hq: 'Essen, Germany',
       revenue: '$36B (FY2025)',
       sector: 'Energy & Utilities — Power Generation, Grids & Renewables · digital unit: RWE Digital',
+      departments: [
+        { name: 'RWE Digital', focus: 'Runs AI forecasting, smart-pricing, and the new AI & Data Ethics function.' },
+        { name: 'Grid Operations', focus: 'Owns renewable grid forecasting and the 2027 upgrade program.' },
+        { name: 'Regulatory Affairs', focus: 'Tracks German and EU energy-market and data-sharing rules.' }
+      ],
+      contacts: [
+        { name: 'Sophie Lindgren', role: 'Digital Energy Program Lead', department: 'RWE Digital', channel: 'sophie.lindgren@rwe.example', lastContact: '2026-07-05' },
+        { name: 'Tom Brandt', role: 'Head of Data & Analytics', department: 'RWE Digital', channel: 'LinkedIn', lastContact: '2026-06-18' }
+      ],
+      sources: [
+        { name: 'RWE Newsroom & Press Releases', type: 'Company News', channel: 'news', status: 'Active' },
+        { name: 'RWE Careers Page', type: 'Job Postings', channel: 'social', status: 'Active' },
+        { name: 'Bundesnetzagentur (grid regulator) updates', type: 'Regulatory Tracker', channel: 'news', status: 'Active' },
+        { name: 'LinkedIn — RWE Digital leadership', type: 'Executive Social Activity', channel: 'social', status: 'Active' },
+        { name: 'Berlin Energy Week & industry event listings', type: 'Event Listings', channel: 'social', status: 'Planned' }
+      ],
       signals: [
         { id:'n1', channel:'news', subtype:'Law', date:'2026-06-22', text:'New EU rule: if AI helps set a customer’s energy price or contract, the company must be able to explain that decision in plain language.' },
         { id:'n2', channel:'news', subtype:'Law', date:'2026-04-11', text:'Germany sets a 2027 deadline for power grids to handle much more solar and wind — grid operators must upgrade their forecasting systems by then.' },
@@ -389,6 +466,22 @@
       hq: 'Leverkusen, Germany',
       revenue: '$47B (FY2025)',
       sector: 'Pharmaceuticals & Life Sciences · digital unit: Bayer R&D Digital',
+      departments: [
+        { name: 'R&D Digital', focus: 'Runs AI drug-discovery tools and the new Responsible AI function.' },
+        { name: 'Clinical Operations', focus: 'Owns trial design and the AI tools used to match candidates.' },
+        { name: 'Data Privacy & Compliance', focus: 'Tracks patient-data rules and AI documentation requirements.' }
+      ],
+      contacts: [
+        { name: 'Dr. Elena Voss', role: 'Director, R&D Digital Innovation', department: 'R&D Digital', channel: 'elena.voss@bayer.example', lastContact: '2026-07-10' },
+        { name: 'Priya Nandakumar', role: 'Clinical Data Systems Lead', department: 'Clinical Operations', channel: 'LinkedIn', lastContact: '2026-06-01' }
+      ],
+      sources: [
+        { name: 'Bayer Newsroom & Press Releases', type: 'Company News', channel: 'news', status: 'Active' },
+        { name: 'Bayer Careers (LinkedIn Jobs)', type: 'Job Postings', channel: 'social', status: 'Active' },
+        { name: 'EMA — European Medicines Agency updates', type: 'Regulatory Tracker', channel: 'news', status: 'Active' },
+        { name: 'ClinicalTrials.gov listings', type: 'Trial Registry', channel: 'news', status: 'Active' },
+        { name: 'LinkedIn — Bayer R&D leadership', type: 'Executive Social Activity', channel: 'social', status: 'Planned' }
+      ],
       signals: [
         { id:'n1', channel:'news', subtype:'Law', date:'2026-06-30', text:'New EU rule says AI used to help discover or test new medicines must be checked and documented, just like lab equipment.' },
         { id:'n2', channel:'news', subtype:'Law', date:'2026-04-17', text:'Germany updates patient-data privacy rules — drug companies must prove how each AI tool uses patient data before rolling it out.' },
@@ -435,7 +528,13 @@
     }
   ];
 
-  var state = { accountId: 'vw', view: 'overview', scenarioId: null };
+  var state = {
+    accountId: 'vw',
+    view: 'overview', // 'overview' | 'setup' | 'scenario'
+    scenarioId: null,
+    addingClient: false,
+    setupAdding: { contact: false, department: false, source: false }
+  };
 
   function byId(id){ return document.getElementById(id); }
   function findAccount(id){ return ACCOUNTS.filter(function(a){ return a.id === id; })[0]; }
@@ -450,17 +549,42 @@
     var parts = dateStr.split('-');
     return months[parseInt(parts[1],10)-1] + ' ' + parts[0];
   }
+  function slugify(s){
+    var out = s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+    return out || ('account-' + Date.now());
+  }
+  function todayStr(){ return '2026-07-23'; }
 
   function navigate(accountId, view, scenarioId){
     state.accountId = accountId; state.view = view; state.scenarioId = scenarioId || null;
+    state.addingClient = false;
+    state.setupAdding = { contact: false, department: false, source: false };
     window.scrollTo(0,0);
     render();
   }
 
   function accountSwitcher(){
-    return '<div class="account-switch-row">' + ACCOUNTS.map(function(a){
-      return '<button class="account-pill' + (a.id === state.accountId ? ' active' : '') + '" data-account="' + a.id + '">' + a.icon + ' ' + a.name + ' <span class="ind-tag">' + a.industry + '</span></button>';
-    }).join('') + '</div>';
+    var pills = ACCOUNTS.map(function(a){
+      return '<button class="account-pill' + (a.id === state.accountId && !state.addingClient ? ' active' : '') + '" data-account="' + a.id + '">' + a.icon + ' ' + a.name + ' <span class="ind-tag">' + a.industry + '</span></button>';
+    }).join('');
+    pills += '<button class="account-pill add-new" data-toggle-addclient="1">+ Add client</button>';
+    var html = '<div class="account-switch-row">' + pills + '</div>';
+    html += '<p class="config-note">Accounts, sectors, contacts, departments, and sources are all configurable — this demo ships with three, but the structure is built to grow.</p>';
+    if (state.addingClient){
+      html += '<div class="inline-form" id="add-client-form">' +
+        '<div class="form-row">' +
+          '<input id="new-client-icon" type="text" placeholder="Icon (emoji)" value="🏢" maxlength="2" style="max-width:70px;flex:none;">' +
+          '<input id="new-client-name" type="text" placeholder="Client name (e.g. Siemens Energy)">' +
+          '<input id="new-client-industry" type="text" placeholder="Sector (e.g. Industrial Manufacturing)">' +
+        '</div>' +
+        '<div class="form-row">' +
+          '<input id="new-client-hq" type="text" placeholder="Headquarters (e.g. Munich, Germany)">' +
+          '<input id="new-client-revenue" type="text" placeholder="Revenue (optional, e.g. $20B (FY2025))">' +
+        '</div>' +
+        '<div class="form-actions"><button class="btn small" data-cancel-addclient="1">Cancel</button><button class="btn small primary" data-save-addclient="1">Create client</button></div>' +
+      '</div>';
+    }
+    return html;
   }
 
   function renderBreadcrumb(account){
@@ -482,8 +606,29 @@
       '</div>';
   }
 
+  function viewTabs(){
+    return '<div class="view-tabs">' +
+      '<button class="view-tab' + (state.view === 'overview' ? ' active' : '') + '" data-view-tab="overview">📡 Signals &amp; Offers</button>' +
+      '<button class="view-tab' + (state.view === 'setup' ? ' active' : '') + '" data-view-tab="setup">⚙️ Client Setup</button>' +
+    '</div>';
+  }
+
+  function accountStrip(account, compact){
+    return '<div class="account-strip"' + (compact ? ' style="margin-bottom:22px;padding:16px 18px;"' : '') + '>' +
+      '<div class="avatar">' + account.avatar + '</div>' +
+      '<div><h2' + (compact ? ' style="font-size:15px"' : '') + '>' + account.name + '</h2><div class="sector-line">' + account.sector + '</div></div>' +
+      (compact ? '' :
+        '<div class="account-facts">' +
+          '<div><div class="fact-label">Headquarters</div><div class="fact-value">' + account.hq + '</div></div>' +
+          '<div><div class="fact-label">Revenue</div><div class="fact-value">' + account.revenue + '</div></div>' +
+        '</div>') +
+    '</div>';
+  }
+
   function signalListHtml(account, channel){
-    return account.signals.filter(function(s){ return s.channel === channel; }).map(function(s){
+    var items = account.signals.filter(function(s){ return s.channel === channel; });
+    if (!items.length) return '<p class="empty-note">No ' + channel + ' signals ingested yet.</p>';
+    return items.map(function(s){
       var cls = channel === 'news' ? 'c-newstype' : 'c-socialtype';
       return '<div class="timeline-item"><div class="timeline-date">' + monthShort(s.date) + '</div>' +
         '<div><span class="evidence-type ' + cls + '">' + s.subtype + '</span><p>' + s.text + '</p></div></div>';
@@ -495,7 +640,7 @@
     var newsCount = account.signals.filter(function(s){ return s.channel === 'news'; }).length;
     var socialCount = account.signals.filter(function(s){ return s.channel === 'social'; }).length;
 
-    var scenarioCards = account.scenarios.map(function(sc){
+    var scenarioCards = account.scenarios.length ? account.scenarios.map(function(sc){
       var t = tier(sc.confidence);
       var refPills = sc.signalIds.map(function(id){
         var s = findSignal(account, id);
@@ -509,17 +654,9 @@
         '<div class="badge-row">' + refPills + '</div>' +
         '<div class="card-footer"><span class="foot-meta">' + tierLabel(t) + '</span><span class="foot-link">View offer &rarr;</span></div>' +
         '</div>';
-    }).join('');
+    }).join('') : '';
 
-    return header() + accountSwitcher() +
-      '<div class="account-strip">' +
-        '<div class="avatar">' + account.avatar + '</div>' +
-        '<div><h2>' + account.name + '</h2><div class="sector-line">' + account.sector + '</div></div>' +
-        '<div class="account-facts">' +
-          '<div><div class="fact-label">Headquarters</div><div class="fact-value">' + account.hq + '</div></div>' +
-          '<div><div class="fact-label">Revenue</div><div class="fact-value">' + account.revenue + '</div></div>' +
-        '</div>' +
-      '</div>' +
+    return header() + accountSwitcher() + accountStrip(account, false) + viewTabs() +
       '<div class="callout"><b class="label">News signals:</b> ' + newsCount + ' &middot; <b class="label">Social &amp; workforce signals:</b> ' + socialCount + ' &middot; <b class="label">Offer scenarios identified:</b> ' + account.scenarios.length + '</div>' +
       '<div class="signal-columns">' +
         '<div class="signal-col">' +
@@ -535,7 +672,76 @@
       '</div>' +
       '<div class="section-head"><h2>🎯 Offer Scenarios for ' + account.name + '</h2></div>' +
       '<p class="section-sub">Where combinations of the signals above point to a concrete AI &amp; data consulting offer worth raising with the account.</p>' +
-      '<div class="grid-3">' + scenarioCards + '</div>';
+      (account.scenarios.length ? '<div class="grid-3">' + scenarioCards + '</div>' :
+        '<p class="empty-note">No offer scenarios yet for ' + account.name + '. Add sources under <b>⚙️ Client Setup</b> to start ingesting signals — scenarios appear here once there’s enough evidence.</p>');
+  }
+
+  function setupListRow(kind, item, idx){
+    if (kind === 'contact'){
+      return '<div class="list-row"><div class="list-row-main"><div class="list-row-name">' + item.name + '</div><div class="list-row-sub">' + item.role + ' &middot; ' + item.department + '</div></div><div class="list-row-meta">' + item.channel + '<br>last contact ' + item.lastContact + '</div></div>';
+    }
+    if (kind === 'department'){
+      return '<div class="list-row"><div class="list-row-main"><div class="list-row-name">' + item.name + '</div><div class="list-row-sub">' + item.focus + '</div></div></div>';
+    }
+    // source
+    var cls = item.channel === 'news' ? 'c-newstype' : 'c-socialtype';
+    var statusCls = item.status === 'Active' ? 'active' : 'planned';
+    return '<div class="list-row"><div class="list-row-main"><div class="list-row-name">' + item.name + '</div><div class="list-row-sub"><span class="' + cls + '">' + item.type + '</span> &middot; feeds ' + (item.channel === 'news' ? 'News' : 'Social & Workforce') + '</div></div><div class="list-row-meta"><span class="status-pill ' + statusCls + '">' + item.status + '</span></div></div>';
+  }
+
+  function setupAddForm(kind){
+    if (kind === 'contact'){
+      return '<div class="inline-form">' +
+        '<div class="form-row"><input id="add-contact-name" type="text" placeholder="Name"><input id="add-contact-role" type="text" placeholder="Role / title"></div>' +
+        '<div class="form-row"><input id="add-contact-dept" type="text" placeholder="Department"><input id="add-contact-channel" type="text" placeholder="Email or LinkedIn"></div>' +
+        '<div class="form-actions"><button class="btn small" data-cancel-add="contact">Cancel</button><button class="btn small primary" data-save-add="contact">Add contact</button></div>' +
+      '</div>';
+    }
+    if (kind === 'department'){
+      return '<div class="inline-form">' +
+        '<div class="form-row"><input id="add-department-name" type="text" placeholder="Department name"></div>' +
+        '<div class="form-row"><input id="add-department-focus" type="text" placeholder="What this department owns"></div>' +
+        '<div class="form-actions"><button class="btn small" data-cancel-add="department">Cancel</button><button class="btn small primary" data-save-add="department">Add department</button></div>' +
+      '</div>';
+    }
+    return '<div class="inline-form">' +
+      '<div class="form-row"><input id="add-source-name" type="text" placeholder="Source name (e.g. Company Newsroom)"></div>' +
+      '<div class="form-row">' +
+        '<input id="add-source-type" type="text" placeholder="Type (e.g. Job Postings, Regulatory Tracker)">' +
+        '<select id="add-source-channel"><option value="news">Feeds News</option><option value="social">Feeds Social & Workforce</option></select>' +
+      '</div>' +
+      '<div class="form-actions"><button class="btn small" data-cancel-add="source">Cancel</button><button class="btn small primary" data-save-add="source">Add source</button></div>' +
+    '</div>';
+  }
+
+  function renderSetup(){
+    var account = currentAccount();
+    var contactsHtml = account.contacts.length ? account.contacts.map(function(c){ return setupListRow('contact', c); }).join('') : '<p class="empty-note">No contacts added yet.</p>';
+    var deptHtml = account.departments.length ? account.departments.map(function(d){ return setupListRow('department', d); }).join('') : '<p class="empty-note">No departments added yet.</p>';
+    var sourcesHtml = account.sources.length ? account.sources.map(function(s){ return setupListRow('source', s); }).join('') : '<p class="empty-note">No data sources added yet.</p>';
+
+    return header() + accountSwitcher() + accountStrip(account, false) + viewTabs() +
+      '<p class="section-sub">Who we talk to, which departments matter, and what we ingest to keep signals current for ' + account.name + '.</p>' +
+      '<div class="setup-grid">' +
+        '<div class="setup-panel">' +
+          '<div class="setup-panel-head"><h3>👤 Contacts</h3></div>' +
+          '<p class="col-sub">People we communicate with at this account.</p>' +
+          contactsHtml +
+          (state.setupAdding.contact ? setupAddForm('contact') : '<button class="add-row-btn" data-toggle-add="contact">+ Add contact</button>') +
+        '</div>' +
+        '<div class="setup-panel">' +
+          '<div class="setup-panel-head"><h3>🏢 Departments</h3></div>' +
+          '<p class="col-sub">Teams at this account whose activity we track.</p>' +
+          deptHtml +
+          (state.setupAdding.department ? setupAddForm('department') : '<button class="add-row-btn" data-toggle-add="department">+ Add department</button>') +
+        '</div>' +
+        '<div class="setup-panel">' +
+          '<div class="setup-panel-head"><h3>🔌 Data Sources</h3></div>' +
+          '<p class="col-sub">Where we ingest news and social/workforce signals from.</p>' +
+          sourcesHtml +
+          (state.setupAdding.source ? setupAddForm('source') : '<button class="add-row-btn" data-toggle-add="source">+ Add source</button>') +
+        '</div>' +
+      '</div>';
   }
 
   function renderScenario(){
@@ -555,9 +761,7 @@
     return header() + renderBreadcrumb(account) +
       '<div class="detail-grid">' +
         '<div class="panel">' +
-          '<div class="account-strip" style="margin-bottom:22px;padding:16px 18px;">' +
-            '<div class="avatar">' + account.avatar + '</div><div><h2 style="font-size:15px">' + account.name + '</h2><div class="sector-line">' + account.sector + '</div></div>' +
-          '</div>' +
+          accountStrip(account, true) +
           '<p class="section-label">Signals behind this offer</p>' +
           evidence +
         '</div>' +
@@ -577,7 +781,10 @@
   }
 
   function render(){
-    var html = state.view === 'overview' ? renderOverview() : renderScenario();
+    var html;
+    if (state.view === 'setup') html = renderSetup();
+    else if (state.view === 'scenario') html = renderScenario();
+    else html = renderOverview();
     byId('main').innerHTML = html;
   }
 
@@ -594,6 +801,9 @@
     var accountBtn = e.target.closest('[data-account]');
     if (accountBtn){ navigate(accountBtn.getAttribute('data-account'), 'overview'); return; }
 
+    var viewTabBtn = e.target.closest('[data-view-tab]');
+    if (viewTabBtn){ state.view = viewTabBtn.getAttribute('data-view-tab'); render(); return; }
+
     var scenarioCard = e.target.closest('[data-scenario-card]');
     if (scenarioCard){ navigate(state.accountId, 'scenario', scenarioCard.getAttribute('data-scenario-card')); return; }
 
@@ -601,6 +811,69 @@
     if (navBtn){
       var nav = navBtn.getAttribute('data-nav');
       if (nav === 'overview') navigate(navBtn.getAttribute('data-account-nav') || state.accountId, 'overview');
+      return;
+    }
+
+    var toggleAddClient = e.target.closest('[data-toggle-addclient]');
+    if (toggleAddClient){ state.addingClient = !state.addingClient; render(); return; }
+    var cancelAddClient = e.target.closest('[data-cancel-addclient]');
+    if (cancelAddClient){ state.addingClient = false; render(); return; }
+    var saveAddClient = e.target.closest('[data-save-addclient]');
+    if (saveAddClient){
+      var name = (byId('new-client-name').value || '').trim();
+      if (!name){ showToast('Enter a client name first'); return; }
+      var icon = (byId('new-client-icon').value || '🏢').trim() || '🏢';
+      var industry = (byId('new-client-industry').value || 'New Sector').trim() || 'New Sector';
+      var hq = (byId('new-client-hq').value || 'Not set yet').trim() || 'Not set yet';
+      var revenue = (byId('new-client-revenue').value || '—').trim() || '—';
+      var id = slugify(name);
+      var newAccount = {
+        id: id, name: name, industry: industry, icon: icon, avatar: name.slice(0,3).toUpperCase(),
+        hq: hq, revenue: revenue, sector: industry + ' · newly configured account',
+        departments: [], contacts: [], sources: [], signals: [], scenarios: []
+      };
+      ACCOUNTS.push(newAccount);
+      state.addingClient = false;
+      navigate(id, 'setup');
+      showToast('Client "' + name + '" created — now add sources to start ingesting');
+      return;
+    }
+
+    var toggleAdd = e.target.closest('[data-toggle-add]');
+    if (toggleAdd){ state.setupAdding[toggleAdd.getAttribute('data-toggle-add')] = true; render(); return; }
+    var cancelAdd = e.target.closest('[data-cancel-add]');
+    if (cancelAdd){ state.setupAdding[cancelAdd.getAttribute('data-cancel-add')] = false; render(); return; }
+    var saveAdd = e.target.closest('[data-save-add]');
+    if (saveAdd){
+      var kind = saveAdd.getAttribute('data-save-add');
+      var account = currentAccount();
+      if (kind === 'contact'){
+        var cName = (byId('add-contact-name').value || '').trim();
+        if (!cName){ showToast('Enter a contact name first'); return; }
+        account.contacts.push({
+          name: cName,
+          role: (byId('add-contact-role').value || 'Role not set').trim() || 'Role not set',
+          department: (byId('add-contact-dept').value || 'Unassigned').trim() || 'Unassigned',
+          channel: (byId('add-contact-channel').value || '—').trim() || '—',
+          lastContact: todayStr()
+        });
+      } else if (kind === 'department'){
+        var dName = (byId('add-department-name').value || '').trim();
+        if (!dName){ showToast('Enter a department name first'); return; }
+        account.departments.push({ name: dName, focus: (byId('add-department-focus').value || 'Not documented yet').trim() || 'Not documented yet' });
+      } else if (kind === 'source'){
+        var sName = (byId('add-source-name').value || '').trim();
+        if (!sName){ showToast('Enter a source name first'); return; }
+        account.sources.push({
+          name: sName,
+          type: (byId('add-source-type').value || 'General').trim() || 'General',
+          channel: byId('add-source-channel').value === 'social' ? 'social' : 'news',
+          status: 'Planned'
+        });
+      }
+      state.setupAdding[kind] = false;
+      render();
+      showToast(kind.charAt(0).toUpperCase() + kind.slice(1) + ' added');
       return;
     }
 

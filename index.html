@@ -192,6 +192,14 @@
   .conf-pill.medium { color: var(--warn); background: var(--warn-soft); border-color: transparent; }
   .conf-pill.low { color: var(--danger); background: var(--danger-soft); border-color: transparent; }
 
+  .stage-pill { cursor: pointer; font-weight: 650; }
+  .stage-pill.cold { color: var(--text-faint); background: var(--panel2); border-color: var(--border); }
+  .stage-pill.warm { color: var(--warn); background: var(--warn-soft); border-color: transparent; }
+  .stage-pill.in-conversation { color: var(--accent); background: var(--accent-soft); border-color: transparent; }
+  .stage-pill.won { color: var(--good); background: var(--good-soft); border-color: transparent; }
+  .stage-pill.lost { color: var(--danger); background: var(--danger-soft); border-color: transparent; }
+  .stage-pill.active { outline: 2px solid currentColor; outline-offset: 1px; }
+
   /* Account profile strip */
   .account-strip {
     background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
@@ -330,6 +338,13 @@
       hq: 'Wolfsburg, Germany',
       revenue: '$322B (FY2025)',
       sector: 'Automotive OEM — Multi-Brand · software unit: CARIAD',
+      stage: 'In Conversation',
+      signalHistory: [6,7,9,10,12,14],
+      activityLog: [
+        { date:'2026-07-15', type:'Call', note:'Intro call with Anna Reinhardt — she confirmed CARIAD is actively evaluating outside partners for the AI governance build-out.' },
+        { date:'2026-06-20', type:'Email', note:'Sent a short note to Marco Feld after the CARIAD cloud deal news broke — no reply yet.' },
+        { date:'2026-05-02', type:'Note', note:'Sabine Ott mentioned in a LinkedIn comment thread that compliance is stretched thin ahead of the AI Act deadline.' }
+      ],
       departments: [
         { name: 'CARIAD (Software & AI)', focus: 'Owns the in-car assistant, ADAS software, and the AI governance build-out.' },
         { name: 'Legal & Compliance', focus: 'Tracks the EU AI Act, Data Act, and cross-border regulatory exposure.' },
@@ -407,6 +422,12 @@
       hq: 'Essen, Germany',
       revenue: '$36B (FY2025)',
       sector: 'Energy & Utilities — Power Generation, Grids & Renewables · digital unit: RWE Digital',
+      stage: 'Warm',
+      signalHistory: [5,6,6,7,8,9],
+      activityLog: [
+        { date:'2026-07-10', type:'Email', note:'Reached out to Sophie Lindgren referencing the Berlin Energy Week keynote — awaiting response.' },
+        { date:'2026-06-02', type:'Note', note:'Tom Brandt liked our LinkedIn post about AI observability — good sign of awareness.' }
+      ],
       departments: [
         { name: 'RWE Digital', focus: 'Runs AI forecasting, smart-pricing, and the new AI & Data Ethics function.' },
         { name: 'Grid Operations', focus: 'Owns renewable grid forecasting and the 2027 upgrade program.' },
@@ -481,6 +502,12 @@
       hq: 'Leverkusen, Germany',
       revenue: '$47B (FY2025)',
       sector: 'Pharmaceuticals & Life Sciences · digital unit: Bayer R&D Digital',
+      stage: 'Warm',
+      signalHistory: [4,5,6,6,7,8],
+      activityLog: [
+        { date:'2026-07-18', type:'Call', note:'Discovery call with Dr. Elena Voss — she flagged the new Responsible AI hire as a real opening.' },
+        { date:'2026-06-25', type:'Note', note:'Priya Nandakumar mentioned in a conference panel that clinical AI explainability is now a board-level topic.' }
+      ],
       departments: [
         { name: 'R&D Digital', focus: 'Runs AI drug-discovery tools and the new Responsible AI function.' },
         { name: 'Clinical Operations', focus: 'Owns trial design and the AI tools used to match candidates.' },
@@ -549,12 +576,15 @@
 
   var state = {
     accountId: 'vw',
-    view: 'overview', // 'overview' | 'setup' | 'scenario' | 'signal'
+    view: 'overview', // 'overview' | 'setup' | 'activity' | 'scenario' | 'signal'
     scenarioId: null,
     signalId: null,
     signalOrigin: { view: 'overview', scenarioId: null },
     emailOpen: false,
     addingClient: false,
+    discoveredSetup: null,
+    newClientDraft: { icon: '🏢', name: '', industry: '', hq: '', revenue: '' },
+    addingActivity: false,
     setupAdding: { contact: false, department: false, source: false }
   };
 
@@ -575,13 +605,16 @@
     var out = s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
     return out || ('account-' + Date.now());
   }
-  function todayStr(){ return '2026-07-23'; }
+  function todayStr(){ return '2026-07-24'; }
+  function escapeAttr(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 
   function navigate(accountId, view, scenarioId){
     state.accountId = accountId; state.view = view; state.scenarioId = scenarioId || null;
     state.signalId = null;
     state.emailOpen = false;
     state.addingClient = false;
+    state.discoveredSetup = null;
+    state.addingActivity = false;
     state.setupAdding = { contact: false, department: false, source: false };
     window.scrollTo(0,0);
     render();
@@ -595,16 +628,19 @@
     var html = '<div class="account-switch-row">' + pills + '</div>';
     html += '<p class="config-note">Accounts, sectors, contacts, departments, and sources are all configurable — this demo ships with three, but the structure is built to grow.</p>';
     if (state.addingClient){
+      var d0 = state.newClientDraft;
       html += '<div class="inline-form" id="add-client-form">' +
         '<div class="form-row">' +
-          '<input id="new-client-icon" type="text" placeholder="Icon (emoji)" value="🏢" maxlength="2" style="max-width:70px;flex:none;">' +
-          '<input id="new-client-name" type="text" placeholder="Client name (e.g. Siemens Energy)">' +
-          '<input id="new-client-industry" type="text" placeholder="Sector (e.g. Industrial Manufacturing)">' +
+          '<input id="new-client-icon" type="text" placeholder="Icon (emoji)" value="' + escapeAttr(d0.icon) + '" maxlength="2" style="max-width:70px;flex:none;">' +
+          '<input id="new-client-name" type="text" placeholder="Client name (e.g. Siemens Energy)" value="' + escapeAttr(d0.name) + '">' +
+          '<input id="new-client-industry" type="text" placeholder="Sector (e.g. Industrial Manufacturing)" value="' + escapeAttr(d0.industry) + '">' +
         '</div>' +
         '<div class="form-row">' +
-          '<input id="new-client-hq" type="text" placeholder="Headquarters (e.g. Munich, Germany)">' +
-          '<input id="new-client-revenue" type="text" placeholder="Revenue (optional, e.g. $20B (FY2025))">' +
+          '<input id="new-client-hq" type="text" placeholder="Headquarters (e.g. Munich, Germany)" value="' + escapeAttr(d0.hq) + '">' +
+          '<input id="new-client-revenue" type="text" placeholder="Revenue (optional, e.g. $20B (FY2025))" value="' + escapeAttr(d0.revenue) + '">' +
         '</div>' +
+        '<div class="form-actions" style="justify-content:flex-start"><button class="btn small" data-discover-client="1">✨ Auto-discover starter setup (demo)</button></div>' +
+        (state.discoveredSetup ? discoveredPreviewHtml(state.discoveredSetup) : '') +
         '<div class="form-actions"><button class="btn small" data-cancel-addclient="1">Cancel</button><button class="btn small primary" data-save-addclient="1">Create client</button></div>' +
       '</div>';
     }
@@ -639,19 +675,138 @@
   function viewTabs(){
     return '<div class="view-tabs">' +
       '<button class="view-tab' + (state.view === 'overview' ? ' active' : '') + '" data-view-tab="overview">📡 Signals &amp; Offers</button>' +
+      '<button class="view-tab' + (state.view === 'activity' ? ' active' : '') + '" data-view-tab="activity">📅 Activity &amp; Stage</button>' +
       '<button class="view-tab' + (state.view === 'setup' ? ' active' : '') + '" data-view-tab="setup">⚙️ Client Setup</button>' +
     '</div>';
   }
+
+  function stageClass(stage){ return (stage || 'cold').toLowerCase().replace(/[^a-z]+/g,'-'); }
 
   function accountStrip(account, compact){
     return '<div class="account-strip"' + (compact ? ' style="margin-bottom:22px;padding:16px 18px;"' : '') + '>' +
       '<div class="avatar">' + account.avatar + '</div>' +
       '<div><h2' + (compact ? ' style="font-size:15px"' : '') + '>' + account.name + '</h2><div class="sector-line">' + account.sector + '</div></div>' +
       (compact ? '' :
+        '<span class="pill stage-pill ' + stageClass(account.stage) + '">' + (account.stage || 'Cold') + '</span>' +
         '<div class="account-facts">' +
           '<div><div class="fact-label">Headquarters</div><div class="fact-value">' + account.hq + '</div></div>' +
           '<div><div class="fact-label">Revenue</div><div class="fact-value">' + account.revenue + '</div></div>' +
         '</div>') +
+    '</div>';
+  }
+
+  function momentumChart(values){
+    values = (values && values.length) ? values : [0,0,0,0,0,0];
+    var w = 240, h = 46, gap = 4;
+    var barW = (w / values.length) - gap;
+    var max = Math.max.apply(null, values) || 1;
+    var bars = values.map(function(v, i){
+      var bh = Math.max(3, (v / max) * h);
+      var x = i * (barW + gap);
+      var y = h - bh;
+      var isLast = i === values.length - 1;
+      return '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + barW.toFixed(1) + '" height="' + bh.toFixed(1) + '" rx="2" fill="' + (isLast ? 'var(--accent)' : 'var(--accent-soft)') + '"></rect>';
+    }).join('');
+    return '<svg viewBox="0 0 ' + w + ' ' + h + '" width="100%" height="' + h + '" preserveAspectRatio="none">' + bars + '</svg>';
+  }
+
+  var DISCOVERY_TEMPLATES = {
+    energy: {
+      departments: [
+        { name: 'Digital & Data', focus: 'Runs analytics and AI initiatives across the business.' },
+        { name: 'Grid / Field Operations', focus: 'Owns operational technology and infrastructure reliability.' },
+        { name: 'Regulatory Affairs', focus: 'Tracks energy-market and data-sharing regulation.' }
+      ],
+      roles: ['Head of Digital & Data', 'Regulatory Affairs Lead'],
+      sourceReg: 'National/EU Energy Regulator updates'
+    },
+    pharma: {
+      departments: [
+        { name: 'R&D Digital', focus: 'Runs AI tools for research and development.' },
+        { name: 'Clinical Operations', focus: 'Owns trial design and patient-data systems.' },
+        { name: 'Data Privacy & Compliance', focus: 'Tracks patient-data and AI documentation rules.' }
+      ],
+      roles: ['Director, R&D Digital Innovation', 'Clinical Data Systems Lead'],
+      sourceReg: 'Relevant Medicines Agency updates'
+    },
+    automotive: {
+      departments: [
+        { name: 'Software & Digital', focus: 'Owns in-vehicle software and AI systems.' },
+        { name: 'Legal & Compliance', focus: 'Tracks vehicle-safety and data regulation.' },
+        { name: 'Procurement', focus: 'Evaluates and onboards outside delivery partners.' }
+      ],
+      roles: ['Head of Digital Partnerships', 'Compliance Counsel, AI & Data'],
+      sourceReg: 'Vehicle Safety & Transport Regulator updates'
+    },
+    tech: {
+      departments: [
+        { name: 'Engineering', focus: 'Builds and operates the core product and AI systems.' },
+        { name: 'Data & AI', focus: 'Owns data infrastructure and model deployment.' },
+        { name: 'Legal & Compliance', focus: 'Tracks data protection and AI regulation.' }
+      ],
+      roles: ['Head of Data & AI', 'Compliance Lead'],
+      sourceReg: 'Data Protection & AI Regulation Tracker'
+    },
+    finance: {
+      departments: [
+        { name: 'Digital & Innovation', focus: 'Runs AI and digital transformation initiatives.' },
+        { name: 'Risk & Compliance', focus: 'Tracks financial and AI-related regulation.' },
+        { name: 'Data & Analytics', focus: 'Owns data infrastructure and reporting.' }
+      ],
+      roles: ['Head of Digital Innovation', 'Risk & Compliance Lead'],
+      sourceReg: 'Financial Regulator updates'
+    },
+    industrial: {
+      departments: [
+        { name: 'Digital & Automation', focus: 'Runs AI and automation initiatives across operations.' },
+        { name: 'Operations', focus: 'Owns production and field reliability.' },
+        { name: 'Compliance & Quality', focus: 'Tracks safety and regulatory requirements.' }
+      ],
+      roles: ['Head of Digital & Automation', 'Quality & Compliance Lead'],
+      sourceReg: 'Relevant Industry Regulator updates'
+    },
+    'default': {
+      departments: [
+        { name: 'Digital & Innovation', focus: 'Runs AI and digital transformation initiatives.' },
+        { name: 'Operations', focus: 'Owns day-to-day delivery and reliability.' },
+        { name: 'Legal & Compliance', focus: 'Tracks relevant regulation and data rules.' }
+      ],
+      roles: ['Head of Digital & Innovation', 'Compliance Lead'],
+      sourceReg: 'Relevant Industry Regulator updates'
+    }
+  };
+
+  function generateStarterSetup(industry, companyName){
+    var ind = (industry || '').toLowerCase();
+    var cat = 'default';
+    if (/energy|utilit|power|grid/.test(ind)) cat = 'energy';
+    else if (/pharma|health|life science|biotech|medical/.test(ind)) cat = 'pharma';
+    else if (/auto|vehicle|mobility/.test(ind)) cat = 'automotive';
+    else if (/software|tech|cloud|data|it\b/.test(ind)) cat = 'tech';
+    else if (/bank|financ|insur/.test(ind)) cat = 'finance';
+    else if (/industrial|manufactur|engineering/.test(ind)) cat = 'industrial';
+    var t = DISCOVERY_TEMPLATES[cat];
+    var name = companyName || 'This company';
+    var stamp = Date.now();
+    return {
+      departments: t.departments.map(function(d){ return { name: d.name, focus: d.focus }; }),
+      contacts: t.roles.map(function(role, i){
+        return { id: 'discovered-' + stamp + '-' + i, name: '— add name —', role: role, department: t.departments[0].name, channel: '— add email/LinkedIn —', lastContact: 'Not yet contacted' };
+      }),
+      sources: [
+        { id: 'press-' + stamp, name: name + ' Newsroom & Press Releases', type: 'Company News', channel: 'news', status: 'Planned' },
+        { id: 'jobs-' + stamp, name: name + ' Careers (LinkedIn Jobs)', type: 'Job Postings', channel: 'social', status: 'Planned' },
+        { id: 'reg-' + stamp, name: t.sourceReg, type: 'Regulatory Tracker', channel: 'news', status: 'Planned' },
+        { id: 'exec-' + stamp, name: 'LinkedIn — Executive Activity', type: 'Executive Social Activity', channel: 'social', status: 'Planned' }
+      ]
+    };
+  }
+
+  function discoveredPreviewHtml(d){
+    return '<div class="callout"><b class="label">Simulated discovery</b> — generated from an industry template for this demo; the real version would use Claude plus live web research, with a review step before saving.<br><br>' +
+      '<b>Departments:</b> ' + d.departments.map(function(x){ return x.name; }).join(', ') + '<br>' +
+      '<b>Contacts to find:</b> ' + d.contacts.map(function(x){ return x.role; }).join(', ') + '<br>' +
+      '<b>Sources:</b> ' + d.sources.map(function(x){ return x.name; }).join(', ') +
     '</div>';
   }
 
@@ -826,6 +981,46 @@
       '</div>';
   }
 
+  function activityAddForm(){
+    return '<div class="inline-form">' +
+      '<div class="form-row"><select id="add-activity-type"><option>Call</option><option>Email</option><option>Meeting</option><option>Note</option></select></div>' +
+      '<div class="form-row"><input id="add-activity-note" type="text" placeholder="What happened?"></div>' +
+      '<div class="form-actions"><button class="btn small" data-cancel-activity="1">Cancel</button><button class="btn small primary" data-save-activity="1">Log it</button></div>' +
+    '</div>';
+  }
+
+  function renderActivity(){
+    var account = currentAccount();
+    var stageOptions = ['Cold','Warm','In Conversation','Won','Lost'];
+    var stagePills = stageOptions.map(function(s){
+      var cls = stageClass(s);
+      var active = account.stage === s;
+      return '<button class="pill stage-pill ' + cls + (active ? ' active' : '') + '" data-set-stage="' + s + '">' + s + '</button>';
+    }).join('');
+
+    var sortedLog = (account.activityLog || []).slice().sort(function(a,b){ return a.date < b.date ? 1 : -1; });
+    var logHtml = sortedLog.length ? sortedLog.map(function(a){
+      return '<div class="timeline-item"><div class="timeline-date">' + a.date + '</div><div><span class="evidence-type">' + a.type + '</span><p>' + a.note + '</p></div></div>';
+    }).join('') : '<p class="empty-note">No activity logged yet.</p>';
+
+    return header() + accountSwitcher() + accountStrip(account, false) + viewTabs() +
+      '<div class="setup-grid" style="grid-template-columns: 1fr 1.4fr;">' +
+        '<div class="setup-panel">' +
+          '<div class="setup-panel-head"><h3>📈 Signal Momentum</h3></div>' +
+          '<p class="col-sub">Signals ingested per month, last 6 months.</p>' +
+          momentumChart(account.signalHistory) +
+          '<p class="section-label" style="margin-top:20px">Deal stage</p>' +
+          '<div class="badge-row">' + stagePills + '</div>' +
+        '</div>' +
+        '<div class="setup-panel">' +
+          '<div class="setup-panel-head"><h3>📝 Activity Log</h3></div>' +
+          '<p class="col-sub">What we’ve actually done with this account.</p>' +
+          logHtml +
+          (state.addingActivity ? activityAddForm() : '<button class="add-row-btn" data-toggle-activity="1">+ Log activity</button>') +
+        '</div>' +
+      '</div>';
+  }
+
   function renderScenario(){
     var account = currentAccount();
     var sc = findScenario(account, state.scenarioId);
@@ -887,6 +1082,7 @@
   function render(){
     var html;
     if (state.view === 'setup') html = renderSetup();
+    else if (state.view === 'activity') html = renderActivity();
     else if (state.view === 'scenario') html = renderScenario();
     else if (state.view === 'signal') html = renderSignal();
     else html = renderOverview();
@@ -901,6 +1097,15 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 2200);
   }
+
+  var NEW_CLIENT_FIELD_MAP = {
+    'new-client-icon': 'icon', 'new-client-name': 'name', 'new-client-industry': 'industry',
+    'new-client-hq': 'hq', 'new-client-revenue': 'revenue'
+  };
+  document.addEventListener('input', function(e){
+    var key = NEW_CLIENT_FIELD_MAP[e.target.id];
+    if (key){ state.newClientDraft[key] = e.target.value; }
+  });
 
   document.addEventListener('click', function(e){
     var accountBtn = e.target.closest('[data-account]');
@@ -952,9 +1157,31 @@
     }
 
     var toggleAddClient = e.target.closest('[data-toggle-addclient]');
-    if (toggleAddClient){ state.addingClient = !state.addingClient; render(); return; }
+    if (toggleAddClient){
+      state.addingClient = !state.addingClient;
+      state.discoveredSetup = null;
+      state.newClientDraft = { icon: '🏢', name: '', industry: '', hq: '', revenue: '' };
+      render();
+      return;
+    }
     var cancelAddClient = e.target.closest('[data-cancel-addclient]');
-    if (cancelAddClient){ state.addingClient = false; render(); return; }
+    if (cancelAddClient){
+      state.addingClient = false;
+      state.discoveredSetup = null;
+      state.newClientDraft = { icon: '🏢', name: '', industry: '', hq: '', revenue: '' };
+      render();
+      return;
+    }
+    var discoverClient = e.target.closest('[data-discover-client]');
+    if (discoverClient){
+      var dName = (byId('new-client-name').value || '').trim();
+      var dIndustry = (byId('new-client-industry').value || '').trim();
+      if (!dName){ showToast('Enter a client name first, then discover'); return; }
+      state.discoveredSetup = generateStarterSetup(dIndustry, dName);
+      render();
+      showToast('Simulated starter setup generated — review before creating');
+      return;
+    }
     var saveAddClient = e.target.closest('[data-save-addclient]');
     if (saveAddClient){
       var name = (byId('new-client-name').value || '').trim();
@@ -964,15 +1191,42 @@
       var hq = (byId('new-client-hq').value || 'Not set yet').trim() || 'Not set yet';
       var revenue = (byId('new-client-revenue').value || '—').trim() || '—';
       var id = slugify(name);
+      var d = state.discoveredSetup;
       var newAccount = {
         id: id, name: name, industry: industry, icon: icon, avatar: name.slice(0,3).toUpperCase(),
         hq: hq, revenue: revenue, sector: industry + ' · newly configured account',
-        departments: [], contacts: [], sources: [], signals: [], scenarios: []
+        stage: 'Cold', signalHistory: [0,0,0,0,0,0], activityLog: [],
+        departments: d ? d.departments : [], contacts: d ? d.contacts : [], sources: d ? d.sources : [],
+        signals: [], scenarios: []
       };
       ACCOUNTS.push(newAccount);
       state.addingClient = false;
+      state.discoveredSetup = null;
       navigate(id, 'setup');
       showToast('Client "' + name + '" created — now add sources to start ingesting');
+      return;
+    }
+
+    var setStage = e.target.closest('[data-set-stage]');
+    if (setStage){
+      currentAccount().stage = setStage.getAttribute('data-set-stage');
+      render();
+      showToast('Stage set to ' + currentAccount().stage);
+      return;
+    }
+    var toggleActivity = e.target.closest('[data-toggle-activity]');
+    if (toggleActivity){ state.addingActivity = true; render(); return; }
+    var cancelActivity = e.target.closest('[data-cancel-activity]');
+    if (cancelActivity){ state.addingActivity = false; render(); return; }
+    var saveActivity = e.target.closest('[data-save-activity]');
+    if (saveActivity){
+      var note = (byId('add-activity-note').value || '').trim();
+      if (!note){ showToast('Enter what happened first'); return; }
+      var type = byId('add-activity-type').value || 'Note';
+      currentAccount().activityLog.push({ date: todayStr(), type: type, note: note });
+      state.addingActivity = false;
+      render();
+      showToast('Activity logged');
       return;
     }
 

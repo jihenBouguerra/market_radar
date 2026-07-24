@@ -219,10 +219,16 @@
 
   .timeline-item { display: grid; grid-template-columns: 78px 1fr; gap: 14px; padding: 12px 0; }
   .timeline-item:not(:last-child) { border-bottom: 1px dashed var(--border); }
+  .timeline-item.clickable { cursor: pointer; border-radius: 8px; margin: 0 -8px; padding: 12px 8px; }
+  .timeline-item.clickable:hover { background: var(--panel2); }
   .timeline-date { font-family: var(--mono); font-size: 11px; color: var(--text-faint); padding-top: 2px; }
   .evidence-type { display: inline-block; font-size: 10.5px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 5px; background: var(--panel2); padding: 2px 8px; border-radius: var(--radius-pill); }
   .timeline-item p { margin: 0; font-size: 12.8px; color: var(--text); line-height: 1.55; }
   .signal-source { font-size: 10.5px; color: var(--text-faint); margin-top: 5px; font-style: italic; }
+
+  .post-quote { font-size: 14.5px; line-height: 1.65; color: var(--text); padding: 16px 18px; background: var(--panel2); border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; margin: 14px 0 18px; }
+
+  .contact-card { display: flex; align-items: center; justify-content: space-between; gap: 14px; background: var(--panel2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 8px; flex-wrap: wrap; }
 
   .sig-ref-pill { font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: var(--radius-pill); background: var(--panel2); border: 1px solid var(--border); }
 
@@ -330,9 +336,9 @@
         { name: 'Procurement — Software & AI Sourcing', focus: 'Evaluates and onboards outside delivery and consulting partners.' }
       ],
       contacts: [
-        { name: 'Anna Reinhardt', role: 'Head of Digital Partnerships', department: 'CARIAD (Software & AI)', channel: 'anna.reinhardt@cariad.example', lastContact: '2026-06-30' },
-        { name: 'Marco Feld', role: 'Procurement Lead, Software & AI Sourcing', department: 'Procurement', channel: 'LinkedIn', lastContact: '2026-05-12' },
-        { name: 'Dr. Sabine Ott', role: 'Compliance Counsel, AI & Data', department: 'Legal & Compliance', channel: 'sabine.ott@vw.example', lastContact: '2026-04-02' }
+        { id: 'anna-reinhardt', name: 'Anna Reinhardt', role: 'Head of Digital Partnerships', department: 'CARIAD (Software & AI)', channel: 'anna.reinhardt@cariad.example', lastContact: '2026-06-30' },
+        { id: 'marco-feld', name: 'Marco Feld', role: 'Procurement Lead, Software & AI Sourcing', department: 'Procurement', channel: 'LinkedIn', lastContact: '2026-05-12' },
+        { id: 'sabine-ott', name: 'Dr. Sabine Ott', role: 'Compliance Counsel, AI & Data', department: 'Legal & Compliance', channel: 'sabine.ott@vw.example', lastContact: '2026-04-02' }
       ],
       sources: [
         { id:'press', name: 'CARIAD Newsroom & Press Releases', type: 'Company News', channel: 'news', status: 'Active' },
@@ -363,28 +369,28 @@
       ],
       scenarios: [
         {
-          id: 'ai-governance', title: 'AI Governance & Observability Build-Out Partner', domainTag: 'AI Regulation & Governance', confidence: 86,
+          id: 'ai-governance', title: 'AI Governance & Observability Build-Out Partner', domainTag: 'AI Regulation & Governance', confidence: 86, primaryContactId: 'anna-reinhardt',
           signalIds: ['n1','s1','s2','s7'],
           summary: 'Volkswagen just started hiring for the AI oversight team the new EU safety law will require — and its own customers are already complaining about a live assistant giving wrong answers. We can deliver the monitoring system their new hires are meant to own, working before the 12-month deadline instead of after a slow internal build.',
           capabilities: ['Hallucination & response-quality monitoring', 'Support passing the new EU AI safety check', 'Customer-complaint triage & root-cause tagging', 'Governance framework & policy templates', 'Extra hands while the new governance team ramps up'],
           nextStep: 'Approach the "Head of AI Governance" and "Staff Engineer — AI Observability" hiring managers directly — offer to have the monitoring system ready before their own hires are even onboarded.'
         },
         {
-          id: 'data-compliance', title: 'Data-Sharing Compliance Layer for the CARIAD Cloud Partnership', domainTag: 'Connected-Vehicle Data Regulation', confidence: 71,
+          id: 'data-compliance', title: 'Data-Sharing Compliance Layer for the CARIAD Cloud Partnership', domainTag: 'Connected-Vehicle Data Regulation', confidence: 71, primaryContactId: 'sabine-ott',
           signalIds: ['n2','n4'],
           summary: 'The new cloud partnership gives CARIAD the infrastructure; the new EU data-access law gives them a deadline. Nobody on the cloud provider’s side owns making sure that data-sharing actually works safely and legally — that is the opening.',
           capabilities: ['Customer data-access & consent tools', 'Third-party data-sharing audit trail', 'Cross-cloud data governance mapping', 'Regulatory reporting automation'],
           nextStep: 'Reach CARIAD’s cloud partnership team, framed around the new data-access law the cloud deal alone doesn’t solve.'
         },
         {
-          id: 'delivery-augmentation', title: 'Embedded AI Delivery Team During the Talent Ramp', domainTag: 'Talent Migration into Auto-Tech', confidence: 64,
+          id: 'delivery-augmentation', title: 'Embedded AI Delivery Team During the Talent Ramp', domainTag: 'Talent Migration into Auto-Tech', confidence: 64, primaryContactId: 'marco-feld',
           signalIds: ['s3','s4','s5','s1'],
           summary: 'CARIAD is visibly building an AI team — new hires, engineers moving over from AI labs, a new digital chief — but a new team takes months to become productive, and the CTO is about to make public "trustworthy AI" promises at a major event. An outside team can deliver a fast, visible win while the internal team ramps up.',
           capabilities: ['Embedded delivery team (2–4 consultants)', 'Fast working pilot in 4–6 weeks', 'Hands-on training for the incoming hires', 'Fact-check of public claims before the keynote'],
           nextStep: 'Offer a short, fixed-scope pilot timed right after the CTO’s keynote, while attention and budget appetite are highest.'
         },
         {
-          id: 'cross-border-advisory', title: 'Cross-Border AI Governance Advisory for the Xpeng Co-Development', domainTag: 'Cross-Border AI Collaboration', confidence: 54,
+          id: 'cross-border-advisory', title: 'Cross-Border AI Governance Advisory for the Xpeng Co-Development', domainTag: 'Cross-Border AI Collaboration', confidence: 54, primaryContactId: 'sabine-ott',
           signalIds: ['n6','n1'],
           summary: 'Sharing software and AI between an EU-regulated company and a Chinese partner creates a gap between EU rules and China’s rules — worth sorting out before the two platforms are more deeply connected.',
           capabilities: ['Cross-border data-flow risk mapping', 'EU vs. China AI-rule gap analysis', 'Shared-IP governance framework', 'Joint-venture compliance playbook'],
@@ -407,8 +413,8 @@
         { name: 'Regulatory Affairs', focus: 'Tracks German and EU energy-market and data-sharing rules.' }
       ],
       contacts: [
-        { name: 'Sophie Lindgren', role: 'Digital Energy Program Lead', department: 'RWE Digital', channel: 'sophie.lindgren@rwe.example', lastContact: '2026-07-05' },
-        { name: 'Tom Brandt', role: 'Head of Data & Analytics', department: 'RWE Digital', channel: 'LinkedIn', lastContact: '2026-06-18' }
+        { id: 'sophie-lindgren', name: 'Sophie Lindgren', role: 'Digital Energy Program Lead', department: 'RWE Digital', channel: 'sophie.lindgren@rwe.example', lastContact: '2026-07-05' },
+        { id: 'tom-brandt', name: 'Tom Brandt', role: 'Head of Data & Analytics', department: 'RWE Digital', channel: 'LinkedIn', lastContact: '2026-06-18' }
       ],
       sources: [
         { id:'press', name: 'RWE Newsroom & Press Releases', type: 'Company News', channel: 'news', status: 'Active' },
@@ -437,28 +443,28 @@
       ],
       scenarios: [
         {
-          id: 'pricing-transparency', title: 'AI Pricing Transparency & Fairness Check', domainTag: 'AI Regulation & Consumer Trust', confidence: 84,
+          id: 'pricing-transparency', title: 'AI Pricing Transparency & Fairness Check', domainTag: 'AI Regulation & Consumer Trust', confidence: 84, primaryContactId: 'tom-brandt',
           signalIds: ['n1','s1','s6'],
           summary: 'RWE must soon be able to explain any AI decision that affects a customer’s bill — and customers are already complaining that the pricing app is confusing. We can build the plain-language explanations and fairness checks the new Ethics hire will need, and fix the trust problem the complaints already reveal.',
           capabilities: ['Plain-language explanations for AI billing decisions', 'Bias & fairness testing for pricing models', 'Customer-complaint pattern analysis', 'Regulatory-readiness documentation'],
           nextStep: 'Reach out to the new Head of AI & Data Ethics — offer to fast-track the explanation tooling before regulators start asking questions.'
         },
         {
-          id: 'grid-forecasting', title: 'Smart Grid Forecasting Accuracy Partner', domainTag: 'Renewable Grid Readiness', confidence: 73,
+          id: 'grid-forecasting', title: 'Smart Grid Forecasting Accuracy Partner', domainTag: 'Renewable Grid Readiness', confidence: 73, primaryContactId: 'sophie-lindgren',
           signalIds: ['n2','n4','s2'],
           summary: 'RWE has a hard 2027 deadline to handle much more solar and wind power, just signed a cloud partnership for forecasting, and is hiring for exactly this. We can help make those forecasts accurate faster than building the skill from scratch.',
           capabilities: ['Forecast accuracy monitoring & benchmarking', 'Weather & demand data-quality checks', 'Performance dashboards for the new hire’s team', 'Grid-readiness reporting for the 2027 deadline'],
           nextStep: 'Offer to partner on forecast accuracy alongside the new cloud deal, timed to the 2027 grid deadline.'
         },
         {
-          id: 'meter-data-compliance', title: 'Smart Meter Data-Sharing Compliance', domainTag: 'Connected-Energy Data Regulation', confidence: 60,
+          id: 'meter-data-compliance', title: 'Smart Meter Data-Sharing Compliance', domainTag: 'Connected-Energy Data Regulation', confidence: 60, primaryContactId: 'tom-brandt',
           signalIds: ['n3','n5'],
           summary: 'The new rule means RWE must safely open up smart-meter data to customers and approved apps, right as it pilots a new AI-driven storage partnership. Someone needs to make sure that data goes out safely and correctly.',
           capabilities: ['Secure data-sharing access layer', 'Customer consent management', 'Third-party app compliance checks'],
           nextStep: 'Approach the digital energy team behind the storage partnership, framed around getting data-sharing compliant before the deadline.'
         },
         {
-          id: 'trust-campaign', title: 'Public Trust Review Ahead of the CEO’s Keynote', domainTag: 'Executive Communications Risk', confidence: 52,
+          id: 'trust-campaign', title: 'Public Trust Review Ahead of the CEO’s Keynote', domainTag: 'Executive Communications Risk', confidence: 52, primaryContactId: 'sophie-lindgren',
           signalIds: ['s4','s3','s7'],
           summary: 'The CEO is about to publicly promise "trustworthy AI" at a major industry event — a good moment to make sure the systems behind that promise can actually back it up.',
           capabilities: ['Pre-keynote AI trust & safety review', 'Fact-check of talking points against real system behavior', 'Quick-win pilot to showcase ahead of the event'],
@@ -481,8 +487,8 @@
         { name: 'Data Privacy & Compliance', focus: 'Tracks patient-data rules and AI documentation requirements.' }
       ],
       contacts: [
-        { name: 'Dr. Elena Voss', role: 'Director, R&D Digital Innovation', department: 'R&D Digital', channel: 'elena.voss@bayer.example', lastContact: '2026-07-10' },
-        { name: 'Priya Nandakumar', role: 'Clinical Data Systems Lead', department: 'Clinical Operations', channel: 'LinkedIn', lastContact: '2026-06-01' }
+        { id: 'elena-voss', name: 'Dr. Elena Voss', role: 'Director, R&D Digital Innovation', department: 'R&D Digital', channel: 'elena.voss@bayer.example', lastContact: '2026-07-10' },
+        { id: 'priya-nandakumar', name: 'Priya Nandakumar', role: 'Clinical Data Systems Lead', department: 'Clinical Operations', channel: 'LinkedIn', lastContact: '2026-06-01' }
       ],
       sources: [
         { id:'press', name: 'Bayer Newsroom & Press Releases', type: 'Company News', channel: 'news', status: 'Active' },
@@ -510,28 +516,28 @@
       ],
       scenarios: [
         {
-          id: 'discovery-documentation', title: 'AI Documentation & Oversight for Drug Discovery', domainTag: 'AI Regulation in R&D', confidence: 82,
+          id: 'discovery-documentation', title: 'AI Documentation & Oversight for Drug Discovery', domainTag: 'AI Regulation in R&D', confidence: 82, primaryContactId: 'elena-voss',
           signalIds: ['n1','s1','n4'],
           summary: 'Bayer must now document and check its AI research tools like any other lab equipment, right as it scales up an AI drug-discovery partnership and hires its first Responsible AI lead. We can build the documentation and monitoring system before regulators come asking.',
           capabilities: ['AI model documentation & audit trail', 'Ongoing quality checks for AI research tools', 'Regulatory-readiness reporting', 'Support for the new Responsible AI lead'],
           nextStep: 'Reach the new Head of Responsible AI in R&D directly — offer to have the documentation system ready before the next regulatory review.'
         },
         {
-          id: 'trial-fairness', title: 'Clinical Trial AI Fairness & Explainability Review', domainTag: 'Clinical AI Regulation', confidence: 79,
+          id: 'trial-fairness', title: 'Clinical Trial AI Fairness & Explainability Review', domainTag: 'Clinical AI Regulation', confidence: 79, primaryContactId: 'priya-nandakumar',
           signalIds: ['n3','s2','s5'],
           summary: 'Patients and doctors are already asking how an AI tool picks clinical trial candidates, and a new law will soon require Bayer to explain exactly that. We can build the fairness checks and plain-language explanations before it becomes a bigger public issue.',
           capabilities: ['Clinical AI fairness & bias testing', 'Plain-language explanation reports for trial decisions', 'Data-quality checks for trial-matching AI', 'Regulatory documentation support'],
           nextStep: 'Approach the new Clinical AI Data Quality Manager, using the public questions already circulating as the reason to act now.'
         },
         {
-          id: 'patient-data-compliance', title: 'Patient-Data Compliance for New AI Tools', domainTag: 'Patient Data Regulation', confidence: 62,
+          id: 'patient-data-compliance', title: 'Patient-Data Compliance for New AI Tools', domainTag: 'Patient Data Regulation', confidence: 62, primaryContactId: 'elena-voss',
           signalIds: ['n2','n5'],
           summary: 'Before rolling AI out more broadly across global research labs through the new cloud deal, Bayer must prove how each tool uses patient data — an easy step to underestimate at global scale.',
           capabilities: ['Patient-data usage mapping per AI tool', 'Consent & privacy compliance checks', 'Global rollout compliance playbook'],
           nextStep: 'Engage the cloud partnership team early, before the AI tools are rolled out lab by lab worldwide.'
         },
         {
-          id: 'research-talent-ramp', title: 'Talent Ramp Support for the New Digital Research Unit', domainTag: 'Talent Migration into Pharma R&D', confidence: 55,
+          id: 'research-talent-ramp', title: 'Talent Ramp Support for the New Digital Research Unit', domainTag: 'Talent Migration into Pharma R&D', confidence: 55, primaryContactId: 'elena-voss',
           signalIds: ['s3','s4','s1'],
           summary: 'Bayer is visibly building a digital AI research team, and its R&D leader is about to make public claims about trustworthy AI at a major conference. An outside team can help the new unit deliver a fast, credible result while it ramps up.',
           capabilities: ['Embedded AI delivery support', 'Quick-win pilot ahead of the conference', 'Hands-on training for the growing research team'],
@@ -543,8 +549,11 @@
 
   var state = {
     accountId: 'vw',
-    view: 'overview', // 'overview' | 'setup' | 'scenario'
+    view: 'overview', // 'overview' | 'setup' | 'scenario' | 'signal'
     scenarioId: null,
+    signalId: null,
+    signalOrigin: { view: 'overview', scenarioId: null },
+    emailOpen: false,
     addingClient: false,
     setupAdding: { contact: false, department: false, source: false }
   };
@@ -570,6 +579,8 @@
 
   function navigate(accountId, view, scenarioId){
     state.accountId = accountId; state.view = view; state.scenarioId = scenarioId || null;
+    state.signalId = null;
+    state.emailOpen = false;
     state.addingClient = false;
     state.setupAdding = { contact: false, department: false, source: false };
     window.scrollTo(0,0);
@@ -602,16 +613,22 @@
 
   function renderBreadcrumb(account){
     var parts = ['<button data-nav="overview" data-account-nav="' + account.id + '">' + account.name + ' Signal Feed</button>'];
-    if (state.scenarioId){
+    if (state.view === 'scenario' && state.scenarioId){
       var sc = findScenario(account, state.scenarioId);
       parts.push('<span class="sep">/</span><span class="current">' + sc.title + '</span>');
+    } else if (state.view === 'signal'){
+      if (state.signalOrigin && state.signalOrigin.view === 'scenario' && state.signalOrigin.scenarioId){
+        var sc2 = findScenario(account, state.signalOrigin.scenarioId);
+        parts.push('<span class="sep">/</span><button data-nav="scenario" data-account-nav="' + account.id + '" data-scenario-nav="' + sc2.id + '">' + sc2.title + '</button>');
+      }
+      parts.push('<span class="sep">/</span><span class="current">Signal detail</span>');
     }
     return '<div class="breadcrumb">' + parts.join('') + '</div>';
   }
 
   function header(){
     return '<h1 class="app-title"><span class="spark">✦</span> Market Intelligence <span class="pilot-tag">&mdash; 3 Pilot Accounts</span></h1>' +
-      '<p class="app-sub">Two signal channels tracked per account — news (laws &amp; collaborations) and social/workforce movements — surfaced as concrete AI &amp; data consulting offers for the sales team to review.</p>' +
+      '<p class="app-sub">Two signal channels tracked per account — news (laws &amp; collaborations) and social/workforce movements — surfaced as offers framed for <b>us as a Data Engineering &amp; Software Consulting partner</b>, ready to route to the right contact.</p>' +
       '<div class="action-row">' +
         '<span class="pill outline">✓ Mocked data — concept demo</span>' +
         '<button class="pill primary-btn" data-toast="Signals refreshed (demo)">↻ Rescan Signals</button>' +
@@ -639,6 +656,54 @@
   }
 
   function findSource(account, sourceId){ return (account.sources || []).filter(function(src){ return src.id === sourceId; })[0]; }
+  function findContact(account, contactId){ return (account.contacts || []).filter(function(c){ return c.id === contactId; })[0]; }
+
+  function draftEmail(account, sc, contact){
+    var firstName = contact.name.replace(/^Dr\.\s*/,'').split(' ')[0];
+    var subject = 'Quick idea for ' + account.name + ' — ' + sc.title;
+    var lines = [
+      'Hi ' + firstName + ',',
+      '',
+      sc.summary,
+      '',
+      'Concretely, this would include: ' + sc.capabilities.slice(0,3).join('; ') + '.',
+      '',
+      sc.nextStep,
+      '',
+      'Would you be open to a short call in the next couple of weeks to see if this is worth exploring together?',
+      '',
+      'Best regards,',
+      '[Your name]',
+      '[Your Company] — Data Engineering & Software Consulting'
+    ];
+    return { subject: subject, body: lines.join('\n') };
+  }
+
+  function renderContactBlock(account, sc){
+    var primary = findContact(account, sc.primaryContactId);
+    var html = '<p class="section-label">Suggested contact</p>';
+    if (!primary){
+      html += '<p class="empty-note">No contact mapped yet — add one under Client Setup.</p>';
+      return html;
+    }
+    html += '<div class="contact-card">' +
+      '<div><div class="list-row-name">' + primary.name + '</div><div class="list-row-sub">' + primary.role + ' &middot; ' + primary.department + '</div><div class="list-row-sub">' + primary.channel + '</div></div>' +
+      '<button class="btn small primary" data-toggle-email="1">✉️ Draft email</button>' +
+    '</div>';
+    if (state.emailOpen){
+      var draft = draftEmail(account, sc, primary);
+      html += '<div class="inline-form" id="email-draft-block">' +
+        '<div class="form-row"><input type="text" readonly value="Subject: ' + draft.subject.replace(/"/g,'&quot;') + '"></div>' +
+        '<textarea id="email-draft-body" readonly rows="9" style="width:100%;background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px;font-size:12.5px;font-family:var(--font);line-height:1.5;">' + draft.body + '</textarea>' +
+        '<div class="form-actions"><button class="btn small" data-cancel-email="1">Close</button><button class="btn small primary" data-copy-email="1">📋 Copy email</button></div>' +
+      '</div>';
+    }
+    var others = (account.contacts || []).filter(function(c){ return c.id !== primary.id; });
+    if (others.length){
+      html += '<p class="empty-note">Also at this account: ' + others.map(function(c){ return c.name + ' (' + c.role + ')'; }).join(' &middot; ') + '</p>';
+    }
+    return html;
+  }
 
   function signalListHtml(account, channel){
     var items = account.signals.filter(function(s){ return s.channel === channel; });
@@ -647,7 +712,7 @@
       var cls = channel === 'news' ? 'c-newstype' : 'c-socialtype';
       var src = findSource(account, s.sourceId);
       var srcHtml = src ? '<div class="signal-source">via ' + src.name + '</div>' : '';
-      return '<div class="timeline-item"><div class="timeline-date">' + monthShort(s.date) + '</div>' +
+      return '<div class="timeline-item clickable" data-signal-card="' + s.id + '" data-signal-origin="overview"><div class="timeline-date">' + monthShort(s.date) + '</div>' +
         '<div><span class="evidence-type ' + cls + '">' + s.subtype + '</span><p>' + s.text + '</p>' + srcHtml + '</div></div>';
     }).join('');
   }
@@ -770,7 +835,7 @@
       var cls = s.channel === 'news' ? 'c-newstype' : 'c-socialtype';
       var src = findSource(account, s.sourceId);
       var srcHtml = src ? '<div class="signal-source">via ' + src.name + '</div>' : '';
-      return '<div class="timeline-item"><div class="timeline-date">' + s.date + '</div>' +
+      return '<div class="timeline-item clickable" data-signal-card="' + s.id + '" data-signal-origin="scenario"><div class="timeline-date">' + s.date + '</div>' +
         '<div><span class="evidence-type ' + cls + '">' + (s.channel === 'news' ? 'News' : 'Social') + ' · ' + s.subtype + '</span><p>' + s.text + '</p>' + srcHtml + '</div></div>';
     }).join('');
     var capabilities = sc.capabilities.map(function(cap){
@@ -786,6 +851,7 @@
         '</div>' +
         '<div class="panel">' +
           '<div class="opp-eyebrow">Recommended offer &middot; ' + sc.domainTag + '</div>' +
+          '<span class="pill outline" style="margin-bottom:12px">🛠 Framed as Data Engineering &amp; Software Consulting</span>' +
           '<h2 class="opp-title">' + sc.title + '</h2>' +
           '<p class="opp-summary">' + sc.summary + '</p>' +
           '<div class="conf-row">' +
@@ -794,7 +860,26 @@
           '<p class="section-label">Included deliverables</p>' +
           '<div class="cap-row">' + capabilities + '</div>' +
           '<div class="callout accent"><b class="label">Recommended next step:</b> ' + sc.nextStep + '</div>' +
+          renderContactBlock(account, sc) +
           '<div class="cta-row"><button class="btn primary" data-toast="Added to sales pipeline (demo)">Send to CRM</button><button class="btn" data-toast="Marked as reviewed (demo)">Mark as reviewed</button></div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function renderSignal(){
+    var account = currentAccount();
+    var s = findSignal(account, state.signalId);
+    var src = findSource(account, s.sourceId);
+    var cls = s.channel === 'news' ? 'c-newstype' : 'c-socialtype';
+    var channelLabel = s.channel === 'news' ? 'News' : 'Social & Workforce Movement';
+    return header() + renderBreadcrumb(account) +
+      '<div class="panel" style="max-width:680px">' +
+        '<div class="opp-eyebrow">' + channelLabel + ' &middot; <span class="' + cls + '">' + s.subtype + '</span></div>' +
+        '<h2 class="opp-title" style="font-size:17px">' + s.date + '</h2>' +
+        '<blockquote class="post-quote">' + s.text + '</blockquote>' +
+        '<div class="badge-row">' +
+          '<span class="tag-pill">' + (src ? src.name : 'Unverified source') + '</span>' +
+          (src ? '<span class="tag-pill">' + src.type + '</span>' : '') +
         '</div>' +
       '</div>';
   }
@@ -803,6 +888,7 @@
     var html;
     if (state.view === 'setup') html = renderSetup();
     else if (state.view === 'scenario') html = renderScenario();
+    else if (state.view === 'signal') html = renderSignal();
     else html = renderOverview();
     byId('main').innerHTML = html;
   }
@@ -826,10 +912,42 @@
     var scenarioCard = e.target.closest('[data-scenario-card]');
     if (scenarioCard){ navigate(state.accountId, 'scenario', scenarioCard.getAttribute('data-scenario-card')); return; }
 
+    var signalCard = e.target.closest('[data-signal-card]');
+    if (signalCard){
+      var origin = signalCard.getAttribute('data-signal-origin');
+      state.signalOrigin = { view: origin, scenarioId: origin === 'scenario' ? state.scenarioId : null };
+      state.signalId = signalCard.getAttribute('data-signal-card');
+      state.view = 'signal';
+      window.scrollTo(0,0);
+      render();
+      return;
+    }
+
     var navBtn = e.target.closest('[data-nav]');
     if (navBtn){
       var nav = navBtn.getAttribute('data-nav');
-      if (nav === 'overview') navigate(navBtn.getAttribute('data-account-nav') || state.accountId, 'overview');
+      var navAccount = navBtn.getAttribute('data-account-nav') || state.accountId;
+      if (nav === 'overview') navigate(navAccount, 'overview');
+      else if (nav === 'scenario') navigate(navAccount, 'scenario', navBtn.getAttribute('data-scenario-nav'));
+      return;
+    }
+
+    var toggleEmail = e.target.closest('[data-toggle-email]');
+    if (toggleEmail){ state.emailOpen = true; render(); return; }
+    var cancelEmail = e.target.closest('[data-cancel-email]');
+    if (cancelEmail){ state.emailOpen = false; render(); return; }
+    var copyEmail = e.target.closest('[data-copy-email]');
+    if (copyEmail){
+      var account2 = currentAccount();
+      var sc2 = findScenario(account2, state.scenarioId);
+      var contact2 = findContact(account2, sc2.primaryContactId);
+      var draft2 = draftEmail(account2, sc2, contact2);
+      var fullText = 'Subject: ' + draft2.subject + '\n\n' + draft2.body;
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(fullText).then(function(){ showToast('Email copied to clipboard'); }, function(){ showToast('Could not copy — select and copy manually'); });
+      } else {
+        showToast('Clipboard not available — select and copy manually');
+      }
       return;
     }
 

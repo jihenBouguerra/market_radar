@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<title>Market Intelligence — 3 Pilot Accounts</title>
+<title>Market Intelligence — Pilot Accounts</title>
 <script>
   // Apply saved theme before first paint to avoid a flash of the wrong theme.
   (function () {
@@ -143,6 +143,10 @@
 
   /* Account switcher */
   .account-switch-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .account-switch-row.grouped { flex-direction: column; gap: 10px; }
+  .sector-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .sector-tag { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-faint); min-width: 92px; flex-shrink: 0; }
+  .sector-pills { display: flex; gap: 8px; flex-wrap: wrap; }
   .account-pill {
     display: inline-flex; align-items: center; gap: 8px;
     background: var(--panel); border: 1px solid var(--border); color: var(--text);
@@ -368,7 +372,7 @@
         { id:'n1', channel:'news', subtype:'Law', date:'2026-07-05', sourceId:'reg', text:'New EU law says AI used in driver assistance and cabin monitoring must pass a safety check within 12 months.' },
         { id:'n2', channel:'news', subtype:'Law', date:'2026-05-14', sourceId:'reg', text:'New EU rule says car makers must let owners and approved apps access their vehicle’s data.' },
         { id:'n3', channel:'news', subtype:'Law', date:'2026-03-02', sourceId:'reg', text:'Germany’s supply-chain law now also covers where a company’s AI training data comes from.' },
-        { id:'n4', channel:'news', subtype:'Collaboration', date:'2026-06-18', sourceId:'press', text:'CARIAD, Volkswagen’s software unit, signs a major cloud and AI deal to power its next in-car assistant.' },
+        { id:'n4', channel:'news', subtype:'Collaboration', date:'2026-06-18', sourceId:'press', text:'CARIAD, Volkswagen’s software unit, signs a major cloud and AI deal with Google Cloud to power its next in-car assistant.' },
         { id:'n5', channel:'news', subtype:'Collaboration', date:'2026-04-09', sourceId:'press', text:'Volkswagen and Rivian’s shared software project hits its first milestone — both companies’ new EVs will run it.' },
         { id:'n6', channel:'news', subtype:'Collaboration', date:'2026-02-20', sourceId:'press', text:'Volkswagen deepens its partnership with Xpeng, sharing software and AI for two new electric models in China.' },
         { id:'n7', channel:'news', subtype:'Recruiting', date:'2026-07-18', sourceId:'tradepress', text:'Business press reports Volkswagen plans to hire 300 more AI and software engineers for CARIAD by 2027.' },
@@ -414,6 +418,64 @@
       ]
     },
     {
+      id: 'bmw',
+      name: 'BMW Group',
+      industry: 'Automotive',
+      icon: '🚗',
+      avatar: 'BMW',
+      hq: 'Munich, Germany',
+      revenue: '$168B (FY2025)',
+      sector: 'Automotive OEM — Luxury · software unit: BMW iX Digital',
+      stage: 'Cold',
+      signalHistory: [3,4,4,5,6,7],
+      activityLog: [
+        { date:'2026-07-08', type:'Note', note:'Added BMW to the automotive sector after seeing repeated AI-hiring and safety-check signals.' }
+      ],
+      departments: [
+        { name: 'BMW iX Digital / Software', focus: 'Owns in-car software, ADAS, and the iDrive AI assistant.' },
+        { name: 'Legal & Compliance', focus: 'Tracks the EU AI Act and vehicle-data regulation.' },
+        { name: 'Procurement', focus: 'Evaluates and onboards outside delivery and consulting partners.' }
+      ],
+      contacts: [
+        { id: 'julia-hoffmann', name: 'Julia Hoffmann', role: 'Head of Digital & AI Partnerships', department: 'BMW iX Digital / Software', channel: 'julia.hoffmann@bmw.example', lastContact: '2026-07-01' },
+        { id: 'markus-weber', name: 'Markus Weber', role: 'Compliance Lead, AI & Data', department: 'Legal & Compliance', channel: 'LinkedIn', lastContact: '2026-06-10' }
+      ],
+      sources: [
+        { id:'press', name: 'BMW Group Newsroom & Press Releases', type: 'Company News', channel: 'news', status: 'Active' },
+        { id:'jobs', name: 'BMW Careers (LinkedIn Jobs)', type: 'Job Postings', channel: 'social', status: 'Active' },
+        { id:'reg', name: 'EUR-Lex — EU AI Act & Vehicle Data Regulation Tracker', type: 'Regulatory Tracker', channel: 'news', status: 'Active' },
+        { id:'execsocial', name: 'LinkedIn — BMW Group executives', type: 'Executive Social Activity', channel: 'social', status: 'Active' },
+        { id:'tradepress', name: 'Handelsblatt — Automotive & Tech Coverage', type: 'Business Press', channel: 'news', status: 'Active' },
+        { id:'listening', name: 'Social Listening — X, Reddit & Owner Forums', type: 'Social Listening', channel: 'social', status: 'Active' }
+      ],
+      signals: [
+        { id:'n1', channel:'news', subtype:'Law', date:'2026-07-05', sourceId:'reg', text:'New EU law says AI used in driver assistance and cabin monitoring must pass a safety check within 12 months.' },
+        { id:'n2', channel:'news', subtype:'Collaboration', date:'2026-06-05', sourceId:'press', text:'BMW partners with Microsoft Azure to run AI models for its next-generation iDrive assistant.' },
+        { id:'n3', channel:'news', subtype:'Recruiting', date:'2026-07-10', sourceId:'tradepress', text:'Business press reports BMW plans to hire 250 more AI and software engineers by 2027.' },
+        { id:'n4', channel:'news', subtype:'Investment', date:'2026-06-20', sourceId:'tradepress', text:'BMW announces an extra €400M investment in AI and software research over the next three years.' },
+        { id:'s1', channel:'social', subtype:'Hiring', date:'2026-05-28', sourceId:'jobs', text:'BMW opens a new role: "AI Safety & Reliability Engineer" for its iDrive digital assistant team.' },
+        { id:'s2', channel:'social', subtype:'Migration', date:'2026-04-15', sourceId:'execsocial', text:'Two senior machine-learning engineers join BMW’s digital team from a major AI lab this year.' },
+        { id:'s3', channel:'social', subtype:'Event', date:'2026-07-02', sourceId:'press', text:'BMW’s Chief Digital Officer will speak at the Munich Auto-AI Summit on "AI You Can Trust in the Cockpit".' },
+        { id:'s4', channel:'social', subtype:'Social Post', date:'2026-06-28', sourceId:'listening', text:'Drivers on social media say BMW’s new AI assistant sometimes misunderstands voice commands in non-English languages.' }
+      ],
+      scenarios: [
+        {
+          id: 'bmw-ai-quality', title: 'AI Quality & Multilingual Reliability Partner', domainTag: 'AI Regulation & Product Quality', confidence: 75, primaryContactId: 'julia-hoffmann',
+          signalIds: ['n1','s1','s4'],
+          summary: 'BMW is hiring for AI safety and reliability just as customers report the assistant struggling with non-English commands, and the new EU safety-check deadline is approaching. We can deliver the multilingual quality monitoring and safety-check support before the deadline.',
+          capabilities: ['Multilingual response-quality monitoring', 'Support passing the new EU AI safety check', 'Customer-complaint triage & root-cause tagging', 'Extra hands while the new AI safety role is filled'],
+          nextStep: 'Approach the "AI Safety & Reliability Engineer" hiring team directly, referencing the multilingual complaints already visible on social media.'
+        },
+        {
+          id: 'bmw-azure-governance', title: 'Governance Layer for the Microsoft Azure AI Partnership', domainTag: 'AI Regulation & Cloud Partnership', confidence: 68, primaryContactId: 'markus-weber',
+          signalIds: ['n2','n1'],
+          summary: 'BMW’s new Azure-powered AI assistant needs a governance and monitoring layer to meet the incoming EU safety check — Microsoft provides the infrastructure, but not the compliance layer on top of it.',
+          capabilities: ['EU AI safety-check readiness', 'Azure-hosted model monitoring', 'Governance framework & policy templates'],
+          nextStep: 'Reach BMW’s digital partnerships team, framed around the compliance gap the Azure deal alone doesn’t close.'
+        }
+      ]
+    },
+    {
       id: 'rwe',
       name: 'RWE AG',
       industry: 'Energy',
@@ -450,7 +512,7 @@
         { id:'n1', channel:'news', subtype:'Law', date:'2026-06-22', sourceId:'reg', text:'New EU rule: if AI helps set a customer’s energy price or contract, the company must be able to explain that decision in plain language.' },
         { id:'n2', channel:'news', subtype:'Law', date:'2026-04-11', sourceId:'reg', text:'Germany sets a 2027 deadline for power grids to handle much more solar and wind — grid operators must upgrade their forecasting systems by then.' },
         { id:'n3', channel:'news', subtype:'Law', date:'2026-02-08', sourceId:'reg', text:'New rule: smart-meter data must be shared with customers and approved apps, not just kept by the energy company.' },
-        { id:'n4', channel:'news', subtype:'Collaboration', date:'2026-06-01', sourceId:'press', text:'RWE partners with a cloud provider to use AI for predicting how much power its wind and solar sites will produce.' },
+        { id:'n4', channel:'news', subtype:'Collaboration', date:'2026-06-01', sourceId:'press', text:'RWE partners with Microsoft Azure to use AI for predicting how much power its wind and solar sites will produce.' },
         { id:'n5', channel:'news', subtype:'Collaboration', date:'2026-03-19', sourceId:'press', text:'RWE teams up with a battery-storage startup to balance power supply and demand using AI forecasts.' },
         { id:'n6', channel:'news', subtype:'Recruiting', date:'2026-07-15', sourceId:'tradepress', text:'Trade press reports RWE plans to double its digital and AI workforce by 2028.' },
         { id:'n7', channel:'news', subtype:'Investment', date:'2026-06-05', sourceId:'tradepress', text:'RWE announces a €200M investment in AI-driven grid research over the next four years.' },
@@ -494,6 +556,64 @@
       ]
     },
     {
+      id: 'siemens-energy',
+      name: 'Siemens Energy AG',
+      industry: 'Energy',
+      icon: '⚡',
+      avatar: 'SIE',
+      hq: 'Munich, Germany',
+      revenue: '$35B (FY2025)',
+      sector: 'Energy Technology — Power Generation & Grid Equipment · digital unit: Siemens Energy Digital',
+      stage: 'Warm',
+      signalHistory: [3,4,5,5,6,7],
+      activityLog: [
+        { date:'2026-07-08', type:'Note', note:'Added Siemens Energy to the pilot after seeing strong AI-hiring and cloud-partnership signals.' }
+      ],
+      departments: [
+        { name: 'Digital & AI', focus: 'Runs AI initiatives across turbine and grid equipment lines.' },
+        { name: 'Field Service & Operations', focus: 'Owns equipment reliability and predictive maintenance.' },
+        { name: 'Regulatory & Compliance', focus: 'Tracks energy-equipment and AI regulation.' }
+      ],
+      contacts: [
+        { id: 'lukas-wagner', name: 'Lukas Wagner', role: 'Head of Digital & AI', department: 'Digital & AI', channel: 'lukas.wagner@siemens-energy.example', lastContact: '2026-07-01' },
+        { id: 'nadia-keller', name: 'Nadia Keller', role: 'Field Service Innovation Lead', department: 'Field Service & Operations', channel: 'LinkedIn', lastContact: '2026-06-14' }
+      ],
+      sources: [
+        { id:'press', name: 'Siemens Energy Newsroom & Press Releases', type: 'Company News', channel: 'news', status: 'Active' },
+        { id:'jobs', name: 'Siemens Energy Careers (LinkedIn Jobs)', type: 'Job Postings', channel: 'social', status: 'Active' },
+        { id:'reg', name: 'EU Industrial & Energy Equipment Regulation Tracker', type: 'Regulatory Tracker', channel: 'news', status: 'Active' },
+        { id:'execsocial', name: 'LinkedIn — Siemens Energy leadership', type: 'Executive Social Activity', channel: 'social', status: 'Active' },
+        { id:'tradepress', name: 'Handelsblatt — Energy & Industrial Technology Coverage', type: 'Business Press', channel: 'news', status: 'Active' },
+        { id:'listening', name: 'Social Listening — Industry Forums & X', type: 'Social Listening', channel: 'social', status: 'Active' }
+      ],
+      signals: [
+        { id:'n1', channel:'news', subtype:'Law', date:'2026-06-15', sourceId:'reg', text:'New EU rule requires AI used in predictive-maintenance systems for power equipment to be tested and documented before deployment.' },
+        { id:'n2', channel:'news', subtype:'Collaboration', date:'2026-05-20', sourceId:'press', text:'Siemens Energy partners with AWS to run AI-based predictive maintenance across its turbine fleet worldwide.' },
+        { id:'n3', channel:'news', subtype:'Recruiting', date:'2026-07-05', sourceId:'tradepress', text:'Trade press reports Siemens Energy plans to add 200 AI and data-engineering roles by 2028.' },
+        { id:'n4', channel:'news', subtype:'Investment', date:'2026-06-01', sourceId:'tradepress', text:'Siemens Energy announces a €250M investment in AI-driven predictive-maintenance research.' },
+        { id:'s1', channel:'social', subtype:'Hiring', date:'2026-05-10', sourceId:'jobs', text:'Siemens Energy posts a new role: "AI Reliability Engineer — Predictive Maintenance".' },
+        { id:'s2', channel:'social', subtype:'Migration', date:'2026-04-20', sourceId:'execsocial', text:'Several data scientists join Siemens Energy’s digital team from a major cloud provider this year.' },
+        { id:'s3', channel:'social', subtype:'Event', date:'2026-07-10', sourceId:'press', text:'Siemens Energy’s CTO will present on "Trustworthy AI for Critical Infrastructure" at an industry conference.' },
+        { id:'s4', channel:'social', subtype:'Social Post', date:'2026-06-25', sourceId:'listening', text:'Field technicians on industry forums note the new predictive-maintenance AI sometimes flags false alarms.' }
+      ],
+      scenarios: [
+        {
+          id: 'sie-predictive-quality', title: 'Predictive Maintenance AI Accuracy & False-Alarm Reduction', domainTag: 'AI Regulation & Field Reliability', confidence: 77, primaryContactId: 'lukas-wagner',
+          signalIds: ['n1','n2','s4'],
+          summary: 'Siemens Energy just partnered with AWS to run predictive-maintenance AI across its turbine fleet, but field technicians are already flagging false alarms — and a new EU rule will soon require this kind of AI to be tested and documented before deployment. We can improve accuracy and deliver the documentation needed to meet the new rule.',
+          capabilities: ['False-alarm root-cause analysis', 'Model accuracy monitoring & tuning', 'EU compliance documentation for predictive-maintenance AI', 'AWS-hosted model observability'],
+          nextStep: 'Reach the Head of Digital & AI, referencing the false-alarm reports and the upcoming documentation requirement.'
+        },
+        {
+          id: 'sie-talent-ramp', title: 'Embedded AI Delivery Support During the Hiring Ramp', domainTag: 'Talent Migration into Industrial AI', confidence: 62, primaryContactId: 'nadia-keller',
+          signalIds: ['s1','s2','n3'],
+          summary: 'Siemens Energy is visibly scaling its AI team — new hires, engineers moving over from a major cloud provider, plus a public plan to add 200 more roles. An embedded team can deliver quick wins while that hiring ramp completes.',
+          capabilities: ['Embedded delivery team (2–3 consultants)', 'Fast working pilot in 4–6 weeks', 'Knowledge transfer to incoming hires'],
+          nextStep: 'Offer a short, fixed-scope pilot timed to the hiring ramp, positioned as bridging capacity rather than replacing the new hires.'
+        }
+      ]
+    },
+    {
       id: 'bayer',
       name: 'Bayer AG',
       industry: 'Pharma',
@@ -531,7 +651,7 @@
         { id:'n2', channel:'news', subtype:'Law', date:'2026-04-17', sourceId:'reg', text:'Germany updates patient-data privacy rules — drug companies must prove how each AI tool uses patient data before rolling it out.' },
         { id:'n3', channel:'news', subtype:'Law', date:'2026-02-25', sourceId:'reg', text:'New EU rule requires drug companies to explain any AI-assisted decision that affects who gets into a clinical trial.' },
         { id:'n4', channel:'news', subtype:'Collaboration', date:'2026-06-09', sourceId:'press', text:'Bayer partners with an AI drug-discovery company to speed up finding new medicines.' },
-        { id:'n5', channel:'news', subtype:'Collaboration', date:'2026-03-14', sourceId:'press', text:'Bayer signs a deal with a cloud provider to run AI models across its research labs worldwide.' },
+        { id:'n5', channel:'news', subtype:'Collaboration', date:'2026-03-14', sourceId:'press', text:'Bayer signs a deal with AWS to run AI models across its research labs worldwide.' },
         { id:'n6', channel:'news', subtype:'Recruiting', date:'2026-07-19', sourceId:'tradepress', text:'Pharma trade press reports Bayer plans to expand its AI research team by 150 roles over the next two years.' },
         { id:'n7', channel:'news', subtype:'Investment', date:'2026-06-11', sourceId:'tradepress', text:'Bayer announces a €300M investment in AI-driven drug discovery research.' },
         { id:'s1', channel:'social', subtype:'Hiring', date:'2026-07-02', sourceId:'jobs', text:'Bayer posts a brand-new role: "Head of Responsible AI in R&D" — its first role focused only on AI oversight in drug research.' },
@@ -621,12 +741,25 @@
   }
 
   function accountSwitcher(){
-    var pills = ACCOUNTS.map(function(a){
-      return '<button class="account-pill' + (a.id === state.accountId && !state.addingClient ? ' active' : '') + '" data-account="' + a.id + '">' + a.icon + ' ' + a.name + ' <span class="ind-tag">' + a.industry + '</span></button>';
+    var sectorRows = SECTORS.map(function(s){
+      var clients = ACCOUNTS.filter(function(a){ return a.industry === s.key; });
+      var pills = clients.map(function(a){
+        var active = a.id === state.accountId && !state.addingClient && state.view !== 'partners';
+        return '<button class="account-pill' + (active ? ' active' : '') + '" data-account="' + a.id + '">' + a.icon + ' ' + a.name + '</button>';
+      }).join('');
+      return '<div class="sector-row"><span class="sector-tag">' + s.icon + ' ' + s.key + '</span><div class="sector-pills">' + pills + '</div></div>';
     }).join('');
-    pills += '<button class="account-pill add-new" data-toggle-addclient="1">+ Add client</button>';
-    var html = '<div class="account-switch-row">' + pills + '</div>';
-    html += '<p class="config-note">Every client is grouped into one of three sectors — Automotive, Energy, or Pharma — to keep the pilot focused. Contacts, departments, and sources are configurable within that.</p>';
+
+    var partnerPills = PARTNERS.map(function(p){
+      var active = state.view === 'partners';
+      return '<button class="account-pill' + (active ? ' active' : '') + '" data-view-partners="1">' + p.icon + ' ' + p.name + '</button>';
+    }).join('');
+    var partnersRow = '<div class="sector-row"><span class="sector-tag">🤝 Partners</span><div class="sector-pills">' + partnerPills + '</div></div>';
+
+    var addRow = '<div class="sector-row"><span class="sector-tag"></span><div class="sector-pills"><button class="account-pill add-new" data-toggle-addclient="1">+ Add client</button></div></div>';
+
+    var html = '<div class="account-switch-row grouped">' + sectorRows + partnersRow + addRow + '</div>';
+    html += '<p class="config-note">Every client sits in one of three sectors — Automotive, Energy, or Pharma — with Partners tracked alongside as a fourth angle.</p>';
     if (state.addingClient){
       var d0 = state.newClientDraft;
       var sectorPills = SECTORS.map(function(s){
@@ -666,7 +799,7 @@
   }
 
   function header(){
-    return '<h1 class="app-title"><span class="spark">✦</span> Market Intelligence <span class="pilot-tag">&mdash; 3 Pilot Accounts</span></h1>' +
+    return '<h1 class="app-title"><span class="spark">✦</span> Market Intelligence <span class="pilot-tag">&mdash; ' + ACCOUNTS.length + ' Pilot Accounts Across 3 Sectors</span></h1>' +
       '<p class="app-sub">Two signal channels tracked per account — news (laws &amp; collaborations) and social/workforce movements — surfaced as offers framed for <b>us as a Data Engineering &amp; Software Consulting partner</b>, ready to route to the right contact.</p>' +
       '<div class="action-row">' +
         '<span class="pill outline">✓ Mocked data — concept demo</span>' +
@@ -717,6 +850,12 @@
     { key: 'Automotive', icon: '🚗' },
     { key: 'Energy', icon: '⚡' },
     { key: 'Pharma', icon: '💊' }
+  ];
+
+  var PARTNERS = [
+    { id: 'microsoft', name: 'Microsoft (Azure)', icon: '🟦', type: 'Cloud & AI Infrastructure Partner', note: 'Powers the AI workloads behind two of our pilot accounts via Azure — a natural seam for us to sit on top of with governance and monitoring.', relatedAccountIds: ['bmw','rwe'] },
+    { id: 'aws', name: 'Amazon Web Services (AWS)', icon: '🟧', type: 'Cloud & AI Infrastructure Partner', note: 'Runs AI workloads for two of our pilot accounts via AWS — same opening: infrastructure without the governance layer.', relatedAccountIds: ['siemens-energy','bayer'] },
+    { id: 'google-cloud', name: 'Google Cloud', icon: '🟩', type: 'Cloud & AI Infrastructure Partner', note: 'Powers Volkswagen/CARIAD’s in-car AI assistant infrastructure.', relatedAccountIds: ['vw'] }
   ];
 
   var DISCOVERY_TEMPLATES = {
@@ -1044,9 +1183,31 @@
       '</div>';
   }
 
+  function renderPartners(){
+    var cards = PARTNERS.map(function(p){
+      var related = p.relatedAccountIds.map(function(id){
+        var a = findAccount(id);
+        return a ? '<button class="tag-pill" data-account="' + a.id + '" style="cursor:pointer">' + a.icon + ' ' + a.name + '</button>' : '';
+      }).join(' ');
+      return '<div class="card" style="cursor:default">' +
+        '<div class="card-title-row"><h3>' + p.icon + ' ' + p.name + '</h3></div>' +
+        '<div class="badge-row"><span class="tag-pill">' + p.type + '</span></div>' +
+        '<p class="card-desc">' + p.note + '</p>' +
+        '<p class="section-label">Connected accounts</p>' +
+        '<div class="badge-row">' + related + '</div>' +
+      '</div>';
+    }).join('');
+
+    return header() + accountSwitcher() +
+      '<div class="section-head"><h2>🤝 Technology &amp; Delivery Partners</h2></div>' +
+      '<p class="section-sub">Cloud and infrastructure partners already showing up across pilot accounts — useful when we position ourselves as sitting on top of their platforms rather than competing with them.</p>' +
+      '<div class="grid-3">' + cards + '</div>';
+  }
+
   function render(){
     var html;
-    if (state.view === 'setup') html = renderSetup();
+    if (state.view === 'partners') html = renderPartners();
+    else if (state.view === 'setup') html = renderSetup();
     else if (state.view === 'activity') html = renderActivity();
     else if (state.view === 'scenario') html = renderScenario();
     else if (state.view === 'signal') html = renderSignal();
@@ -1072,6 +1233,9 @@
   });
 
   document.addEventListener('click', function(e){
+    var viewPartnersBtn = e.target.closest('[data-view-partners]');
+    if (viewPartnersBtn){ state.view = 'partners'; window.scrollTo(0,0); render(); return; }
+
     var accountBtn = e.target.closest('[data-account]');
     if (accountBtn){ navigate(accountBtn.getAttribute('data-account'), 'overview'); return; }
 

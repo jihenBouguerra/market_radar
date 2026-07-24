@@ -797,10 +797,6 @@
   }
 
   function renderBreadcrumb(account){
-    if (state.view === 'signal' && state.signalOrigin && state.signalOrigin.view === 'sector'){
-      var sector = state.signalOrigin.sector;
-      return '<div class="breadcrumb"><button data-nav="sector" data-sector-nav="' + sector + '">' + sector + ' Clients</button><span class="sep">/</span><span class="current">Signal detail</span></div>';
-    }
     var parts = ['<button data-nav="overview" data-account-nav="' + account.id + '">' + account.name + ' Signal Feed</button>'];
     if (state.view === 'scenario' && state.scenarioId){
       var sc = findScenario(account, state.scenarioId);
@@ -1256,37 +1252,21 @@
       '</div>';
     }).join('');
 
-    var items = [];
-    clients.forEach(function(a){
-      a.signals.filter(function(s){ return s.channel === 'news'; }).forEach(function(s){
-        items.push({ account: a, signal: s });
-      });
-    });
-    (SECTOR_NEWS[sectorKey] || []).forEach(function(s){
-      items.push({ account: null, signal: s });
-    });
-    items.sort(function(x, y){ return x.signal.date < y.signal.date ? 1 : -1; });
+    var items = (SECTOR_NEWS[sectorKey] || []).slice();
+    items.sort(function(x, y){ return x.date < y.date ? 1 : -1; });
 
-    var itemsHtml = items.length ? items.map(function(item){
-      var s = item.signal, a = item.account;
-      if (!a){
-        return '<div class="timeline-item"><div class="timeline-date">' + monthShort(s.date) + '</div>' +
-          '<div><span class="evidence-type c-newstype">' + s.subtype + '</span> <span class="tag-pill">🌐 Industry-Wide</span><p>' + s.text + '</p><div class="signal-source">via ' + s.source + '</div></div></div>';
-      }
-      var src = findSource(a, s.sourceId);
-      var srcHtml = src ? '<div class="signal-source">via ' + src.name + '</div>' : '';
-      return '<div class="timeline-item clickable" data-signal-card="' + s.id + '" data-signal-origin="sector" data-signal-account="' + a.id + '">' +
-        '<div class="timeline-date">' + monthShort(s.date) + '</div>' +
-        '<div><span class="evidence-type c-newstype">' + s.subtype + '</span> <span class="tag-pill">' + a.icon + ' ' + a.name + '</span><p>' + s.text + '</p>' + srcHtml + '</div></div>';
-    }).join('') : '<p class="empty-note">No news signals yet for this sector.</p>';
+    var itemsHtml = items.length ? items.map(function(s){
+      return '<div class="timeline-item"><div class="timeline-date">' + monthShort(s.date) + '</div>' +
+        '<div><span class="evidence-type c-newstype">' + s.subtype + '</span> <span class="tag-pill">🌐 Industry-Wide</span><p>' + s.text + '</p><div class="signal-source">via ' + s.source + '</div></div></div>';
+    }).join('') : '<p class="empty-note">No industry-wide news yet for this sector.</p>';
 
     return header() + sectorNav() +
       '<div class="section-head"><h2>' + (sectorDef ? sectorDef.icon : '') + ' ' + sectorKey + ' Clients</h2></div>' +
       '<p class="section-sub">Select a client to see its full signal feed and offers.</p>' +
       '<div class="grid-3">' + cards + '</div>' +
       addClientPanel() +
-      '<div class="section-head"><h2>📰 All ' + sectorKey + ' News</h2></div>' +
-      '<p class="section-sub">News across every client in ' + sectorKey + ', plus industry-wide laws and regulations that aren’t tied to any single account — newest first.</p>' +
+      '<div class="section-head"><h2>🌐 ' + sectorKey + ' — Industry-Wide News</h2></div>' +
+      '<p class="section-sub">Laws and regulations affecting the whole sector — not tied to any single client. Per-client news lives on each client’s own page.</p>' +
       '<div class="signal-col" style="max-width:760px">' + itemsHtml + '</div>';
   }
 
@@ -1350,8 +1330,7 @@
       if (signalAccountId){ state.accountId = signalAccountId; }
       state.signalOrigin = {
         view: origin,
-        scenarioId: origin === 'scenario' ? state.scenarioId : null,
-        sector: origin === 'sector' ? state.selectedSector : null
+        scenarioId: origin === 'scenario' ? state.scenarioId : null
       };
       state.signalId = signalCard.getAttribute('data-signal-card');
       state.view = 'signal';
@@ -1366,13 +1345,6 @@
       var navAccount = navBtn.getAttribute('data-account-nav') || state.accountId;
       if (nav === 'overview') navigate(navAccount, 'overview');
       else if (nav === 'scenario') navigate(navAccount, 'scenario', navBtn.getAttribute('data-scenario-nav'));
-      else if (nav === 'sector'){
-        state.selectedSector = navBtn.getAttribute('data-sector-nav') || state.selectedSector;
-        state.view = 'sector';
-        state.signalId = null;
-        window.scrollTo(0,0);
-        render();
-      }
       return;
     }
 

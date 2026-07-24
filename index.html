@@ -583,7 +583,7 @@
     emailOpen: false,
     addingClient: false,
     discoveredSetup: null,
-    newClientDraft: { icon: '🏢', name: '', industry: '', hq: '', revenue: '' },
+    newClientDraft: { icon: '', name: '', industry: '', hq: '', revenue: '' },
     addingActivity: false,
     setupAdding: { contact: false, department: false, source: false }
   };
@@ -626,14 +626,17 @@
     }).join('');
     pills += '<button class="account-pill add-new" data-toggle-addclient="1">+ Add client</button>';
     var html = '<div class="account-switch-row">' + pills + '</div>';
-    html += '<p class="config-note">Accounts, sectors, contacts, departments, and sources are all configurable — this demo ships with three, but the structure is built to grow.</p>';
+    html += '<p class="config-note">Every client is grouped into one of three sectors — Automotive, Energy, or Pharma — to keep the pilot focused. Contacts, departments, and sources are configurable within that.</p>';
     if (state.addingClient){
       var d0 = state.newClientDraft;
+      var sectorPills = SECTORS.map(function(s){
+        var active = d0.industry === s.key;
+        return '<button class="pill' + (active ? ' primary-btn' : ' outline') + '" data-set-sector="' + s.key + '">' + s.icon + ' ' + s.key + '</button>';
+      }).join(' ');
       html += '<div class="inline-form" id="add-client-form">' +
+        '<div class="form-row">' + sectorPills + '</div>' +
         '<div class="form-row">' +
-          '<input id="new-client-icon" type="text" placeholder="Icon (emoji)" value="' + escapeAttr(d0.icon) + '" maxlength="2" style="max-width:70px;flex:none;">' +
           '<input id="new-client-name" type="text" placeholder="Client name (e.g. Siemens Energy)" value="' + escapeAttr(d0.name) + '">' +
-          '<input id="new-client-industry" type="text" placeholder="Sector (e.g. Industrial Manufacturing)" value="' + escapeAttr(d0.industry) + '">' +
         '</div>' +
         '<div class="form-row">' +
           '<input id="new-client-hq" type="text" placeholder="Headquarters (e.g. Munich, Germany)" value="' + escapeAttr(d0.hq) + '">' +
@@ -710,8 +713,14 @@
     return '<svg viewBox="0 0 ' + w + ' ' + h + '" width="100%" height="' + h + '" preserveAspectRatio="none">' + bars + '</svg>';
   }
 
+  var SECTORS = [
+    { key: 'Automotive', icon: '🚗' },
+    { key: 'Energy', icon: '⚡' },
+    { key: 'Pharma', icon: '💊' }
+  ];
+
   var DISCOVERY_TEMPLATES = {
-    energy: {
+    Energy: {
       departments: [
         { name: 'Digital & Data', focus: 'Runs analytics and AI initiatives across the business.' },
         { name: 'Grid / Field Operations', focus: 'Owns operational technology and infrastructure reliability.' },
@@ -720,7 +729,7 @@
       roles: ['Head of Digital & Data', 'Regulatory Affairs Lead'],
       sourceReg: 'National/EU Energy Regulator updates'
     },
-    pharma: {
+    Pharma: {
       departments: [
         { name: 'R&D Digital', focus: 'Runs AI tools for research and development.' },
         { name: 'Clinical Operations', focus: 'Owns trial design and patient-data systems.' },
@@ -729,7 +738,7 @@
       roles: ['Director, R&D Digital Innovation', 'Clinical Data Systems Lead'],
       sourceReg: 'Relevant Medicines Agency updates'
     },
-    automotive: {
+    Automotive: {
       departments: [
         { name: 'Software & Digital', focus: 'Owns in-vehicle software and AI systems.' },
         { name: 'Legal & Compliance', focus: 'Tracks vehicle-safety and data regulation.' },
@@ -737,55 +746,11 @@
       ],
       roles: ['Head of Digital Partnerships', 'Compliance Counsel, AI & Data'],
       sourceReg: 'Vehicle Safety & Transport Regulator updates'
-    },
-    tech: {
-      departments: [
-        { name: 'Engineering', focus: 'Builds and operates the core product and AI systems.' },
-        { name: 'Data & AI', focus: 'Owns data infrastructure and model deployment.' },
-        { name: 'Legal & Compliance', focus: 'Tracks data protection and AI regulation.' }
-      ],
-      roles: ['Head of Data & AI', 'Compliance Lead'],
-      sourceReg: 'Data Protection & AI Regulation Tracker'
-    },
-    finance: {
-      departments: [
-        { name: 'Digital & Innovation', focus: 'Runs AI and digital transformation initiatives.' },
-        { name: 'Risk & Compliance', focus: 'Tracks financial and AI-related regulation.' },
-        { name: 'Data & Analytics', focus: 'Owns data infrastructure and reporting.' }
-      ],
-      roles: ['Head of Digital Innovation', 'Risk & Compliance Lead'],
-      sourceReg: 'Financial Regulator updates'
-    },
-    industrial: {
-      departments: [
-        { name: 'Digital & Automation', focus: 'Runs AI and automation initiatives across operations.' },
-        { name: 'Operations', focus: 'Owns production and field reliability.' },
-        { name: 'Compliance & Quality', focus: 'Tracks safety and regulatory requirements.' }
-      ],
-      roles: ['Head of Digital & Automation', 'Quality & Compliance Lead'],
-      sourceReg: 'Relevant Industry Regulator updates'
-    },
-    'default': {
-      departments: [
-        { name: 'Digital & Innovation', focus: 'Runs AI and digital transformation initiatives.' },
-        { name: 'Operations', focus: 'Owns day-to-day delivery and reliability.' },
-        { name: 'Legal & Compliance', focus: 'Tracks relevant regulation and data rules.' }
-      ],
-      roles: ['Head of Digital & Innovation', 'Compliance Lead'],
-      sourceReg: 'Relevant Industry Regulator updates'
     }
   };
 
-  function generateStarterSetup(industry, companyName){
-    var ind = (industry || '').toLowerCase();
-    var cat = 'default';
-    if (/energy|utilit|power|grid/.test(ind)) cat = 'energy';
-    else if (/pharma|health|life science|biotech|medical/.test(ind)) cat = 'pharma';
-    else if (/auto|vehicle|mobility/.test(ind)) cat = 'automotive';
-    else if (/software|tech|cloud|data|it\b/.test(ind)) cat = 'tech';
-    else if (/bank|financ|insur/.test(ind)) cat = 'finance';
-    else if (/industrial|manufactur|engineering/.test(ind)) cat = 'industrial';
-    var t = DISCOVERY_TEMPLATES[cat];
+  function generateStarterSetup(sector, companyName){
+    var t = DISCOVERY_TEMPLATES[sector] || DISCOVERY_TEMPLATES.Automotive;
     var name = companyName || 'This company';
     var stamp = Date.now();
     return {
@@ -1099,8 +1064,7 @@
   }
 
   var NEW_CLIENT_FIELD_MAP = {
-    'new-client-icon': 'icon', 'new-client-name': 'name', 'new-client-industry': 'industry',
-    'new-client-hq': 'hq', 'new-client-revenue': 'revenue'
+    'new-client-name': 'name', 'new-client-hq': 'hq', 'new-client-revenue': 'revenue'
   };
   document.addEventListener('input', function(e){
     var key = NEW_CLIENT_FIELD_MAP[e.target.id];
@@ -1160,7 +1124,7 @@
     if (toggleAddClient){
       state.addingClient = !state.addingClient;
       state.discoveredSetup = null;
-      state.newClientDraft = { icon: '🏢', name: '', industry: '', hq: '', revenue: '' };
+      state.newClientDraft = { icon: '', name: '', industry: '', hq: '', revenue: '' };
       render();
       return;
     }
@@ -1168,16 +1132,25 @@
     if (cancelAddClient){
       state.addingClient = false;
       state.discoveredSetup = null;
-      state.newClientDraft = { icon: '🏢', name: '', industry: '', hq: '', revenue: '' };
+      state.newClientDraft = { icon: '', name: '', industry: '', hq: '', revenue: '' };
+      render();
+      return;
+    }
+    var setSector = e.target.closest('[data-set-sector]');
+    if (setSector){
+      var sectorKey = setSector.getAttribute('data-set-sector');
+      var sectorDef = SECTORS.filter(function(s){ return s.key === sectorKey; })[0];
+      state.newClientDraft.industry = sectorKey;
+      state.newClientDraft.icon = sectorDef ? sectorDef.icon : '🏢';
       render();
       return;
     }
     var discoverClient = e.target.closest('[data-discover-client]');
     if (discoverClient){
       var dName = (byId('new-client-name').value || '').trim();
-      var dIndustry = (byId('new-client-industry').value || '').trim();
       if (!dName){ showToast('Enter a client name first, then discover'); return; }
-      state.discoveredSetup = generateStarterSetup(dIndustry, dName);
+      if (!state.newClientDraft.industry){ showToast('Pick a sector first'); return; }
+      state.discoveredSetup = generateStarterSetup(state.newClientDraft.industry, dName);
       render();
       showToast('Simulated starter setup generated — review before creating');
       return;
@@ -1186,8 +1159,9 @@
     if (saveAddClient){
       var name = (byId('new-client-name').value || '').trim();
       if (!name){ showToast('Enter a client name first'); return; }
-      var icon = (byId('new-client-icon').value || '🏢').trim() || '🏢';
-      var industry = (byId('new-client-industry').value || 'New Sector').trim() || 'New Sector';
+      if (!state.newClientDraft.industry){ showToast('Pick a sector first'); return; }
+      var icon = state.newClientDraft.icon || '🏢';
+      var industry = state.newClientDraft.industry;
       var hq = (byId('new-client-hq').value || 'Not set yet').trim() || 'Not set yet';
       var revenue = (byId('new-client-revenue').value || '—').trim() || '—';
       var id = slugify(name);

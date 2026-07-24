@@ -696,6 +696,240 @@
           nextStep: 'Offer a short pilot timed before the Head of R&D’s conference talk, so there’s a real result to point to.'
         }
       ]
+    },
+    {
+      id: 'deutsche-bank',
+      name: 'Deutsche Bank AG',
+      industry: 'Finance',
+      icon: '🏦',
+      avatar: 'DB',
+      hq: 'Frankfurt, Germany',
+      revenue: '$30B (FY2025)',
+      sector: 'Banking & Financial Services · digital unit: Deutsche Bank Digital',
+      stage: 'Warm',
+      signalHistory: [4,5,6,7,8,9],
+      activityLog: [
+        { date:'2026-07-05', type:'Note', note:'Added Deutsche Bank to the pilot after seeing strong AI-hiring and fraud-detection signals.' }
+      ],
+      departments: [
+        { name: 'Digital & AI', focus: 'Runs AI initiatives for fraud detection, credit scoring, and customer service.' },
+        { name: 'Risk & Compliance', focus: 'Tracks financial and AI-related regulation across markets.' },
+        { name: 'Technology Procurement', focus: 'Evaluates and onboards outside delivery and consulting partners.' }
+      ],
+      contacts: [
+        { id: 'anja-richter', name: 'Anja Richter', role: 'Head of AI & Digital Innovation', department: 'Digital & AI', channel: 'anja.richter@db.example', lastContact: '2026-07-02' },
+        { id: 'thomas-berger', name: 'Thomas Berger', role: 'Risk & Compliance Lead, AI', department: 'Risk & Compliance', channel: 'LinkedIn', lastContact: '2026-06-08' }
+      ],
+      sources: [
+        { id:'press', name: 'Deutsche Bank Newsroom & Press Releases', type: 'Company News', channel: 'news', status: 'Active' },
+        { id:'jobs', name: 'Deutsche Bank Careers (LinkedIn Jobs)', type: 'Job Postings', channel: 'social', status: 'Active' },
+        { id:'reg', name: 'European Banking Authority — AI & Risk Regulation Tracker', type: 'Regulatory Tracker', channel: 'news', status: 'Active' },
+        { id:'execsocial', name: 'LinkedIn — Deutsche Bank digital leadership', type: 'Executive Social Activity', channel: 'social', status: 'Active' },
+        { id:'tradepress', name: 'Handelsblatt — Banking & Fintech Coverage', type: 'Business Press', channel: 'news', status: 'Active' },
+        { id:'listening', name: 'Social Listening — X, Reddit & Customer Forums', type: 'Social Listening', channel: 'social', status: 'Active' }
+      ],
+      signals: [
+        { id:'n1', channel:'news', subtype:'Law', date:'2026-06-25', sourceId:'reg', text:'New EU rule requires banks to explain any AI-assisted decision that affects a customer’s loan or credit application.' },
+        { id:'n2', channel:'news', subtype:'Law', date:'2026-05-02', sourceId:'reg', text:'The European Banking Authority sets a 2027 deadline for banks to document and test all AI models used in credit risk scoring.' },
+        { id:'n3', channel:'news', subtype:'Collaboration', date:'2026-06-10', sourceId:'press', text:'Deutsche Bank partners with Google Cloud to run AI-based fraud detection across its European retail operations.' },
+        { id:'n4', channel:'news', subtype:'Recruiting', date:'2026-07-08', sourceId:'tradepress', text:'Business press reports Deutsche Bank plans to hire 200 more AI and data engineers by 2027.' },
+        { id:'n5', channel:'news', subtype:'Investment', date:'2026-06-15', sourceId:'tradepress', text:'Deutsche Bank announces a €350M investment in AI-driven risk and fraud technology.' },
+        { id:'s1', channel:'social', subtype:'Hiring', date:'2026-06-01', sourceId:'jobs', text:'Deutsche Bank posts a new role: "AI Model Risk Manager" to oversee credit-scoring AI.' },
+        { id:'s2', channel:'social', subtype:'Hiring', date:'2026-05-15', sourceId:'jobs', text:'Deutsche Bank opens a "Responsible AI Engineer" position for its fraud-detection team.' },
+        { id:'s3', channel:'social', subtype:'Migration', date:'2026-04-22', sourceId:'execsocial', text:'Several AI risk specialists join Deutsche Bank’s digital team from a major fintech this year.' },
+        { id:'s4', channel:'social', subtype:'Event', date:'2026-07-01', sourceId:'press', text:'Deutsche Bank’s Chief Digital Officer will speak at the Frankfurt FinTech Summit on "Trustworthy AI in Banking".' },
+        { id:'s5', channel:'social', subtype:'Social Post', date:'2026-07-12', sourceId:'listening', text:'Customers on social media report confusing explanations when declined for a loan by Deutsche Bank’s new AI system.' }
+      ],
+      scenarios: [
+        {
+          id: 'db-credit-explainability', title: 'AI Credit Decision Explainability & Compliance', domainTag: 'AI Regulation & Consumer Lending', confidence: 83, primaryContactId: 'thomas-berger',
+          signalIds: ['n1','n2','s5'],
+          summary: 'Deutsche Bank must soon explain every AI-assisted credit decision, and customers are already complaining about confusing loan rejections. We can build the explainability layer and compliance documentation before the 2027 EBA deadline.',
+          capabilities: ['Plain-language explanations for AI credit decisions', 'EBA compliance documentation for credit-scoring models', 'Customer-complaint pattern analysis', 'Bias & fairness testing for lending AI'],
+          nextStep: 'Reach the Risk & Compliance Lead directly — offer to have explainability tooling ready before the 2027 EBA deadline.'
+        },
+        {
+          id: 'db-fraud-governance', title: 'Governance Layer for the Google Cloud Fraud Detection Partnership', domainTag: 'AI Regulation & Cloud Partnership', confidence: 70, primaryContactId: 'anja-richter',
+          signalIds: ['n3','n2'],
+          summary: 'The new Google Cloud fraud-detection deal gives Deutsche Bank the infrastructure; EBA model-documentation rules give them a deadline. Nobody on the cloud side owns the compliance layer in between.',
+          capabilities: ['Model documentation & audit trail', 'Cloud-hosted fraud-model monitoring', 'Regulatory reporting automation'],
+          nextStep: 'Approach the Head of AI & Digital Innovation, framed around the compliance gap the Google Cloud deal alone doesn’t close.'
+        },
+        {
+          id: 'db-talent-ramp', title: 'Embedded AI Delivery Support During the Risk-Team Ramp', domainTag: 'Talent Migration into Banking AI', confidence: 60, primaryContactId: 'anja-richter',
+          signalIds: ['s1','s3','s4'],
+          summary: 'Deutsche Bank is visibly building an AI risk team just as its CDO makes public "trustworthy AI" commitments at a major summit. An embedded team can deliver a fast, credible result while the internal hires ramp up.',
+          capabilities: ['Embedded delivery pod (2–3 consultants)', 'Fast working pilot in 4–6 weeks', 'Knowledge transfer to incoming risk hires'],
+          nextStep: 'Offer a short pilot timed right after the CDO’s keynote, while executive attention is highest.'
+        }
+      ]
+    },
+    {
+      id: 'commerzbank',
+      name: 'Commerzbank AG',
+      industry: 'Finance',
+      icon: '🏦',
+      avatar: 'CBK',
+      hq: 'Frankfurt, Germany',
+      revenue: '$10B (FY2025)',
+      sector: 'Banking & Financial Services · digital unit: Commerzbank Digital',
+      stage: 'Cold',
+      signalHistory: [2,3,3,4,4,5],
+      activityLog: [
+        { date:'2026-07-10', type:'Note', note:'Added Commerzbank to the pilot after seeing AI-hiring signals in retail banking.' }
+      ],
+      departments: [
+        { name: 'Digital Banking', focus: 'Runs AI initiatives for retail banking and customer service.' },
+        { name: 'Compliance', focus: 'Tracks EU banking and AI regulation.' }
+      ],
+      contacts: [
+        { id: 'greta-schulz', name: 'Greta Schulz', role: 'Head of Digital Banking', department: 'Digital Banking', channel: 'greta.schulz@commerzbank.example', lastContact: '2026-06-20' }
+      ],
+      sources: [
+        { id:'press', name: 'Commerzbank Newsroom & Press Releases', type: 'Company News', channel: 'news', status: 'Active' },
+        { id:'jobs', name: 'Commerzbank Careers (LinkedIn Jobs)', type: 'Job Postings', channel: 'social', status: 'Active' },
+        { id:'reg', name: 'European Banking Authority — AI & Risk Regulation Tracker', type: 'Regulatory Tracker', channel: 'news', status: 'Active' },
+        { id:'execsocial', name: 'LinkedIn — Commerzbank digital leadership', type: 'Executive Social Activity', channel: 'social', status: 'Planned' }
+      ],
+      signals: [
+        { id:'n1', channel:'news', subtype:'Law', date:'2026-06-25', sourceId:'reg', text:'New EU rule requires banks to explain any AI-assisted decision that affects a customer’s loan or credit application.' },
+        { id:'n2', channel:'news', subtype:'Collaboration', date:'2026-05-28', sourceId:'press', text:'Commerzbank partners with AWS to modernize its retail banking AI infrastructure.' },
+        { id:'s1', channel:'social', subtype:'Hiring', date:'2026-06-05', sourceId:'jobs', text:'Commerzbank posts a new role: "AI Product Manager — Retail Banking".' },
+        { id:'s2', channel:'social', subtype:'Social Post', date:'2026-06-22', sourceId:'execsocial', text:'Customers on social media mention Commerzbank’s new chatbot gives inconsistent answers about account fees.' }
+      ],
+      scenarios: [
+        {
+          id: 'cbk-chatbot-quality', title: 'Customer-Facing AI Quality & Fee Transparency', domainTag: 'AI Regulation & Customer Trust', confidence: 65, primaryContactId: 'greta-schulz',
+          signalIds: ['n1','s2'],
+          summary: 'Commerzbank’s customers are already flagging inconsistent chatbot answers about fees, and a new EU rule will soon require explainable AI decisions in banking. We can fix the quality gap and build the explainability layer together.',
+          capabilities: ['Chatbot response-quality monitoring', 'Plain-language fee/decision explanations', 'Customer-complaint triage'],
+          nextStep: 'Reach the Head of Digital Banking, using the chatbot complaints as the opening.'
+        },
+        {
+          id: 'cbk-aws-governance', title: 'Governance Layer for the AWS Retail Banking Modernization', domainTag: 'AI Regulation & Cloud Partnership', confidence: 55, primaryContactId: 'greta-schulz',
+          signalIds: ['n2','n1'],
+          summary: 'Commerzbank’s AWS modernization gives it new AI infrastructure for retail banking — a natural moment to build in compliance and governance from the start rather than retrofit it later.',
+          capabilities: ['AWS-hosted model governance', 'EU banking AI compliance documentation'],
+          nextStep: 'Engage the digital banking team early, while the AWS modernization is still being rolled out.'
+        }
+      ]
+    },
+    {
+      id: 'fresenius',
+      name: 'Fresenius SE',
+      industry: 'Healthcare',
+      icon: '🏥',
+      avatar: 'FRE',
+      hq: 'Bad Homburg, Germany',
+      revenue: '$22B (FY2025)',
+      sector: 'Healthcare Services & Hospital Operations · digital unit: Fresenius Digital Health',
+      stage: 'Warm',
+      signalHistory: [3,4,5,6,7,8],
+      activityLog: [
+        { date:'2026-07-03', type:'Note', note:'Added Fresenius to the pilot after seeing strong AI-hiring and patient-data signals.' }
+      ],
+      departments: [
+        { name: 'Digital Health', focus: 'Runs AI initiatives for dialysis and hospital operations.' },
+        { name: 'Clinical Operations', focus: 'Owns patient care systems and clinical AI tools.' },
+        { name: 'Data Privacy & Compliance', focus: 'Tracks patient-data and AI documentation requirements.' }
+      ],
+      contacts: [
+        { id: 'martin-vogel', name: 'Martin Vogel', role: 'Head of Digital Health', department: 'Digital Health', channel: 'martin.vogel@fresenius.example', lastContact: '2026-07-01' },
+        { id: 'sofia-lang', name: 'Sofia Lang', role: 'Clinical Data Systems Lead', department: 'Clinical Operations', channel: 'LinkedIn', lastContact: '2026-06-12' }
+      ],
+      sources: [
+        { id:'press', name: 'Fresenius Newsroom & Press Releases', type: 'Company News', channel: 'news', status: 'Active' },
+        { id:'jobs', name: 'Fresenius Careers (LinkedIn Jobs)', type: 'Job Postings', channel: 'social', status: 'Active' },
+        { id:'reg', name: 'EU Medical Device & AI Health Regulation Tracker', type: 'Regulatory Tracker', channel: 'news', status: 'Active' },
+        { id:'execsocial', name: 'LinkedIn — Fresenius digital health leadership', type: 'Executive Social Activity', channel: 'social', status: 'Active' },
+        { id:'tradepress', name: 'Healthcare Trade Press — Business & Clinical Coverage', type: 'Business Press', channel: 'news', status: 'Active' },
+        { id:'listening', name: 'Social Listening — Patient & Caregiver Forums', type: 'Social Listening', channel: 'social', status: 'Active' }
+      ],
+      signals: [
+        { id:'n1', channel:'news', subtype:'Law', date:'2026-06-18', sourceId:'reg', text:'New EU rule requires AI used in dialysis and patient-monitoring equipment to pass a safety and documentation review before deployment.' },
+        { id:'n2', channel:'news', subtype:'Law', date:'2026-04-25', sourceId:'reg', text:'Germany updates patient-data privacy rules — healthcare providers must prove how each AI tool uses patient data before rolling it out.' },
+        { id:'n3', channel:'news', subtype:'Collaboration', date:'2026-06-05', sourceId:'press', text:'Fresenius partners with Microsoft Azure to run AI-based patient monitoring across its dialysis clinics.' },
+        { id:'n4', channel:'news', subtype:'Recruiting', date:'2026-07-09', sourceId:'tradepress', text:'Healthcare trade press reports Fresenius plans to hire 180 more AI and clinical-data roles by 2028.' },
+        { id:'n5', channel:'news', subtype:'Investment', date:'2026-05-30', sourceId:'tradepress', text:'Fresenius announces a €200M investment in AI-driven patient monitoring research.' },
+        { id:'s1', channel:'social', subtype:'Hiring', date:'2026-05-20', sourceId:'jobs', text:'Fresenius posts a new role: "Clinical AI Safety Engineer" for its dialysis monitoring systems.' },
+        { id:'s2', channel:'social', subtype:'Hiring', date:'2026-06-08', sourceId:'jobs', text:'Fresenius opens a "Patient Data Privacy Lead" position.' },
+        { id:'s3', channel:'social', subtype:'Migration', date:'2026-04-10', sourceId:'execsocial', text:'Several clinical AI specialists join Fresenius’s digital health team from a major medtech company this year.' },
+        { id:'s4', channel:'social', subtype:'Event', date:'2026-07-14', sourceId:'press', text:'Fresenius’s Head of Digital Health will speak at a major health-tech conference on "AI Safety in Patient Monitoring".' },
+        { id:'s5', channel:'social', subtype:'Social Post', date:'2026-06-30', sourceId:'listening', text:'Patients and caregivers on forums raise questions about how Fresenius’s new AI system flags dialysis complications.' }
+      ],
+      scenarios: [
+        {
+          id: 'fre-patient-monitoring-safety', title: 'Patient Monitoring AI Safety & Documentation', domainTag: 'AI Regulation in Healthcare', confidence: 81, primaryContactId: 'martin-vogel',
+          signalIds: ['n1','s1','n3'],
+          summary: 'Fresenius must now document and safety-test its patient-monitoring AI before deployment, right as it scales up an Azure-based monitoring partnership and hires its first Clinical AI Safety Engineer. We can build the documentation and monitoring system before regulators come asking.',
+          capabilities: ['AI model documentation & safety-testing framework', 'Regulatory-readiness reporting', 'Azure-hosted model monitoring', 'Support for the new Clinical AI Safety Engineer'],
+          nextStep: 'Reach the Head of Digital Health directly — offer to have the safety-documentation system ready before the next regulatory review.'
+        },
+        {
+          id: 'fre-patient-trust', title: 'Patient Trust & Alert-Accuracy Review', domainTag: 'Clinical AI Regulation', confidence: 74, primaryContactId: 'sofia-lang',
+          signalIds: ['s5','n1'],
+          summary: 'Patients and caregivers are already questioning how the AI flags dialysis complications, and a new law will soon require safety documentation for exactly this kind of system. We can improve alert accuracy and build the transparency patients are asking for.',
+          capabilities: ['Alert-accuracy monitoring & tuning', 'Plain-language explanations for clinical AI flags', 'Patient-complaint pattern analysis'],
+          nextStep: 'Approach the Clinical Data Systems Lead, using the patient forum questions as the reason to act now.'
+        },
+        {
+          id: 'fre-patient-data-compliance', title: 'Patient-Data Compliance for New AI Tools', domainTag: 'Patient Data Regulation', confidence: 60, primaryContactId: 'sofia-lang',
+          signalIds: ['n2','n3'],
+          summary: 'Before rolling AI out more broadly across its clinics through the new Azure partnership, Fresenius must prove how each tool uses patient data — an easy step to underestimate at multi-clinic scale.',
+          capabilities: ['Patient-data usage mapping per AI tool', 'Consent & privacy compliance checks', 'Multi-clinic rollout compliance playbook'],
+          nextStep: 'Engage the digital health team early, before the AI tools are rolled out clinic by clinic.'
+        }
+      ]
+    },
+    {
+      id: 'siemens-healthineers',
+      name: 'Siemens Healthineers AG',
+      industry: 'Healthcare',
+      icon: '🏥',
+      avatar: 'SHL',
+      hq: 'Erlangen, Germany',
+      revenue: '$23B (FY2025)',
+      sector: 'Medical Technology & Diagnostics · digital unit: Siemens Healthineers Digital',
+      stage: 'Cold',
+      signalHistory: [2,3,3,4,5,5],
+      activityLog: [
+        { date:'2026-07-11', type:'Note', note:'Added Siemens Healthineers after seeing AI-hiring signals in diagnostic imaging.' }
+      ],
+      departments: [
+        { name: 'Digital & AI', focus: 'Runs AI initiatives for diagnostic imaging and lab systems.' },
+        { name: 'Regulatory Affairs', focus: 'Tracks medical-device and AI regulation.' }
+      ],
+      contacts: [
+        { id: 'karin-fuchs', name: 'Karin Fuchs', role: 'Head of AI & Digital Diagnostics', department: 'Digital & AI', channel: 'karin.fuchs@siemens-healthineers.example', lastContact: '2026-06-25' }
+      ],
+      sources: [
+        { id:'press', name: 'Siemens Healthineers Newsroom & Press Releases', type: 'Company News', channel: 'news', status: 'Active' },
+        { id:'jobs', name: 'Siemens Healthineers Careers (LinkedIn Jobs)', type: 'Job Postings', channel: 'social', status: 'Active' },
+        { id:'reg', name: 'EU Medical Device & AI Health Regulation Tracker', type: 'Regulatory Tracker', channel: 'news', status: 'Active' },
+        { id:'execsocial', name: 'LinkedIn — Siemens Healthineers leadership', type: 'Executive Social Activity', channel: 'social', status: 'Planned' }
+      ],
+      signals: [
+        { id:'n1', channel:'news', subtype:'Law', date:'2026-06-18', sourceId:'reg', text:'New EU rule requires AI used in diagnostic imaging systems to pass a safety and documentation review before deployment.' },
+        { id:'n2', channel:'news', subtype:'Collaboration', date:'2026-05-15', sourceId:'press', text:'Siemens Healthineers partners with AWS to run AI-based diagnostic imaging analysis across its scanner fleet.' },
+        { id:'s1', channel:'social', subtype:'Hiring', date:'2026-06-02', sourceId:'jobs', text:'Siemens Healthineers posts a new role: "AI Validation Engineer — Diagnostic Imaging".' },
+        { id:'s2', channel:'social', subtype:'Social Post', date:'2026-06-20', sourceId:'execsocial', text:'Radiologists on professional forums note the new diagnostic AI sometimes flags false positives.' }
+      ],
+      scenarios: [
+        {
+          id: 'shl-imaging-validation', title: 'Diagnostic Imaging AI Validation & False-Positive Reduction', domainTag: 'AI Regulation & Clinical Accuracy', confidence: 68, primaryContactId: 'karin-fuchs',
+          signalIds: ['n1','s2'],
+          summary: 'Radiologists are already flagging false positives from the new diagnostic AI, and a new EU rule will soon require safety validation for exactly this kind of system. We can improve accuracy and deliver the validation documentation needed.',
+          capabilities: ['False-positive root-cause analysis', 'Model validation & documentation framework', 'Regulatory-readiness reporting'],
+          nextStep: 'Reach the Head of AI & Digital Diagnostics, referencing the false-positive reports and the upcoming validation requirement.'
+        },
+        {
+          id: 'shl-aws-governance', title: 'Governance Layer for the AWS Diagnostic Imaging Partnership', domainTag: 'AI Regulation & Cloud Partnership', confidence: 52, primaryContactId: 'karin-fuchs',
+          signalIds: ['n2','n1'],
+          summary: 'The new AWS partnership gives Siemens Healthineers the infrastructure for AI-based imaging analysis — a good moment to build in the compliance layer the cloud deal alone doesn’t provide.',
+          capabilities: ['AWS-hosted model governance', 'EU medical-device AI compliance documentation'],
+          nextStep: 'Engage the digital diagnostics team early, while the AWS partnership is still being rolled out.'
+        }
+      ]
     }
   ];
 
@@ -813,7 +1047,7 @@
 
   function header(){
     return '<div class="title-bar">' +
-        '<h1 class="app-title"><span class="spark">✦</span> Market Intelligence <span class="pilot-tag">&mdash; ' + ACCOUNTS.length + ' Pilot Accounts Across 3 Sectors</span></h1>' +
+        '<h1 class="app-title"><span class="spark">✦</span> Market Intelligence <span class="pilot-tag">&mdash; ' + ACCOUNTS.length + ' Pilot Accounts Across ' + SECTORS.length + ' Sectors</span></h1>' +
         '<div class="title-actions">' +
           '<button class="pill primary-btn" data-toast="Signals refreshed (demo)">↻ Rescan Signals</button>' +
           '<span class="last-update">Last updated 2026-07-23</span>' +
@@ -866,13 +1100,15 @@
   var SECTORS = [
     { key: 'Automotive', icon: '🚗' },
     { key: 'Energy', icon: '⚡' },
-    { key: 'Pharma', icon: '💊' }
+    { key: 'Pharma', icon: '💊' },
+    { key: 'Finance', icon: '🏦' },
+    { key: 'Healthcare', icon: '🏥' }
   ];
 
   var PARTNERS = [
-    { id: 'microsoft', name: 'Microsoft (Azure)', icon: '🟦', type: 'Cloud & AI Infrastructure Partner', note: 'Powers the AI workloads behind two of our pilot accounts via Azure — a natural seam for us to sit on top of with governance and monitoring.', relatedAccountIds: ['bmw','rwe'] },
-    { id: 'aws', name: 'Amazon Web Services (AWS)', icon: '🟧', type: 'Cloud & AI Infrastructure Partner', note: 'Runs AI workloads for two of our pilot accounts via AWS — same opening: infrastructure without the governance layer.', relatedAccountIds: ['siemens-energy','bayer'] },
-    { id: 'google-cloud', name: 'Google Cloud', icon: '🟩', type: 'Cloud & AI Infrastructure Partner', note: 'Powers Volkswagen/CARIAD’s in-car AI assistant infrastructure.', relatedAccountIds: ['vw'] }
+    { id: 'microsoft', name: 'Microsoft (Azure)', icon: '🟦', type: 'Cloud & AI Infrastructure Partner', note: 'Powers the AI workloads behind several pilot accounts via Azure — a natural seam for us to sit on top of with governance and monitoring.', relatedAccountIds: ['bmw','rwe','fresenius'] },
+    { id: 'aws', name: 'Amazon Web Services (AWS)', icon: '🟧', type: 'Cloud & AI Infrastructure Partner', note: 'Runs AI workloads for several pilot accounts via AWS — same opening: infrastructure without the governance layer.', relatedAccountIds: ['siemens-energy','bayer','commerzbank','siemens-healthineers'] },
+    { id: 'google-cloud', name: 'Google Cloud', icon: '🟩', type: 'Cloud & AI Infrastructure Partner', note: 'Powers in-car and fraud-detection AI infrastructure for two of our pilot accounts.', relatedAccountIds: ['vw','deutsche-bank'] }
   ];
 
   var SECTOR_NEWS = {
@@ -887,6 +1123,14 @@
     Pharma: [
       { date: '2026-06-28', subtype: 'Law', source: 'European Medicines Agency', text: 'The EMA issues industry-wide guidance requiring every AI-assisted drug-discovery tool to pass a new validation framework by 2027, regardless of vendor.' },
       { date: '2026-04-30', subtype: 'Collaboration', source: 'European Federation of Pharmaceutical Industries', text: 'The European pharma industry association proposes shared standards for AI transparency in clinical trials, applying across all member companies.' }
+    ],
+    Finance: [
+      { date: '2026-06-25', subtype: 'Law', source: 'European Banking Authority', text: 'The EBA sets an industry-wide deadline of 2027 for every bank to document and test AI models used in credit risk scoring, not just early adopters.' },
+      { date: '2026-04-20', subtype: 'Collaboration', source: 'European Banking Federation', text: 'The European Banking Federation proposes a shared framework for explainable AI in lending, so customers get consistent explanations across every bank.' }
+    ],
+    Healthcare: [
+      { date: '2026-06-18', subtype: 'Law', source: 'EU Medical Device Regulation Body', text: 'The EU extends its medical device AI rules to require safety documentation for every AI system used in patient monitoring or diagnostics, across all providers.' },
+      { date: '2026-04-15', subtype: 'Collaboration', source: 'European Hospital Federation', text: 'The European Hospital Federation calls for shared clinical-AI validation standards across all member hospitals and providers.' }
     ]
   };
 
@@ -917,6 +1161,24 @@
       ],
       roles: ['Head of Digital Partnerships', 'Compliance Counsel, AI & Data'],
       sourceReg: 'Vehicle Safety & Transport Regulator updates'
+    },
+    Finance: {
+      departments: [
+        { name: 'Digital & Innovation', focus: 'Runs AI and digital transformation initiatives.' },
+        { name: 'Risk & Compliance', focus: 'Tracks financial and AI-related regulation.' },
+        { name: 'Data & Analytics', focus: 'Owns data infrastructure and reporting.' }
+      ],
+      roles: ['Head of Digital Innovation', 'Risk & Compliance Lead'],
+      sourceReg: 'Financial Regulator updates'
+    },
+    Healthcare: {
+      departments: [
+        { name: 'Digital Health', focus: 'Runs AI initiatives for clinical and patient-care systems.' },
+        { name: 'Clinical Operations', focus: 'Owns patient care systems and clinical AI tools.' },
+        { name: 'Data Privacy & Compliance', focus: 'Tracks patient-data and AI documentation requirements.' }
+      ],
+      roles: ['Head of Digital Health', 'Clinical Data Systems Lead'],
+      sourceReg: 'EU Medical Device & AI Health Regulation Tracker'
     }
   };
 

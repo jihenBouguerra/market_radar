@@ -222,6 +222,7 @@
   .timeline-date { font-family: var(--mono); font-size: 11px; color: var(--text-faint); padding-top: 2px; }
   .evidence-type { display: inline-block; font-size: 10.5px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 5px; background: var(--panel2); padding: 2px 8px; border-radius: var(--radius-pill); }
   .timeline-item p { margin: 0; font-size: 12.8px; color: var(--text); line-height: 1.55; }
+  .signal-source { font-size: 10.5px; color: var(--text-faint); margin-top: 5px; font-style: italic; }
 
   .sig-ref-pill { font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: var(--radius-pill); background: var(--panel2); border: 1px solid var(--border); }
 
@@ -334,27 +335,31 @@
         { name: 'Dr. Sabine Ott', role: 'Compliance Counsel, AI & Data', department: 'Legal & Compliance', channel: 'sabine.ott@vw.example', lastContact: '2026-04-02' }
       ],
       sources: [
-        { name: 'CARIAD Newsroom & Press Releases', type: 'Company News', channel: 'news', status: 'Active' },
-        { name: 'CARIAD Careers (LinkedIn Jobs)', type: 'Job Postings', channel: 'social', status: 'Active' },
-        { name: 'EUR-Lex — EU AI Act & Data Act updates', type: 'Regulatory Tracker', channel: 'news', status: 'Active' },
-        { name: 'LinkedIn — CARIAD & VW Group executives', type: 'Executive Social Activity', channel: 'social', status: 'Active' },
-        { name: 'Bundesanzeiger (German company filings)', type: 'Company Filings', channel: 'news', status: 'Planned' }
+        { id:'press', name: 'CARIAD Newsroom & Press Releases', type: 'Company News', channel: 'news', status: 'Active' },
+        { id:'jobs', name: 'CARIAD Careers (LinkedIn Jobs)', type: 'Job Postings', channel: 'social', status: 'Active' },
+        { id:'reg', name: 'EUR-Lex — EU AI Act & Data Act updates', type: 'Regulatory Tracker', channel: 'news', status: 'Active' },
+        { id:'execsocial', name: 'LinkedIn — CARIAD & VW Group executives', type: 'Executive Social Activity', channel: 'social', status: 'Active' },
+        { id:'filings', name: 'Bundesanzeiger (German company filings)', type: 'Company Filings', channel: 'news', status: 'Planned' },
+        { id:'tradepress', name: 'Handelsblatt — Automotive & Tech Coverage', type: 'Business Press', channel: 'news', status: 'Active' },
+        { id:'listening', name: 'Social Listening — X, Reddit & Owner Forums', type: 'Social Listening', channel: 'social', status: 'Active' }
       ],
       signals: [
-        { id:'n1', channel:'news', subtype:'Law', date:'2026-07-05', text:'New EU law says AI used in driver assistance and cabin monitoring must pass a safety check within 12 months.' },
-        { id:'n2', channel:'news', subtype:'Law', date:'2026-05-14', text:'New EU rule says car makers must let owners and approved apps access their vehicle’s data.' },
-        { id:'n3', channel:'news', subtype:'Law', date:'2026-03-02', text:'Germany’s supply-chain law now also covers where a company’s AI training data comes from.' },
-        { id:'n4', channel:'news', subtype:'Collaboration', date:'2026-06-18', text:'CARIAD, Volkswagen’s software unit, signs a major cloud and AI deal to power its next in-car assistant.' },
-        { id:'n5', channel:'news', subtype:'Collaboration', date:'2026-04-09', text:'Volkswagen and Rivian’s shared software project hits its first milestone — both companies’ new EVs will run it.' },
-        { id:'n6', channel:'news', subtype:'Collaboration', date:'2026-02-20', text:'Volkswagen deepens its partnership with Xpeng, sharing software and AI for two new electric models in China.' },
-        { id:'s1', channel:'social', subtype:'Hiring', date:'2026-06-25', text:'Volkswagen posts three senior roles at once — "Head of AI Governance", "Data Trust & Privacy Lead", and "Responsible AI Program Manager".' },
-        { id:'s2', channel:'social', subtype:'Hiring', date:'2026-05-30', text:'CARIAD opens its first role focused purely on AI quality: "Staff Engineer — AI Observability & Monitoring".' },
-        { id:'s3', channel:'social', subtype:'Migration', date:'2026-06-10', text:'Three senior AI engineers leave a major AI lab to join CARIAD, all within the same month.' },
-        { id:'s4', channel:'social', subtype:'Migration', date:'2026-01-22', text:'CARIAD’s new Chief Digital Officer joins from a Silicon Valley self-driving startup, bringing former colleagues along.' },
-        { id:'s5', channel:'social', subtype:'Event', date:'2026-07-01', text:'Volkswagen’s CTO will keynote the Munich Auto-AI Summit on "Trustworthy AI in Vehicles".' },
-        { id:'s6', channel:'social', subtype:'Event', date:'2026-04-25', text:'CARIAD holds a developer day to preview its in-car assistant roadmap to press and analysts.' },
-        { id:'s7', channel:'social', subtype:'Social Post', date:'2026-07-10', text:'Drivers on social media say the ID. software assistant gives wrong or confusing answers about charging and range.' },
-        { id:'s8', channel:'social', subtype:'Social Post', date:'2026-03-15', text:'CARIAD’s digital lead posts on LinkedIn about building real AI skills in-house instead of relying on vendors.' }
+        { id:'n1', channel:'news', subtype:'Law', date:'2026-07-05', sourceId:'reg', text:'New EU law says AI used in driver assistance and cabin monitoring must pass a safety check within 12 months.' },
+        { id:'n2', channel:'news', subtype:'Law', date:'2026-05-14', sourceId:'reg', text:'New EU rule says car makers must let owners and approved apps access their vehicle’s data.' },
+        { id:'n3', channel:'news', subtype:'Law', date:'2026-03-02', sourceId:'reg', text:'Germany’s supply-chain law now also covers where a company’s AI training data comes from.' },
+        { id:'n4', channel:'news', subtype:'Collaboration', date:'2026-06-18', sourceId:'press', text:'CARIAD, Volkswagen’s software unit, signs a major cloud and AI deal to power its next in-car assistant.' },
+        { id:'n5', channel:'news', subtype:'Collaboration', date:'2026-04-09', sourceId:'press', text:'Volkswagen and Rivian’s shared software project hits its first milestone — both companies’ new EVs will run it.' },
+        { id:'n6', channel:'news', subtype:'Collaboration', date:'2026-02-20', sourceId:'press', text:'Volkswagen deepens its partnership with Xpeng, sharing software and AI for two new electric models in China.' },
+        { id:'n7', channel:'news', subtype:'Recruiting', date:'2026-07-18', sourceId:'tradepress', text:'Business press reports Volkswagen plans to hire 300 more AI and software engineers for CARIAD by 2027.' },
+        { id:'n8', channel:'news', subtype:'Investment', date:'2026-06-26', sourceId:'tradepress', text:'Volkswagen announces an extra €500M investment in AI and software research over the next three years.' },
+        { id:'s1', channel:'social', subtype:'Hiring', date:'2026-06-25', sourceId:'jobs', text:'Volkswagen posts three senior roles at once — "Head of AI Governance", "Data Trust & Privacy Lead", and "Responsible AI Program Manager".' },
+        { id:'s2', channel:'social', subtype:'Hiring', date:'2026-05-30', sourceId:'jobs', text:'CARIAD opens its first role focused purely on AI quality: "Staff Engineer — AI Observability & Monitoring".' },
+        { id:'s3', channel:'social', subtype:'Migration', date:'2026-06-10', sourceId:'execsocial', text:'Three senior AI engineers leave a major AI lab to join CARIAD, all within the same month.' },
+        { id:'s4', channel:'social', subtype:'Migration', date:'2026-01-22', sourceId:'execsocial', text:'CARIAD’s new Chief Digital Officer joins from a Silicon Valley self-driving startup, bringing former colleagues along.' },
+        { id:'s5', channel:'social', subtype:'Event', date:'2026-07-01', sourceId:'press', text:'Volkswagen’s CTO will keynote the Munich Auto-AI Summit on "Trustworthy AI in Vehicles".' },
+        { id:'s6', channel:'social', subtype:'Event', date:'2026-04-25', sourceId:'press', text:'CARIAD holds a developer day to preview its in-car assistant roadmap to press and analysts.' },
+        { id:'s7', channel:'social', subtype:'Social Post', date:'2026-07-10', sourceId:'listening', text:'Drivers on social media say the ID. software assistant gives wrong or confusing answers about charging and range.' },
+        { id:'s8', channel:'social', subtype:'Social Post', date:'2026-03-15', sourceId:'execsocial', text:'CARIAD’s digital lead posts on LinkedIn about building real AI skills in-house instead of relying on vendors.' }
       ],
       scenarios: [
         {
@@ -406,25 +411,29 @@
         { name: 'Tom Brandt', role: 'Head of Data & Analytics', department: 'RWE Digital', channel: 'LinkedIn', lastContact: '2026-06-18' }
       ],
       sources: [
-        { name: 'RWE Newsroom & Press Releases', type: 'Company News', channel: 'news', status: 'Active' },
-        { name: 'RWE Careers Page', type: 'Job Postings', channel: 'social', status: 'Active' },
-        { name: 'Bundesnetzagentur (grid regulator) updates', type: 'Regulatory Tracker', channel: 'news', status: 'Active' },
-        { name: 'LinkedIn — RWE Digital leadership', type: 'Executive Social Activity', channel: 'social', status: 'Active' },
-        { name: 'Berlin Energy Week & industry event listings', type: 'Event Listings', channel: 'social', status: 'Planned' }
+        { id:'press', name: 'RWE Newsroom & Press Releases', type: 'Company News', channel: 'news', status: 'Active' },
+        { id:'jobs', name: 'RWE Careers Page', type: 'Job Postings', channel: 'social', status: 'Active' },
+        { id:'reg', name: 'Bundesnetzagentur (grid regulator) updates', type: 'Regulatory Tracker', channel: 'news', status: 'Active' },
+        { id:'execsocial', name: 'LinkedIn — RWE Digital leadership', type: 'Executive Social Activity', channel: 'social', status: 'Active' },
+        { id:'events', name: 'Berlin Energy Week & industry event listings', type: 'Event Listings', channel: 'social', status: 'Planned' },
+        { id:'tradepress', name: 'Handelsblatt — Energy & Utilities Coverage', type: 'Business Press', channel: 'news', status: 'Active' },
+        { id:'listening', name: 'Social Listening — X, Reddit & Customer Forums', type: 'Social Listening', channel: 'social', status: 'Active' }
       ],
       signals: [
-        { id:'n1', channel:'news', subtype:'Law', date:'2026-06-22', text:'New EU rule: if AI helps set a customer’s energy price or contract, the company must be able to explain that decision in plain language.' },
-        { id:'n2', channel:'news', subtype:'Law', date:'2026-04-11', text:'Germany sets a 2027 deadline for power grids to handle much more solar and wind — grid operators must upgrade their forecasting systems by then.' },
-        { id:'n3', channel:'news', subtype:'Law', date:'2026-02-08', text:'New rule: smart-meter data must be shared with customers and approved apps, not just kept by the energy company.' },
-        { id:'n4', channel:'news', subtype:'Collaboration', date:'2026-06-01', text:'RWE partners with a cloud provider to use AI for predicting how much power its wind and solar sites will produce.' },
-        { id:'n5', channel:'news', subtype:'Collaboration', date:'2026-03-19', text:'RWE teams up with a battery-storage startup to balance power supply and demand using AI forecasts.' },
-        { id:'s1', channel:'social', subtype:'Hiring', date:'2026-06-28', text:'RWE posts a brand-new role: "Head of AI & Data Ethics" — its first of this kind.' },
-        { id:'s2', channel:'social', subtype:'Hiring', date:'2026-05-16', text:'RWE is hiring a "Grid AI Forecasting Lead" to help predict power supply and demand.' },
-        { id:'s3', channel:'social', subtype:'Migration', date:'2026-05-02', text:'Several data scientists from a large tech company join RWE’s new digital energy team this year.' },
-        { id:'s4', channel:'social', subtype:'Event', date:'2026-07-08', text:'RWE’s CEO is confirmed to speak at Berlin Energy Week on "Trustworthy AI for the Power Grid".' },
-        { id:'s5', channel:'social', subtype:'Event', date:'2026-03-27', text:'RWE hosts an open house for its new digital energy control room, showing off its AI forecasting tools.' },
-        { id:'s6', channel:'social', subtype:'Social Post', date:'2026-07-14', text:'Customers on social media complain that RWE’s new smart-pricing app gives confusing or wrong price predictions.' },
-        { id:'s7', channel:'social', subtype:'Social Post', date:'2026-04-30', text:'RWE’s digital lead posts on LinkedIn about wanting AI that customers can "actually trust with their energy bill".' }
+        { id:'n1', channel:'news', subtype:'Law', date:'2026-06-22', sourceId:'reg', text:'New EU rule: if AI helps set a customer’s energy price or contract, the company must be able to explain that decision in plain language.' },
+        { id:'n2', channel:'news', subtype:'Law', date:'2026-04-11', sourceId:'reg', text:'Germany sets a 2027 deadline for power grids to handle much more solar and wind — grid operators must upgrade their forecasting systems by then.' },
+        { id:'n3', channel:'news', subtype:'Law', date:'2026-02-08', sourceId:'reg', text:'New rule: smart-meter data must be shared with customers and approved apps, not just kept by the energy company.' },
+        { id:'n4', channel:'news', subtype:'Collaboration', date:'2026-06-01', sourceId:'press', text:'RWE partners with a cloud provider to use AI for predicting how much power its wind and solar sites will produce.' },
+        { id:'n5', channel:'news', subtype:'Collaboration', date:'2026-03-19', sourceId:'press', text:'RWE teams up with a battery-storage startup to balance power supply and demand using AI forecasts.' },
+        { id:'n6', channel:'news', subtype:'Recruiting', date:'2026-07-15', sourceId:'tradepress', text:'Trade press reports RWE plans to double its digital and AI workforce by 2028.' },
+        { id:'n7', channel:'news', subtype:'Investment', date:'2026-06-05', sourceId:'tradepress', text:'RWE announces a €200M investment in AI-driven grid research over the next four years.' },
+        { id:'s1', channel:'social', subtype:'Hiring', date:'2026-06-28', sourceId:'jobs', text:'RWE posts a brand-new role: "Head of AI & Data Ethics" — its first of this kind.' },
+        { id:'s2', channel:'social', subtype:'Hiring', date:'2026-05-16', sourceId:'jobs', text:'RWE is hiring a "Grid AI Forecasting Lead" to help predict power supply and demand.' },
+        { id:'s3', channel:'social', subtype:'Migration', date:'2026-05-02', sourceId:'execsocial', text:'Several data scientists from a large tech company join RWE’s new digital energy team this year.' },
+        { id:'s4', channel:'social', subtype:'Event', date:'2026-07-08', sourceId:'press', text:'RWE’s CEO is confirmed to speak at Berlin Energy Week on "Trustworthy AI for the Power Grid".' },
+        { id:'s5', channel:'social', subtype:'Event', date:'2026-03-27', sourceId:'press', text:'RWE hosts an open house for its new digital energy control room, showing off its AI forecasting tools.' },
+        { id:'s6', channel:'social', subtype:'Social Post', date:'2026-07-14', sourceId:'listening', text:'Customers on social media complain that RWE’s new smart-pricing app gives confusing or wrong price predictions.' },
+        { id:'s7', channel:'social', subtype:'Social Post', date:'2026-04-30', sourceId:'execsocial', text:'RWE’s digital lead posts on LinkedIn about wanting AI that customers can "actually trust with their energy bill".' }
       ],
       scenarios: [
         {
@@ -476,24 +485,28 @@
         { name: 'Priya Nandakumar', role: 'Clinical Data Systems Lead', department: 'Clinical Operations', channel: 'LinkedIn', lastContact: '2026-06-01' }
       ],
       sources: [
-        { name: 'Bayer Newsroom & Press Releases', type: 'Company News', channel: 'news', status: 'Active' },
-        { name: 'Bayer Careers (LinkedIn Jobs)', type: 'Job Postings', channel: 'social', status: 'Active' },
-        { name: 'EMA — European Medicines Agency updates', type: 'Regulatory Tracker', channel: 'news', status: 'Active' },
-        { name: 'ClinicalTrials.gov listings', type: 'Trial Registry', channel: 'news', status: 'Active' },
-        { name: 'LinkedIn — Bayer R&D leadership', type: 'Executive Social Activity', channel: 'social', status: 'Planned' }
+        { id:'press', name: 'Bayer Newsroom & Press Releases', type: 'Company News', channel: 'news', status: 'Active' },
+        { id:'jobs', name: 'Bayer Careers (LinkedIn Jobs)', type: 'Job Postings', channel: 'social', status: 'Active' },
+        { id:'reg', name: 'EMA — European Medicines Agency updates', type: 'Regulatory Tracker', channel: 'news', status: 'Active' },
+        { id:'trials', name: 'ClinicalTrials.gov listings', type: 'Trial Registry', channel: 'news', status: 'Active' },
+        { id:'execsocial', name: 'LinkedIn — Bayer R&D leadership', type: 'Executive Social Activity', channel: 'social', status: 'Planned' },
+        { id:'tradepress', name: 'Pharma Trade Press — Business & Science Coverage', type: 'Business Press', channel: 'news', status: 'Active' },
+        { id:'listening', name: 'Social Listening — Patient & Physician Forums', type: 'Social Listening', channel: 'social', status: 'Active' }
       ],
       signals: [
-        { id:'n1', channel:'news', subtype:'Law', date:'2026-06-30', text:'New EU rule says AI used to help discover or test new medicines must be checked and documented, just like lab equipment.' },
-        { id:'n2', channel:'news', subtype:'Law', date:'2026-04-17', text:'Germany updates patient-data privacy rules — drug companies must prove how each AI tool uses patient data before rolling it out.' },
-        { id:'n3', channel:'news', subtype:'Law', date:'2026-02-25', text:'New EU rule requires drug companies to explain any AI-assisted decision that affects who gets into a clinical trial.' },
-        { id:'n4', channel:'news', subtype:'Collaboration', date:'2026-06-09', text:'Bayer partners with an AI drug-discovery company to speed up finding new medicines.' },
-        { id:'n5', channel:'news', subtype:'Collaboration', date:'2026-03-14', text:'Bayer signs a deal with a cloud provider to run AI models across its research labs worldwide.' },
-        { id:'s1', channel:'social', subtype:'Hiring', date:'2026-07-02', text:'Bayer posts a brand-new role: "Head of Responsible AI in R&D" — its first role focused only on AI oversight in drug research.' },
-        { id:'s2', channel:'social', subtype:'Hiring', date:'2026-05-21', text:'Bayer is hiring a "Clinical AI Data Quality Manager" to check AI results used in clinical trials.' },
-        { id:'s3', channel:'social', subtype:'Migration', date:'2026-05-06', text:'Several AI scientists leave large tech and pharma companies to join Bayer’s new digital research unit this year.' },
-        { id:'s4', channel:'social', subtype:'Event', date:'2026-07-12', text:'Bayer’s Head of R&D is confirmed to speak at a major health-tech conference on "Can We Trust AI to Help Find New Medicines?".' },
-        { id:'s5', channel:'social', subtype:'Social Post', date:'2026-07-16', text:'Patients and doctors on social media question how an AI tool Bayer uses picks candidates for a clinical trial.' },
-        { id:'s6', channel:'social', subtype:'Social Post', date:'2026-03-20', text:'Bayer’s digital research lead posts on LinkedIn about wanting every AI decision in drug discovery to be fully explainable.' }
+        { id:'n1', channel:'news', subtype:'Law', date:'2026-06-30', sourceId:'reg', text:'New EU rule says AI used to help discover or test new medicines must be checked and documented, just like lab equipment.' },
+        { id:'n2', channel:'news', subtype:'Law', date:'2026-04-17', sourceId:'reg', text:'Germany updates patient-data privacy rules — drug companies must prove how each AI tool uses patient data before rolling it out.' },
+        { id:'n3', channel:'news', subtype:'Law', date:'2026-02-25', sourceId:'reg', text:'New EU rule requires drug companies to explain any AI-assisted decision that affects who gets into a clinical trial.' },
+        { id:'n4', channel:'news', subtype:'Collaboration', date:'2026-06-09', sourceId:'press', text:'Bayer partners with an AI drug-discovery company to speed up finding new medicines.' },
+        { id:'n5', channel:'news', subtype:'Collaboration', date:'2026-03-14', sourceId:'press', text:'Bayer signs a deal with a cloud provider to run AI models across its research labs worldwide.' },
+        { id:'n6', channel:'news', subtype:'Recruiting', date:'2026-07-19', sourceId:'tradepress', text:'Pharma trade press reports Bayer plans to expand its AI research team by 150 roles over the next two years.' },
+        { id:'n7', channel:'news', subtype:'Investment', date:'2026-06-11', sourceId:'tradepress', text:'Bayer announces a €300M investment in AI-driven drug discovery research.' },
+        { id:'s1', channel:'social', subtype:'Hiring', date:'2026-07-02', sourceId:'jobs', text:'Bayer posts a brand-new role: "Head of Responsible AI in R&D" — its first role focused only on AI oversight in drug research.' },
+        { id:'s2', channel:'social', subtype:'Hiring', date:'2026-05-21', sourceId:'jobs', text:'Bayer is hiring a "Clinical AI Data Quality Manager" to check AI results used in clinical trials.' },
+        { id:'s3', channel:'social', subtype:'Migration', date:'2026-05-06', sourceId:'execsocial', text:'Several AI scientists leave large tech and pharma companies to join Bayer’s new digital research unit this year.' },
+        { id:'s4', channel:'social', subtype:'Event', date:'2026-07-12', sourceId:'press', text:'Bayer’s Head of R&D is confirmed to speak at a major health-tech conference on "Can We Trust AI to Help Find New Medicines?".' },
+        { id:'s5', channel:'social', subtype:'Social Post', date:'2026-07-16', sourceId:'listening', text:'Patients and doctors on social media question how an AI tool Bayer uses picks candidates for a clinical trial.' },
+        { id:'s6', channel:'social', subtype:'Social Post', date:'2026-03-20', sourceId:'execsocial', text:'Bayer’s digital research lead posts on LinkedIn about wanting every AI decision in drug discovery to be fully explainable.' }
       ],
       scenarios: [
         {
@@ -625,13 +638,17 @@
     '</div>';
   }
 
+  function findSource(account, sourceId){ return (account.sources || []).filter(function(src){ return src.id === sourceId; })[0]; }
+
   function signalListHtml(account, channel){
     var items = account.signals.filter(function(s){ return s.channel === channel; });
     if (!items.length) return '<p class="empty-note">No ' + channel + ' signals ingested yet.</p>';
     return items.map(function(s){
       var cls = channel === 'news' ? 'c-newstype' : 'c-socialtype';
+      var src = findSource(account, s.sourceId);
+      var srcHtml = src ? '<div class="signal-source">via ' + src.name + '</div>' : '';
       return '<div class="timeline-item"><div class="timeline-date">' + monthShort(s.date) + '</div>' +
-        '<div><span class="evidence-type ' + cls + '">' + s.subtype + '</span><p>' + s.text + '</p></div></div>';
+        '<div><span class="evidence-type ' + cls + '">' + s.subtype + '</span><p>' + s.text + '</p>' + srcHtml + '</div></div>';
     }).join('');
   }
 
@@ -751,8 +768,10 @@
     var evidence = sc.signalIds.map(function(id){
       var s = findSignal(account, id);
       var cls = s.channel === 'news' ? 'c-newstype' : 'c-socialtype';
+      var src = findSource(account, s.sourceId);
+      var srcHtml = src ? '<div class="signal-source">via ' + src.name + '</div>' : '';
       return '<div class="timeline-item"><div class="timeline-date">' + s.date + '</div>' +
-        '<div><span class="evidence-type ' + cls + '">' + (s.channel === 'news' ? 'News' : 'Social') + ' · ' + s.subtype + '</span><p>' + s.text + '</p></div></div>';
+        '<div><span class="evidence-type ' + cls + '">' + (s.channel === 'news' ? 'News' : 'Social') + ' · ' + s.subtype + '</span><p>' + s.text + '</p>' + srcHtml + '</div></div>';
     }).join('');
     var capabilities = sc.capabilities.map(function(cap){
       return '<span class="cap-pill"><span class="dot"></span>' + cap + '</span>';
@@ -865,6 +884,7 @@
         var sName = (byId('add-source-name').value || '').trim();
         if (!sName){ showToast('Enter a source name first'); return; }
         account.sources.push({
+          id: slugify(sName) + '-' + Date.now(),
           name: sName,
           type: (byId('add-source-type').value || 'General').trim() || 'General',
           channel: byId('add-source-channel').value === 'social' ? 'social' : 'news',

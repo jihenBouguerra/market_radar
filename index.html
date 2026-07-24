@@ -80,19 +80,18 @@
     --card-shadow: 0 4px 24px rgba(0,0,0,0.25);
   }
 
-  /* Theme toggle (light / dark) */
-  .theme-toggle { position: fixed; top: 14px; right: 16px; z-index: 200; width: 36px; height: 36px; border-radius: 999px; background: var(--panel); border: 1px solid var(--border); box-shadow: var(--card-shadow); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; line-height: 1; transition: border-color .15s, background .15s; }
-  .theme-toggle:hover { border-color: var(--accent); }
-  .theme-toggle .icon-moon { display: none; }
-  .theme-toggle .icon-sun { display: block; }
+  /* Theme toggle (light / dark) — inline, top of page */
+  .theme-toggle-inline { cursor: pointer; font-size: 15px; padding: 6px 12px; }
+  .theme-toggle-inline .icon-moon { display: none; }
+  .theme-toggle-inline .icon-sun { display: block; }
   @media (prefers-color-scheme: light) {
-    :root:not([data-theme="dark"]) .theme-toggle .icon-moon { display: block; }
-    :root:not([data-theme="dark"]) .theme-toggle .icon-sun { display: none; }
+    :root:not([data-theme="dark"]) .theme-toggle-inline .icon-moon { display: block; }
+    :root:not([data-theme="dark"]) .theme-toggle-inline .icon-sun { display: none; }
   }
-  :root[data-theme="light"] .theme-toggle .icon-moon { display: block; }
-  :root[data-theme="light"] .theme-toggle .icon-sun { display: none; }
-  :root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
-  :root[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+  :root[data-theme="light"] .theme-toggle-inline .icon-moon { display: block; }
+  :root[data-theme="light"] .theme-toggle-inline .icon-sun { display: none; }
+  :root[data-theme="dark"] .theme-toggle-inline .icon-moon { display: none; }
+  :root[data-theme="dark"] .theme-toggle-inline .icon-sun { display: block; }
 
   /* Fixed categorical colors for the two signal channels — constant across themes */
   .c-newstype { color: #14b8a6; } .bg-newstype { background: #5eead4; }
@@ -104,7 +103,7 @@
   :root[data-theme="dark"] .c-socialtype { color: #a78bfa; }
 
   * { box-sizing: border-box; }
-  html, body { height: 100%; }
+  html, body { height: 100%; width: 100%; }
   body {
     margin: 0;
     background: var(--bg);
@@ -113,13 +112,18 @@
     font-size: 14px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+    display: flex;
+    justify-content: center;
   }
   ::selection { background: var(--accent-soft); }
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
   button { font: inherit; color: inherit; }
   @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; } }
 
-  .wrap { max-width: 1180px; margin: 0 auto; padding: 40px 32px 80px; }
+  .wrap { flex: 0 1 1180px; max-width: 1180px; margin: 0 auto; padding: 40px 32px 80px; }
+
+  .title-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .title-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 
   .app-title { display: flex; align-items: baseline; gap: 10px; margin: 0 0 8px; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
   .app-title .spark { color: var(--accent); }
@@ -139,14 +143,19 @@
   .pill.live-pill { color: var(--good); background: var(--good-soft); border-color: transparent; font-weight: 500; }
   .pill.live-pill b { background: var(--good); color: #06280f; font-size: 10px; font-weight: 800; letter-spacing: 0.03em; padding: 1px 6px; border-radius: var(--radius-pill); margin-left: 2px; }
 
-  .action-row { display: flex; gap: 10px; align-items: center; margin-bottom: 22px; flex-wrap: wrap; }
+  .action-row { display: flex; gap: 12px; align-items: center; margin-bottom: 22px; flex-wrap: wrap; }
+  .last-update { color: var(--text-faint); font-size: 12px; }
 
-  /* Account switcher */
-  .account-switch-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
-  .account-switch-row.grouped { flex-direction: column; gap: 10px; }
-  .sector-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .sector-tag { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-faint); min-width: 92px; flex-shrink: 0; }
-  .sector-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+  /* Sector nav (top tier) + client sub-row (second tier) */
+  .sector-nav-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .sector-nav-pill {
+    background: var(--panel); border: 1px solid var(--border); color: var(--text);
+    padding: 11px 20px; border-radius: var(--radius-pill); font-size: 14.5px; font-weight: 700; cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .sector-nav-pill:hover { border-color: var(--border-strong); }
+  .sector-nav-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .client-sub-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
   .account-pill {
     display: inline-flex; align-items: center; gap: 8px;
     background: var(--panel); border: 1px solid var(--border); color: var(--text);
@@ -322,10 +331,6 @@
 </style>
 </head>
 <body>
-<button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light / dark theme" title="Toggle light / dark theme">
-  <span class="icon-moon">🌙</span><span class="icon-sun">☀️</span>
-</button>
-
 <div class="wrap" id="main"></div>
 <div class="toast" id="toast"></div>
 
@@ -696,7 +701,8 @@
 
   var state = {
     accountId: 'vw',
-    view: 'overview', // 'overview' | 'setup' | 'activity' | 'scenario' | 'signal'
+    selectedSector: 'Automotive',
+    view: 'sector', // 'sector' | 'partners' | 'overview' | 'setup' | 'activity' | 'scenario' | 'signal'
     scenarioId: null,
     signalId: null,
     signalOrigin: { view: 'overview', scenarioId: null },
@@ -730,6 +736,8 @@
 
   function navigate(accountId, view, scenarioId){
     state.accountId = accountId; state.view = view; state.scenarioId = scenarioId || null;
+    var acc = findAccount(accountId);
+    if (acc) state.selectedSector = acc.industry;
     state.signalId = null;
     state.emailOpen = false;
     state.addingClient = false;
@@ -740,26 +748,18 @@
     render();
   }
 
-  function accountSwitcher(){
-    var sectorRows = SECTORS.map(function(s){
-      var clients = ACCOUNTS.filter(function(a){ return a.industry === s.key; });
-      var pills = clients.map(function(a){
-        var active = a.id === state.accountId && !state.addingClient && state.view !== 'partners';
-        return '<button class="account-pill' + (active ? ' active' : '') + '" data-account="' + a.id + '">' + a.icon + ' ' + a.name + '</button>';
-      }).join('');
-      return '<div class="sector-row"><span class="sector-tag">' + s.icon + ' ' + s.key + '</span><div class="sector-pills">' + pills + '</div></div>';
+  function sectorNav(){
+    var pills = SECTORS.map(function(s){
+      var active = state.selectedSector === s.key;
+      return '<button class="sector-nav-pill' + (active ? ' active' : '') + '" data-select-sector="' + s.key + '">' + s.icon + ' ' + s.key + '</button>';
     }).join('');
+    var partnersActive = state.selectedSector === 'Partners';
+    pills += '<button class="sector-nav-pill' + (partnersActive ? ' active' : '') + '" data-select-sector="Partners">🤝 Partners</button>';
+    return '<div class="sector-nav-row">' + pills + '</div>';
+  }
 
-    var partnerPills = PARTNERS.map(function(p){
-      var active = state.view === 'partners';
-      return '<button class="account-pill' + (active ? ' active' : '') + '" data-view-partners="1">' + p.icon + ' ' + p.name + '</button>';
-    }).join('');
-    var partnersRow = '<div class="sector-row"><span class="sector-tag">🤝 Partners</span><div class="sector-pills">' + partnerPills + '</div></div>';
-
-    var addRow = '<div class="sector-row"><span class="sector-tag"></span><div class="sector-pills"><button class="account-pill add-new" data-toggle-addclient="1">+ Add client</button></div></div>';
-
-    var html = '<div class="account-switch-row grouped">' + sectorRows + partnersRow + addRow + '</div>';
-    html += '<p class="config-note">Every client sits in one of three sectors — Automotive, Energy, or Pharma — with Partners tracked alongside as a fourth angle.</p>';
+  function addClientPanel(){
+    var html = '<div class="client-sub-row"><button class="account-pill add-new" data-toggle-addclient="1">+ Add client</button></div>';
     if (state.addingClient){
       var d0 = state.newClientDraft;
       var sectorPills = SECTORS.map(function(s){
@@ -783,7 +783,24 @@
     return html;
   }
 
+  function accountSwitcher(){
+    return sectorNav();
+  }
+
+  function selectSector(key){
+    state.selectedSector = key;
+    state.addingClient = false;
+    state.discoveredSetup = null;
+    state.view = (key === 'Partners') ? 'partners' : 'sector';
+    window.scrollTo(0,0);
+    render();
+  }
+
   function renderBreadcrumb(account){
+    if (state.view === 'signal' && state.signalOrigin && state.signalOrigin.view === 'sector'){
+      var sector = state.signalOrigin.sector;
+      return '<div class="breadcrumb"><button data-nav="sector" data-sector-nav="' + sector + '">' + sector + ' Clients</button><span class="sep">/</span><span class="current">Signal detail</span></div>';
+    }
     var parts = ['<button data-nav="overview" data-account-nav="' + account.id + '">' + account.name + ' Signal Feed</button>'];
     if (state.view === 'scenario' && state.scenarioId){
       var sc = findScenario(account, state.scenarioId);
@@ -799,13 +816,17 @@
   }
 
   function header(){
-    return '<h1 class="app-title"><span class="spark">✦</span> Market Intelligence <span class="pilot-tag">&mdash; ' + ACCOUNTS.length + ' Pilot Accounts Across 3 Sectors</span></h1>' +
-      '<p class="app-sub">Two signal channels tracked per account — news (laws &amp; collaborations) and social/workforce movements — surfaced as offers framed for <b>us as a Data Engineering &amp; Software Consulting partner</b>, ready to route to the right contact.</p>' +
-      '<div class="action-row">' +
-        '<span class="pill outline">✓ Mocked data — concept demo</span>' +
-        '<button class="pill primary-btn" data-toast="Signals refreshed (demo)">↻ Rescan Signals</button>' +
-        '<span class="pill live-pill">✓ Snapshot generated<b>2026-07-23</b></span>' +
-      '</div>';
+    return '<div class="title-bar">' +
+        '<h1 class="app-title"><span class="spark">✦</span> Market Intelligence <span class="pilot-tag">&mdash; ' + ACCOUNTS.length + ' Pilot Accounts Across 3 Sectors</span></h1>' +
+        '<div class="title-actions">' +
+          '<button class="pill primary-btn" data-toast="Signals refreshed (demo)">↻ Rescan Signals</button>' +
+          '<span class="last-update">Last updated 2026-07-23</span>' +
+          '<button class="pill outline theme-toggle-inline" data-toggle-theme="1" title="Toggle light / dark">' +
+            '<span class="icon-moon">🌙</span><span class="icon-sun">☀️</span>' +
+          '</button>' +
+        '</div>' +
+      '</div>' +
+      '<p class="app-sub">Two signal channels tracked per account — news (laws &amp; collaborations) and social/workforce movements — surfaced as offers framed for <b>us as a Data Engineering &amp; Software Consulting partner</b>, ready to route to the right contact.</p>';
   }
 
   function viewTabs(){
@@ -857,6 +878,21 @@
     { id: 'aws', name: 'Amazon Web Services (AWS)', icon: '🟧', type: 'Cloud & AI Infrastructure Partner', note: 'Runs AI workloads for two of our pilot accounts via AWS — same opening: infrastructure without the governance layer.', relatedAccountIds: ['siemens-energy','bayer'] },
     { id: 'google-cloud', name: 'Google Cloud', icon: '🟩', type: 'Cloud & AI Infrastructure Partner', note: 'Powers Volkswagen/CARIAD’s in-car AI assistant infrastructure.', relatedAccountIds: ['vw'] }
   ];
+
+  var SECTOR_NEWS = {
+    Automotive: [
+      { date: '2026-07-08', subtype: 'Law', source: 'European Commission — Industry Regulation', text: 'The EU expands its AI Act to explicitly cover Level 3+ autonomous driving systems industry-wide, with compliance required by 2028 for every manufacturer, not just early movers.' },
+      { date: '2026-05-12', subtype: 'Collaboration', source: 'European Automobile Manufacturers Association', text: 'The European automotive industry association calls for a shared AI safety-testing standard across all manufacturers, rather than each OEM certifying separately.' }
+    ],
+    Energy: [
+      { date: '2026-06-20', subtype: 'Law', source: 'EU Energy Directorate', text: 'The EU sets a new grid-interoperability standard requiring every utility to support AI-based demand forecasting by 2029, regardless of size.' },
+      { date: '2026-04-18', subtype: 'Collaboration', source: 'European Energy Regulators Taskforce', text: 'European energy regulators launch a joint taskforce on AI use in critical infrastructure, covering every grid operator and generator in the bloc.' }
+    ],
+    Pharma: [
+      { date: '2026-06-28', subtype: 'Law', source: 'European Medicines Agency', text: 'The EMA issues industry-wide guidance requiring every AI-assisted drug-discovery tool to pass a new validation framework by 2027, regardless of vendor.' },
+      { date: '2026-04-30', subtype: 'Collaboration', source: 'European Federation of Pharmaceutical Industries', text: 'The European pharma industry association proposes shared standards for AI transparency in clinical trials, applying across all member companies.' }
+    ]
+  };
 
   var DISCOVERY_TEMPLATES = {
     Energy: {
@@ -1204,9 +1240,60 @@
       '<div class="grid-3">' + cards + '</div>';
   }
 
+  function renderSectorLanding(){
+    var sectorKey = state.selectedSector;
+    var sectorDef = SECTORS.filter(function(s){ return s.key === sectorKey; })[0];
+    var clients = ACCOUNTS.filter(function(a){ return a.industry === sectorKey; });
+
+    var cards = clients.map(function(a){
+      var newsCount = a.signals.filter(function(s){ return s.channel === 'news'; }).length;
+      var socialCount = a.signals.filter(function(s){ return s.channel === 'social'; }).length;
+      return '<div class="card" data-account="' + a.id + '">' +
+        '<div class="card-title-row"><h3>' + a.icon + ' ' + a.name + '</h3><span class="pill stage-pill ' + stageClass(a.stage) + '">' + (a.stage || 'Cold') + '</span></div>' +
+        '<div class="badge-row"><span class="tag-pill">' + a.hq + '</span><span class="tag-pill">' + a.revenue + '</span></div>' +
+        '<p class="card-desc">' + a.sector + '</p>' +
+        '<div class="card-footer"><span class="foot-meta">' + a.scenarios.length + ' offers &middot; ' + (newsCount + socialCount) + ' signals</span><span class="foot-link">View account &rarr;</span></div>' +
+      '</div>';
+    }).join('');
+
+    var items = [];
+    clients.forEach(function(a){
+      a.signals.filter(function(s){ return s.channel === 'news'; }).forEach(function(s){
+        items.push({ account: a, signal: s });
+      });
+    });
+    (SECTOR_NEWS[sectorKey] || []).forEach(function(s){
+      items.push({ account: null, signal: s });
+    });
+    items.sort(function(x, y){ return x.signal.date < y.signal.date ? 1 : -1; });
+
+    var itemsHtml = items.length ? items.map(function(item){
+      var s = item.signal, a = item.account;
+      if (!a){
+        return '<div class="timeline-item"><div class="timeline-date">' + monthShort(s.date) + '</div>' +
+          '<div><span class="evidence-type c-newstype">' + s.subtype + '</span> <span class="tag-pill">🌐 Industry-Wide</span><p>' + s.text + '</p><div class="signal-source">via ' + s.source + '</div></div></div>';
+      }
+      var src = findSource(a, s.sourceId);
+      var srcHtml = src ? '<div class="signal-source">via ' + src.name + '</div>' : '';
+      return '<div class="timeline-item clickable" data-signal-card="' + s.id + '" data-signal-origin="sector" data-signal-account="' + a.id + '">' +
+        '<div class="timeline-date">' + monthShort(s.date) + '</div>' +
+        '<div><span class="evidence-type c-newstype">' + s.subtype + '</span> <span class="tag-pill">' + a.icon + ' ' + a.name + '</span><p>' + s.text + '</p>' + srcHtml + '</div></div>';
+    }).join('') : '<p class="empty-note">No news signals yet for this sector.</p>';
+
+    return header() + sectorNav() +
+      '<div class="section-head"><h2>' + (sectorDef ? sectorDef.icon : '') + ' ' + sectorKey + ' Clients</h2></div>' +
+      '<p class="section-sub">Select a client to see its full signal feed and offers.</p>' +
+      '<div class="grid-3">' + cards + '</div>' +
+      addClientPanel() +
+      '<div class="section-head"><h2>📰 All ' + sectorKey + ' News</h2></div>' +
+      '<p class="section-sub">News across every client in ' + sectorKey + ', plus industry-wide laws and regulations that aren’t tied to any single account — newest first.</p>' +
+      '<div class="signal-col" style="max-width:760px">' + itemsHtml + '</div>';
+  }
+
   function render(){
     var html;
     if (state.view === 'partners') html = renderPartners();
+    else if (state.view === 'sector') html = renderSectorLanding();
     else if (state.view === 'setup') html = renderSetup();
     else if (state.view === 'activity') html = renderActivity();
     else if (state.view === 'scenario') html = renderScenario();
@@ -1233,8 +1320,19 @@
   });
 
   document.addEventListener('click', function(e){
-    var viewPartnersBtn = e.target.closest('[data-view-partners]');
-    if (viewPartnersBtn){ state.view = 'partners'; window.scrollTo(0,0); render(); return; }
+    var toggleThemeBtn = e.target.closest('[data-toggle-theme]');
+    if (toggleThemeBtn){
+      var root = document.documentElement;
+      var cur = root.getAttribute('data-theme');
+      if (!cur){ cur = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
+      var next = cur === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('theme', next); } catch (err) {}
+      return;
+    }
+
+    var selectSectorBtn = e.target.closest('[data-select-sector]');
+    if (selectSectorBtn){ selectSector(selectSectorBtn.getAttribute('data-select-sector')); return; }
 
     var accountBtn = e.target.closest('[data-account]');
     if (accountBtn){ navigate(accountBtn.getAttribute('data-account'), 'overview'); return; }
@@ -1248,7 +1346,13 @@
     var signalCard = e.target.closest('[data-signal-card]');
     if (signalCard){
       var origin = signalCard.getAttribute('data-signal-origin');
-      state.signalOrigin = { view: origin, scenarioId: origin === 'scenario' ? state.scenarioId : null };
+      var signalAccountId = signalCard.getAttribute('data-signal-account');
+      if (signalAccountId){ state.accountId = signalAccountId; }
+      state.signalOrigin = {
+        view: origin,
+        scenarioId: origin === 'scenario' ? state.scenarioId : null,
+        sector: origin === 'sector' ? state.selectedSector : null
+      };
       state.signalId = signalCard.getAttribute('data-signal-card');
       state.view = 'signal';
       window.scrollTo(0,0);
@@ -1262,6 +1366,13 @@
       var navAccount = navBtn.getAttribute('data-account-nav') || state.accountId;
       if (nav === 'overview') navigate(navAccount, 'overview');
       else if (nav === 'scenario') navigate(navAccount, 'scenario', navBtn.getAttribute('data-scenario-nav'));
+      else if (nav === 'sector'){
+        state.selectedSector = navBtn.getAttribute('data-sector-nav') || state.selectedSector;
+        state.view = 'sector';
+        state.signalId = null;
+        window.scrollTo(0,0);
+        render();
+      }
       return;
     }
 
@@ -1288,7 +1399,11 @@
     if (toggleAddClient){
       state.addingClient = !state.addingClient;
       state.discoveredSetup = null;
-      state.newClientDraft = { icon: '', name: '', industry: '', hq: '', revenue: '' };
+      var prefillSector = SECTORS.filter(function(s){ return s.key === state.selectedSector; })[0];
+      state.newClientDraft = {
+        icon: prefillSector ? prefillSector.icon : '',
+        name: '', industry: prefillSector ? prefillSector.key : '', hq: '', revenue: ''
+      };
       render();
       return;
     }
@@ -1413,19 +1528,6 @@
 
   render();
 })();
-</script>
-<script>
-// Toggle light / dark theme and remember the choice.
-function toggleTheme() {
-  const root = document.documentElement;
-  let current = root.getAttribute('data-theme');
-  if (!current) {
-    current = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  }
-  const next = current === 'dark' ? 'light' : 'dark';
-  root.setAttribute('data-theme', next);
-  try { localStorage.setItem('theme', next); } catch (e) {}
-}
 </script>
 </body>
 </html>

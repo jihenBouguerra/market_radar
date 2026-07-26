@@ -213,6 +213,13 @@
   .stage-pill.lost { color: var(--danger); background: var(--danger-soft); border-color: transparent; }
   .stage-pill.active { outline: 2px solid currentColor; outline-offset: 1px; }
 
+  .sentiment-pill { font-weight: 650; }
+  .sentiment-pill.enthusiastic { color: var(--good); background: var(--good-soft); border-color: transparent; }
+  .sentiment-pill.positive { color: var(--accent); background: var(--accent-soft); border-color: transparent; }
+  .sentiment-pill.neutral { color: var(--text-faint); background: var(--panel2); border-color: var(--border); }
+  .sentiment-pill.hesitant { color: var(--warn); background: var(--warn-soft); border-color: transparent; }
+  .sentiment-pill.skeptical { color: var(--danger); background: var(--danger-soft); border-color: transparent; }
+
   /* Account profile strip */
   .account-strip {
     background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
@@ -1045,6 +1052,7 @@
     discoveredSetup: null,
     newClientDraft: { icon: '', name: '', industry: '', hq: '', revenue: '' },
     addingActivity: false,
+    addingManualOffer: false,
     setupAdding: { contact: false, department: false, source: false }
   };
 
@@ -1077,6 +1085,7 @@
     state.addingClient = false;
     state.discoveredSetup = null;
     state.addingActivity = false;
+    state.addingManualOffer = false;
     state.setupAdding = { contact: false, department: false, source: false };
     window.scrollTo(0,0);
     render();
@@ -1168,6 +1177,7 @@
   }
 
   function stageClass(stage){ return (stage || 'cold').toLowerCase().replace(/[^a-z]+/g,'-'); }
+  function sentimentClass(sentiment){ return (sentiment || 'neutral').toLowerCase().replace(/[^a-z]+/g,'-'); }
 
   function accountStrip(account, compact){
     return '<div class="account-strip"' + (compact ? ' style="margin-bottom:22px;padding:16px 18px;"' : '') + '>' +
@@ -1384,10 +1394,53 @@
     }).join('');
   }
 
+  function manualOfferAddForm(account){
+    var partnerOptions = '<option value="">No partner / internal only</option>' + PARTNERS.map(function(p){
+      return '<option value="' + p.id + '">' + p.name + '</option>';
+    }).join('');
+    var stageOpts = ['Cold','Warm','In Conversation','Won','Lost'].map(function(s){
+      return '<option value="' + s + '"' + (account.stage === s ? ' selected' : '') + '>' + s + '</option>';
+    }).join('');
+    var sentimentOpts = ['Enthusiastic','Positive','Neutral','Hesitant','Skeptical'].map(function(s){
+      return '<option value="' + s + '">' + s + '</option>';
+    }).join('');
+    return '<div class="inline-form">' +
+      '<div class="form-row"><input id="mo-title" type="text" placeholder="Offer title (e.g. Fraud-detection compliance package)"></div>' +
+      '<div class="form-row"><input id="mo-summary" type="text" placeholder="What was offered / discussed"></div>' +
+      '<div class="form-row">' +
+        '<select id="mo-sentiment" title="Client sentiment">' + sentimentOpts + '</select>' +
+        '<select id="mo-partner" title="Collaboration angle">' + partnerOptions + '</select>' +
+      '</div>' +
+      '<div class="form-row">' +
+        '<input id="mo-owner" type="text" placeholder="Responsible salesperson">' +
+        '<input id="mo-date" type="date" value="' + todayStr() + '">' +
+      '</div>' +
+      '<div class="form-row"><select id="mo-stage" title="Deal stage">' + stageOpts + '</select></div>' +
+      '<div class="form-row"><input id="mo-note" type="text" placeholder="What affected the stage / next step"></div>' +
+      '<div class="form-actions"><button class="btn small" data-cancel-manual-offer="1">Cancel</button><button class="btn small primary" data-save-manual-offer="1">Save offer</button></div>' +
+    '</div>';
+  }
+
+  function manualOfferCardHtml(mo){
+    var partner = PARTNERS.filter(function(p){ return p.id === mo.partnerId; })[0];
+    return '<div class="card" style="cursor:default">' +
+      '<div class="card-title-row"><h3>' + mo.title + '</h3><span class="pill sentiment-pill ' + sentimentClass(mo.sentiment) + '">' + mo.sentiment + '</span></div>' +
+      '<div class="badge-row">' +
+        '<span class="tag-pill">👤 ' + mo.owner + '</span>' +
+        '<span class="tag-pill">📅 ' + mo.meetingDate + '</span>' +
+        '<span class="pill stage-pill ' + stageClass(mo.stage) + '">' + mo.stage + '</span>' +
+        (partner ? '<span class="tag-pill">' + partner.icon + ' ' + partner.name + '</span>' : '') +
+      '</div>' +
+      (mo.summary ? '<p class="card-desc">' + mo.summary + '</p>' : '') +
+      (mo.note ? '<p class="col-sub">' + mo.note + '</p>' : '') +
+    '</div>';
+  }
+
   function renderOverview(){
     var account = currentAccount();
     var newsCount = account.signals.filter(function(s){ return s.channel === 'news'; }).length;
     var socialCount = account.signals.filter(function(s){ return s.channel === 'social'; }).length;
+    var manualOffers = account.manualOffers || [];
 
     var scenarioCards = account.scenarios.length ? account.scenarios.map(function(sc){
       var t = tier(sc.confidence);
@@ -1422,7 +1475,12 @@
       '<div class="section-head"><h2>🎯 Offer Scenarios for ' + account.name + '</h2></div>' +
       '<p class="section-sub">Where combinations of the signals above point to a concrete AI &amp; data consulting offer worth raising with the account.</p>' +
       (account.scenarios.length ? '<div class="grid-3">' + scenarioCards + '</div>' :
-        '<p class="empty-note">No offer scenarios yet for ' + account.name + '. Add sources under <b>⚙️ Client Setup</b> to start ingesting signals — scenarios appear here once there’s enough evidence.</p>');
+        '<p class="empty-note">No offer scenarios yet for ' + account.name + '. Add sources under <b>⚙️ Client Setup</b> to start ingesting signals — scenarios appear here once there’s enough evidence.</p>') +
+      '<div class="section-head" style="margin-top:28px"><h2>🤝 Sales-Logged Offers</h2></div>' +
+      '<p class="section-sub">Entered by sales after a meeting — client sentiment, collaboration angle, ownership, and stage impact.</p>' +
+      (manualOffers.length ? '<div class="grid-3">' + manualOffers.map(manualOfferCardHtml).join('') + '</div>' :
+        '<p class="empty-note">No manual offers logged yet for ' + account.name + '.</p>') +
+      (state.addingManualOffer ? manualOfferAddForm(account) : '<button class="add-row-btn" data-toggle-manual-offer="1">+ Add manual offer</button>');
   }
 
   function setupListRow(kind, item, idx){
@@ -1798,7 +1856,7 @@
         hq: hq, revenue: revenue, sector: industry + ' · newly configured account',
         stage: 'Cold', signalHistory: [0,0,0,0,0,0], activityLog: [],
         departments: d ? d.departments : [], contacts: d ? d.contacts : [], sources: d ? d.sources : [],
-        signals: [], scenarios: []
+        signals: [], scenarios: [], manualOffers: []
       };
       ACCOUNTS.push(newAccount);
       state.addingClient = false;
@@ -1828,6 +1886,46 @@
       state.addingActivity = false;
       render();
       showToast('Activity logged');
+      return;
+    }
+
+    var toggleManualOffer = e.target.closest('[data-toggle-manual-offer]');
+    if (toggleManualOffer){ state.addingManualOffer = true; render(); return; }
+    var cancelManualOffer = e.target.closest('[data-cancel-manual-offer]');
+    if (cancelManualOffer){ state.addingManualOffer = false; render(); return; }
+    var saveManualOffer = e.target.closest('[data-save-manual-offer]');
+    if (saveManualOffer){
+      var moAccount = currentAccount();
+      var moTitle = (byId('mo-title').value || '').trim();
+      if (!moTitle){ showToast('Enter an offer title first'); return; }
+      var moSummary = (byId('mo-summary').value || '').trim();
+      var moSentiment = byId('mo-sentiment').value || 'Neutral';
+      var moPartnerId = byId('mo-partner').value || '';
+      var moOwner = (byId('mo-owner').value || '').trim() || 'Unassigned';
+      var moDate = byId('mo-date').value || todayStr();
+      var moStage = byId('mo-stage').value || moAccount.stage;
+      var moNote = (byId('mo-note').value || '').trim();
+
+      moAccount.manualOffers = moAccount.manualOffers || [];
+      moAccount.manualOffers.push({
+        id: 'manual-' + Date.now(),
+        title: moTitle, summary: moSummary, sentiment: moSentiment,
+        partnerId: moPartnerId, owner: moOwner, meetingDate: moDate, stage: moStage, note: moNote
+      });
+
+      var stageChanged = moAccount.stage !== moStage;
+      moAccount.stage = moStage;
+
+      var moPartner = PARTNERS.filter(function(p){ return p.id === moPartnerId; })[0];
+      var logNote = moOwner + ' logged a sales meeting for "' + moTitle + '" — client sentiment: ' + moSentiment +
+        (moPartner ? '; collaboration angle: ' + moPartner.name : '') +
+        (stageChanged ? '; stage moved to ' + moStage : '') +
+        (moNote ? '. ' + moNote : '');
+      moAccount.activityLog.push({ date: moDate, type: 'Meeting', note: logNote });
+
+      state.addingManualOffer = false;
+      render();
+      showToast('Manual offer logged' + (stageChanged ? ' — stage updated to ' + moStage : ''));
       return;
     }
 

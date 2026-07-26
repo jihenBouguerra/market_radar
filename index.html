@@ -1161,7 +1161,6 @@
     setupAdding: { contact: false, department: false, source: false },
     addingTemplate: false,
     pendingTemplateFile: null,
-    addingTender: false,
     addingTenderImport: false,
     showAllTenders: false,
     tenderId: null,
@@ -1244,7 +1243,6 @@
       social: { category: 'all', timing: 'all' }
     };
     state.setupAdding = { contact: false, department: false, source: false };
-    state.addingTender = false;
     state.addingTenderImport = false;
     state.tenderId = null;
     state.editingTender = false;
@@ -1766,17 +1764,6 @@
     '</div>';
   }
 
-  function tenderAddForm(){
-    return '<div class="inline-form">' +
-      '<div class="form-row"><input id="tender-title" type="text" placeholder="Call / tender title"></div>' +
-      '<div class="form-row"><input id="tender-desc" type="text" placeholder="What they’re asking for"></div>' +
-      '<div class="form-row"><input id="tender-deadline" type="date" value="' + todayStr() + '"></div>' +
-      '<div class="form-row"><input id="tender-resources" type="text" placeholder="Resources needed (e.g. 2 consultants, 6 weeks)"></div>' +
-      '<div class="form-row"><label style="font-size:12.5px;display:flex;align-items:center;gap:6px"><input id="tender-relevant" type="checkbox" checked style="width:auto"> Relevant to our AI &amp; data consulting business</label></div>' +
-      '<div class="form-actions"><button class="btn small" data-cancel-tender="1">Cancel</button><button class="btn small primary" data-save-tender="1">Save call</button></div>' +
-    '</div>';
-  }
-
   function tenderImportForm(){
     return '<div class="inline-form">' +
       '<p class="empty-note">Paste a link to a tender/RFP listing — we’ll draft a call from the URL (title guessed from the link) that you can edit afterward. This app has no backend, so the page itself isn’t fetched or scraped.</p>' +
@@ -1791,15 +1778,11 @@
     var hiddenCount = all.length - relevant.length;
     var shown = state.showAllTenders ? all : relevant;
     var cards = shown.map(tenderCardHtml).join('');
-    var addButtons = '<div class="badge-row">' +
-      '<button class="add-row-btn" data-toggle-tender="1">+ Add call for project</button>' +
-      '<button class="add-row-btn" data-toggle-tender-import="1">🔗 Import from link</button>' +
-    '</div>';
     return '<div class="section-head" style="margin-top:28px"><h2>📋 Calls for Projects</h2></div>' +
-      '<p class="section-sub">Tenders and RFPs — auto-detected from the signal feed where possible, plus manually added or imported from a link — kept to the ones relevant to our AI &amp; data consulting model' + (hiddenCount ? ' (' + hiddenCount + ' filtered out as not relevant)' : '') + '.</p>' +
+      '<p class="section-sub">Tenders and RFPs — auto-detected from the signal feed where possible, plus added from a link — kept to the ones relevant to our AI &amp; data consulting model' + (hiddenCount ? ' (' + hiddenCount + ' filtered out as not relevant)' : '') + '.</p>' +
       (hiddenCount ? '<button class="add-row-btn" data-toggle-show-all-tenders="1" style="margin-bottom:12px">' + (state.showAllTenders ? 'Hide non-relevant calls' : 'Show all calls (' + all.length + ')') + '</button>' : '') +
       (shown.length ? '<div class="grid-3">' + cards + '</div>' : '<p class="empty-note">No relevant calls for projects right now.</p>') +
-      (state.addingTender ? tenderAddForm() : (state.addingTenderImport ? tenderImportForm() : addButtons));
+      (state.addingTenderImport ? tenderImportForm() : '<button class="add-row-btn" data-toggle-tender-import="1">🔗 Add call for project from link</button>');
   }
 
   function tenderEditForm(t){
@@ -2681,31 +2664,8 @@
 
     var toggleShowAllTenders = e.target.closest('[data-toggle-show-all-tenders]');
     if (toggleShowAllTenders){ state.showAllTenders = !state.showAllTenders; render(); return; }
-    var toggleTender = e.target.closest('[data-toggle-tender]');
-    if (toggleTender){ state.addingTender = true; state.addingTenderImport = false; render(); return; }
-    var cancelTender = e.target.closest('[data-cancel-tender]');
-    if (cancelTender){ state.addingTender = false; render(); return; }
-    var saveTender = e.target.closest('[data-save-tender]');
-    if (saveTender){
-      var tenderAccount = currentAccount();
-      var tenderTitle = (byId('tender-title').value || '').trim();
-      if (!tenderTitle){ showToast('Enter a call/tender title first'); return; }
-      var tenderDesc = (byId('tender-desc').value || '').trim();
-      var tenderDeadline = byId('tender-deadline').value || todayStr();
-      var tenderResources = (byId('tender-resources').value || 'Not specified').trim() || 'Not specified';
-      var tenderRelevant = !!byId('tender-relevant').checked;
-      tenderAccount.tenders = tenderAccount.tenders || [];
-      tenderAccount.tenders.push({
-        id: 'tender-' + Date.now(), title: tenderTitle, description: tenderDesc || 'No description provided.',
-        deadline: tenderDeadline, resources: tenderResources, relevant: tenderRelevant, applied: false, source: 'manual'
-      });
-      state.addingTender = false;
-      render();
-      showToast('Call for project added');
-      return;
-    }
     var toggleTenderImport = e.target.closest('[data-toggle-tender-import]');
-    if (toggleTenderImport){ state.addingTenderImport = true; state.addingTender = false; render(); return; }
+    if (toggleTenderImport){ state.addingTenderImport = true; render(); return; }
     var cancelTenderImport = e.target.closest('[data-cancel-tender-import]');
     if (cancelTenderImport){ state.addingTenderImport = false; render(); return; }
     var saveTenderImport = e.target.closest('[data-save-tender-import]');

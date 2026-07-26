@@ -220,6 +220,10 @@
   .sentiment-pill.hesitant { color: var(--warn); background: var(--warn-soft); border-color: transparent; }
   .sentiment-pill.skeptical { color: var(--danger); background: var(--danger-soft); border-color: transparent; }
 
+  .relationship-pill { cursor: pointer; font-weight: 650; }
+  .relationship-pill.client { color: var(--good); background: var(--good-soft); border-color: transparent; }
+  .relationship-pill.potential-client { color: var(--accent); background: var(--accent-soft); border-color: transparent; }
+
   /* Pipeline: horizontal bar lists */
   .hbar-row { display: grid; grid-template-columns: 180px 1fr 110px; align-items: center; gap: 12px; padding: 8px 0; }
   .hbar-label { font-size: 12.5px; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -382,6 +386,7 @@
       revenue: '$322B (FY2025)',
       techStack: ['Google Cloud', 'Databricks'],
       sector: 'Automotive OEM — Multi-Brand · software unit: CARIAD',
+      relationship: 'Potential Client',
       stage: 'In Conversation',
       signalHistory: [6,7,9,10,12,14],
       activityLog: [
@@ -468,6 +473,7 @@
       revenue: '$168B (FY2025)',
       techStack: ['Microsoft Azure', 'Snowflake'],
       sector: 'Automotive OEM — Luxury · software unit: BMW iX Digital',
+      relationship: 'Potential Client',
       stage: 'Cold',
       signalHistory: [3,4,4,5,6,7],
       activityLog: [
@@ -527,6 +533,7 @@
       revenue: '$36B (FY2025)',
       techStack: ['Microsoft Azure', 'Databricks'],
       sector: 'Energy & Utilities — Power Generation, Grids & Renewables · digital unit: RWE Digital',
+      relationship: 'Potential Client',
       stage: 'Warm',
       signalHistory: [5,6,6,7,8,9],
       activityLog: [
@@ -608,6 +615,7 @@
       revenue: '$35B (FY2025)',
       techStack: ['AWS', 'Snowflake'],
       sector: 'Energy Technology — Power Generation & Grid Equipment · digital unit: Siemens Energy Digital',
+      relationship: 'Potential Client',
       stage: 'Warm',
       signalHistory: [3,4,5,5,6,7],
       activityLog: [
@@ -667,6 +675,7 @@
       revenue: '$47B (FY2025)',
       techStack: ['AWS', 'Databricks'],
       sector: 'Pharmaceuticals & Life Sciences · digital unit: Bayer R&D Digital',
+      relationship: 'Potential Client',
       stage: 'Warm',
       signalHistory: [4,5,6,6,7,8],
       activityLog: [
@@ -747,6 +756,7 @@
       revenue: '$30B (FY2025)',
       techStack: ['Google Cloud', 'Snowflake'],
       sector: 'Banking & Financial Services · digital unit: Deutsche Bank Digital',
+      relationship: 'Potential Client',
       stage: 'Warm',
       signalHistory: [4,5,6,7,8,9],
       activityLog: [
@@ -816,6 +826,7 @@
       revenue: '$10B (FY2025)',
       techStack: ['AWS', 'Snowflake'],
       sector: 'Banking & Financial Services · digital unit: Commerzbank Digital',
+      relationship: 'Potential Client',
       stage: 'Cold',
       signalHistory: [2,3,3,4,4,5],
       activityLog: [
@@ -868,6 +879,7 @@
       revenue: '$22B (FY2025)',
       techStack: ['Microsoft Azure', 'Databricks'],
       sector: 'Healthcare Services & Hospital Operations · digital unit: Fresenius Digital Health',
+      relationship: 'Potential Client',
       stage: 'Warm',
       signalHistory: [3,4,5,6,7,8],
       activityLog: [
@@ -936,6 +948,7 @@
       revenue: '$23B (FY2025)',
       techStack: ['AWS', 'Databricks'],
       sector: 'Medical Technology & Diagnostics · digital unit: Siemens Healthineers Digital',
+      relationship: 'Potential Client',
       stage: 'Cold',
       signalHistory: [2,3,3,4,5,5],
       activityLog: [
@@ -987,6 +1000,7 @@
       revenue: '$12B (FY2025)',
       techStack: ['Google Cloud', 'Snowflake'],
       sector: 'Drugstore & Health-Retail Chain · digital unit: Rossmann Digital',
+      relationship: 'Potential Client',
       stage: 'Cold',
       signalHistory: [2,3,3,4,4,5],
       activityLog: [
@@ -1039,6 +1053,7 @@
       revenue: '$11B (FY2025)',
       techStack: ['AWS', 'Databricks'],
       sector: 'Online Fashion & Lifestyle Retail · digital unit: Zalando Tech',
+      relationship: 'Potential Client',
       stage: 'Cold',
       signalHistory: [3,3,4,4,5,6],
       activityLog: [
@@ -1292,6 +1307,7 @@
 
   function stageClass(stage){ return (stage || 'cold').toLowerCase().replace(/[^a-z]+/g,'-'); }
   function sentimentClass(sentiment){ return (sentiment || 'neutral').toLowerCase().replace(/[^a-z]+/g,'-'); }
+  function relationshipClass(r){ return (r || 'potential client').toLowerCase().replace(/[^a-z]+/g,'-'); }
 
   var BATTLE_CARDS = {
     'Economic Buyer': { cares: 'ROI, competitive positioning, regulatory exposure', objection: '“We already have an internal team working on this.”', angle: 'Lead with the ROI estimate and the speed advantage of an embedded team vs. hiring.' },
@@ -1334,6 +1350,7 @@
       '<div><h2' + (compact ? ' style="font-size:15px"' : '') + '>' + account.name + '</h2><div class="sector-line">' + account.sector + '</div></div>' +
       (compact ? '' :
         '<span class="pill stage-pill ' + stageClass(account.stage) + '">' + (account.stage || 'Cold') + '</span>' +
+        '<span class="pill relationship-pill ' + relationshipClass(account.relationship) + '" data-toggle-relationship="' + account.id + '" title="Click to toggle Client / Potential Client">' + (account.relationship || 'Potential Client') + '</span>' +
         '<div class="account-facts">' +
           '<div><div class="fact-label">Headquarters</div><div class="fact-value">' + account.hq + '</div></div>' +
           '<div><div class="fact-label">Revenue</div><div class="fact-value">' + account.revenue + '</div></div>' +
@@ -2028,7 +2045,7 @@
       var socialCount = a.signals.filter(function(s){ return s.channel === 'social'; }).length;
       return '<div class="card" data-account="' + a.id + '">' +
         '<div class="card-title-row"><h3>' + a.icon + ' ' + a.name + '</h3><span class="pill stage-pill ' + stageClass(a.stage) + '">' + (a.stage || 'Cold') + '</span></div>' +
-        '<div class="badge-row"><span class="tag-pill">' + a.hq + '</span><span class="tag-pill">' + a.revenue + '</span></div>' +
+        '<div class="badge-row"><span class="pill relationship-pill ' + relationshipClass(a.relationship) + '" style="cursor:default">' + (a.relationship || 'Potential Client') + '</span><span class="tag-pill">' + a.hq + '</span><span class="tag-pill">' + a.revenue + '</span></div>' +
         '<p class="card-desc">' + a.sector + '</p>' +
         '<div class="card-footer"><span class="foot-meta">' + a.scenarios.length + ' offers &middot; ' + (newsCount + socialCount) + ' signals</span><span class="foot-link">View account &rarr;</span></div>' +
       '</div>';
@@ -2228,7 +2245,7 @@
       var newAccount = {
         id: id, name: name, industry: industry, icon: icon, avatar: name.slice(0,3).toUpperCase(),
         hq: hq, revenue: revenue, sector: industry + ' · newly configured account', techStack: [],
-        stage: 'Cold', signalHistory: [0,0,0,0,0,0], activityLog: [],
+        relationship: 'Potential Client', stage: 'Cold', signalHistory: [0,0,0,0,0,0], activityLog: [],
         departments: d ? d.departments : [], contacts: d ? d.contacts : [], sources: d ? d.sources : [],
         signals: [], scenarios: [], manualOffers: []
       };
@@ -2245,6 +2262,14 @@
       currentAccount().stage = setStage.getAttribute('data-set-stage');
       render();
       showToast('Stage set to ' + currentAccount().stage);
+      return;
+    }
+    var toggleRelationship = e.target.closest('[data-toggle-relationship]');
+    if (toggleRelationship){
+      var relAccount = findAccount(toggleRelationship.getAttribute('data-toggle-relationship'));
+      relAccount.relationship = relAccount.relationship === 'Client' ? 'Potential Client' : 'Client';
+      render();
+      showToast(relAccount.name + ' flagged as ' + relAccount.relationship);
       return;
     }
     var toggleActivity = e.target.closest('[data-toggle-activity]');

@@ -311,6 +311,14 @@
   .inline-form input:focus, .inline-form select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
   .form-actions { display: flex; gap: 8px; justify-content: flex-end; }
 
+  .signal-filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .signal-filter-bar select {
+    background: var(--panel2); border: 1px solid var(--border); color: var(--text);
+    font-size: 12px; padding: 6px 12px; border-radius: var(--radius-pill); font-family: var(--font); cursor: pointer;
+  }
+  .signal-filter-bar select:hover { border-color: var(--border-strong); }
+  .signal-filter-bar select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
   /* Detail / scenario view */
   .detail-grid { display: grid; grid-template-columns: 1fr 1.05fr; gap: 20px; align-items: start; margin-top: 6px; }
   .panel { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 26px; }
@@ -1567,7 +1575,7 @@
     var timingOpts = TIMING_OPTIONS.map(function(t){
       return '<option value="' + t.key + '"' + (filter.timing === t.key ? ' selected' : '') + '>' + t.label + '</option>';
     }).join('');
-    return '<div class="form-row" style="margin-bottom:10px">' +
+    return '<div class="signal-filter-bar">' +
       '<select data-signal-filter-category="' + channel + '">' + categoryOpts + '</select>' +
       '<select data-signal-filter-timing="' + channel + '">' + timingOpts + '</select>' +
     '</div>';

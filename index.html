@@ -930,6 +930,106 @@
           nextStep: 'Engage the digital diagnostics team early, while the AWS partnership is still being rolled out.'
         }
       ]
+    },
+    {
+      id: 'rossmann',
+      name: 'Dirk Rossmann GmbH',
+      industry: 'Retail',
+      icon: '🛍️',
+      avatar: 'ROS',
+      hq: 'Burgwedel, Germany',
+      revenue: '$12B (FY2025)',
+      sector: 'Drugstore & Health-Retail Chain · digital unit: Rossmann Digital',
+      stage: 'Cold',
+      signalHistory: [2,3,3,4,4,5],
+      activityLog: [
+        { date:'2026-07-14', type:'Note', note:'Added Rossmann to the pilot after seeing AI-personalization hiring and loyalty-app signals.' }
+      ],
+      departments: [
+        { name: 'Digital & E-Commerce', focus: 'Runs AI-driven personalization and recommendation systems for the loyalty app and online store.' },
+        { name: 'Supply Chain & Logistics', focus: 'Owns inventory forecasting across stores and distribution centers.' }
+      ],
+      contacts: [
+        { id: 'lukas-meyer', name: 'Lukas Meyer', role: 'Head of Digital & E-Commerce', department: 'Digital & E-Commerce', channel: 'lukas.meyer@rossmann.example', lastContact: '2026-06-28' }
+      ],
+      sources: [
+        { id:'press', name: 'Rossmann Newsroom & Press Releases', type: 'Company News', channel: 'news', status: 'Active' },
+        { id:'jobs', name: 'Rossmann Careers (LinkedIn Jobs)', type: 'Job Postings', channel: 'social', status: 'Active' },
+        { id:'reg', name: 'European Consumer Protection Authority — Retail AI Tracker', type: 'Regulatory Tracker', channel: 'news', status: 'Active' },
+        { id:'execsocial', name: 'LinkedIn — Rossmann digital leadership', type: 'Executive Social Activity', channel: 'social', status: 'Planned' }
+      ],
+      signals: [
+        { id:'n1', channel:'news', subtype:'Law', date:'2026-06-22', sourceId:'reg', text:'New EU rule requires retailers to disclose the logic behind AI-driven personalized pricing and recommendations to customers.' },
+        { id:'n2', channel:'news', subtype:'Collaboration', date:'2026-05-30', sourceId:'press', text:'Rossmann partners with Google Cloud to power AI-driven personalized recommendations across its loyalty app and stores.' },
+        { id:'s1', channel:'social', subtype:'Hiring', date:'2026-06-10', sourceId:'jobs', text:'Rossmann posts a new role: "AI Personalization Product Manager" for its loyalty app.' },
+        { id:'s2', channel:'social', subtype:'Social Post', date:'2026-06-24', sourceId:'execsocial', text:'Customers on social media mention Rossmann’s loyalty app recommends products that don’t match their purchase history.' }
+      ],
+      scenarios: [
+        {
+          id: 'ros-personalization-transparency', title: 'Personalization AI Transparency & Accuracy', domainTag: 'Retail AI Regulation & Customer Trust', confidence: 62, primaryContactId: 'lukas-meyer',
+          signalIds: ['n1','s2'],
+          summary: 'Rossmann customers are already flagging mismatched recommendations in the loyalty app, and a new EU rule will soon require retailers to explain the logic behind personalized recommendations. We can fix the accuracy gap and build the disclosure layer together.',
+          capabilities: ['Recommendation-quality monitoring', 'Plain-language personalization disclosures', 'Customer-feedback triage'],
+          nextStep: 'Reach the Head of Digital & E-Commerce, using the loyalty-app complaints as the opening.'
+        },
+        {
+          id: 'ros-gcloud-governance', title: 'Governance Layer for the Google Cloud Personalization Partnership', domainTag: 'Retail AI Regulation & Cloud Partnership', confidence: 50, primaryContactId: 'lukas-meyer',
+          signalIds: ['n2','n1'],
+          summary: 'Rossmann’s new Google Cloud partnership gives it the infrastructure for AI-driven personalization — a natural moment to build in the disclosure and governance layer the cloud deal alone doesn’t provide.',
+          capabilities: ['Google Cloud-hosted model governance', 'EU retail AI compliance documentation'],
+          nextStep: 'Engage the digital & e-commerce team early, while the Google Cloud rollout is still underway.'
+        }
+      ]
+    },
+    {
+      id: 'zalando',
+      name: 'Zalando SE',
+      industry: 'Retail',
+      icon: '🛍️',
+      avatar: 'ZAL',
+      hq: 'Berlin, Germany',
+      revenue: '$11B (FY2025)',
+      sector: 'Online Fashion & Lifestyle Retail · digital unit: Zalando Tech',
+      stage: 'Cold',
+      signalHistory: [3,3,4,4,5,6],
+      activityLog: [
+        { date:'2026-07-16', type:'Note', note:'Added Zalando to the pilot after seeing AI-hiring signals around sizing and fit recommendations.' }
+      ],
+      departments: [
+        { name: 'Zalando Tech', focus: 'Runs AI-driven sizing, fit, and recommendation systems across the fashion platform.' },
+        { name: 'Fulfillment & Logistics', focus: 'Owns AI-driven demand forecasting and warehouse operations.' }
+      ],
+      contacts: [
+        { id: 'nina-krueger', name: 'Nina Krüger', role: 'Head of AI Personalization', department: 'Zalando Tech', channel: 'nina.krueger@zalando.example', lastContact: '2026-06-30' }
+      ],
+      sources: [
+        { id:'press', name: 'Zalando Newsroom & Press Releases', type: 'Company News', channel: 'news', status: 'Active' },
+        { id:'jobs', name: 'Zalando Careers (LinkedIn Jobs)', type: 'Job Postings', channel: 'social', status: 'Active' },
+        { id:'reg', name: 'European Retail Federation — AI & Consumer Regulation Tracker', type: 'Regulatory Tracker', channel: 'news', status: 'Active' },
+        { id:'execsocial', name: 'LinkedIn — Zalando Tech leadership', type: 'Executive Social Activity', channel: 'social', status: 'Active' }
+      ],
+      signals: [
+        { id:'n1', channel:'news', subtype:'Law', date:'2026-06-22', sourceId:'reg', text:'New EU rule requires online retailers to disclose how AI-driven sizing and recommendation systems use customer data.' },
+        { id:'n2', channel:'news', subtype:'Collaboration', date:'2026-06-02', sourceId:'press', text:'Zalando partners with AWS to run AI-driven sizing and fit recommendations across its fashion platform.' },
+        { id:'s1', channel:'social', subtype:'Hiring', date:'2026-06-12', sourceId:'jobs', text:'Zalando posts a new role: "AI Fit & Sizing Engineer" for its recommendation platform.' },
+        { id:'s2', channel:'social', subtype:'Social Post', date:'2026-06-27', sourceId:'execsocial', text:'Customers on social media report Zalando’s AI sizing tool gives inconsistent recommendations across brands.' }
+      ],
+      scenarios: [
+        {
+          id: 'zal-sizing-accuracy', title: 'Sizing & Fit AI Accuracy and Disclosure', domainTag: 'Retail AI Regulation & Customer Trust', confidence: 64, primaryContactId: 'nina-krueger',
+          signalIds: ['n1','s2'],
+          summary: 'Customers are already reporting inconsistent sizing recommendations across brands, and a new EU rule will soon require disclosure of how these AI systems use customer data. We can improve cross-brand accuracy and deliver the disclosure layer needed.',
+          capabilities: ['Cross-brand sizing model calibration', 'Plain-language data-use disclosures', 'Customer-feedback triage'],
+          nextStep: 'Reach the Head of AI Personalization, using the cross-brand sizing complaints as the opening.'
+        },
+        {
+          id: 'zal-aws-governance', title: 'Governance Layer for the AWS Sizing & Fit Partnership', domainTag: 'Retail AI Regulation & Cloud Partnership', confidence: 53, primaryContactId: 'nina-krueger',
+          signalIds: ['n2','n1'],
+          summary: 'Zalando’s new AWS partnership gives it the infrastructure for AI-driven sizing and fit recommendations — a good moment to build in the compliance and governance layer the cloud deal alone doesn’t provide.',
+          capabilities: ['AWS-hosted model governance', 'EU retail AI compliance documentation'],
+          nextStep: 'Engage the Zalando Tech team early, while the AWS rollout is still underway.'
+        }
+      ]
     }
   ];
 
@@ -1102,13 +1202,14 @@
     { key: 'Energy', icon: '⚡' },
     { key: 'Pharma', icon: '💊' },
     { key: 'Finance', icon: '🏦' },
-    { key: 'Healthcare', icon: '🏥' }
+    { key: 'Healthcare', icon: '🏥' },
+    { key: 'Retail', icon: '🛍️' }
   ];
 
   var PARTNERS = [
     { id: 'microsoft', name: 'Microsoft (Azure)', icon: '🟦', type: 'Cloud & AI Infrastructure Partner', note: 'Powers the AI workloads behind several pilot accounts via Azure — a natural seam for us to sit on top of with governance and monitoring.', relatedAccountIds: ['bmw','rwe','fresenius'] },
-    { id: 'aws', name: 'Amazon Web Services (AWS)', icon: '🟧', type: 'Cloud & AI Infrastructure Partner', note: 'Runs AI workloads for several pilot accounts via AWS — same opening: infrastructure without the governance layer.', relatedAccountIds: ['siemens-energy','bayer','commerzbank','siemens-healthineers'] },
-    { id: 'google-cloud', name: 'Google Cloud', icon: '🟩', type: 'Cloud & AI Infrastructure Partner', note: 'Powers in-car and fraud-detection AI infrastructure for two of our pilot accounts.', relatedAccountIds: ['vw','deutsche-bank'] }
+    { id: 'aws', name: 'Amazon Web Services (AWS)', icon: '🟧', type: 'Cloud & AI Infrastructure Partner', note: 'Runs AI workloads for several pilot accounts via AWS — same opening: infrastructure without the governance layer.', relatedAccountIds: ['siemens-energy','bayer','commerzbank','siemens-healthineers','zalando'] },
+    { id: 'google-cloud', name: 'Google Cloud', icon: '🟩', type: 'Cloud & AI Infrastructure Partner', note: 'Powers in-car, fraud-detection, and personalized-retail AI infrastructure across three of our pilot accounts.', relatedAccountIds: ['vw','deutsche-bank','rossmann'] }
   ];
 
   var SECTOR_NEWS = {
@@ -1131,6 +1232,10 @@
     Healthcare: [
       { date: '2026-06-18', subtype: 'Law', source: 'EU Medical Device Regulation Body', text: 'The EU extends its medical device AI rules to require safety documentation for every AI system used in patient monitoring or diagnostics, across all providers.' },
       { date: '2026-04-15', subtype: 'Collaboration', source: 'European Hospital Federation', text: 'The European Hospital Federation calls for shared clinical-AI validation standards across all member hospitals and providers.' }
+    ],
+    Retail: [
+      { date: '2026-06-22', subtype: 'Law', source: 'European Consumer Protection Authority', text: 'The EU requires every retailer using AI-driven personalized pricing or recommendations to disclose the logic behind them to consumers by 2027, regardless of size.' },
+      { date: '2026-04-25', subtype: 'Collaboration', source: 'European Retail Federation', text: 'The European Retail Federation calls for shared standards on AI-driven demand forecasting and personalization across all member retailers.' }
     ]
   };
 
@@ -1179,6 +1284,15 @@
       ],
       roles: ['Head of Digital Health', 'Clinical Data Systems Lead'],
       sourceReg: 'EU Medical Device & AI Health Regulation Tracker'
+    },
+    Retail: {
+      departments: [
+        { name: 'Digital & E-Commerce', focus: 'Runs AI-driven personalization, recommendation, and pricing systems.' },
+        { name: 'Supply Chain & Logistics', focus: 'Owns inventory forecasting and fulfillment systems.' },
+        { name: 'Data Privacy & Compliance', focus: 'Tracks consumer-data and AI regulation.' }
+      ],
+      roles: ['Head of Digital & E-Commerce', 'Data Privacy & Compliance Lead'],
+      sourceReg: 'EU Consumer & Retail AI Regulation Tracker'
     }
   };
 

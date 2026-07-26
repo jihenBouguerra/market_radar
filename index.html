@@ -267,8 +267,8 @@
   .view-tab:hover { color: var(--text); }
   .view-tab.active { color: var(--text); border-bottom-color: var(--accent); }
 
-  /* Three-column signal feed */
-  .signal-columns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 8px; }
+  /* Two-column signal feed */
+  .signal-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 8px; }
   .signal-col { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 24px; }
   .signal-col-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 2px; }
   .signal-col-head h3 { margin: 0; font-size: 15px; }
@@ -469,8 +469,8 @@
         }
       ],
       tenders: [
-        { id: 'vw-t1', title: 'CARIAD AI Governance Framework — RFP', description: 'CARIAD is requesting proposals for an external partner to design and document its AI governance and safety-testing framework ahead of the 2028 AI Act deadline.', deadline: '2026-09-15', resources: '2 senior consultants, 1 compliance specialist, ~8 weeks', relevant: true, applied: false },
-        { id: 'vw-t2', title: 'CARIAD Fleet Telematics Hardware Refresh — RFQ', description: 'Request for quotation to replace in-vehicle telematics hardware across the fleet.', deadline: '2026-08-20', resources: 'Hardware sourcing team, logistics', relevant: false, applied: false }
+        { id: 'vw-t1', title: 'CARIAD AI Governance Framework — RFP', description: 'CARIAD is requesting proposals for an external partner to design and document its AI governance and safety-testing framework ahead of the 2028 AI Act deadline.', deadline: '2026-09-15', resources: '2 senior consultants, 1 compliance specialist, ~8 weeks', relevant: true, applied: false, source: 'auto' },
+        { id: 'vw-t2', title: 'CARIAD Fleet Telematics Hardware Refresh — RFQ', description: 'Request for quotation to replace in-vehicle telematics hardware across the fleet.', deadline: '2026-08-20', resources: 'Hardware sourcing team, logistics', relevant: false, applied: false, source: 'auto' }
       ]
     },
     {
@@ -826,7 +826,7 @@
         }
       ],
       tenders: [
-        { id: 'db-t1', title: 'AI Model Risk Documentation — Tender', description: 'Deutsche Bank is tendering for a partner to build EBA-compliant documentation and audit trails for its credit-scoring and fraud-detection models.', deadline: '2026-10-01', resources: '3 consultants (risk, ML, compliance), ~10 weeks', relevant: true, applied: false }
+        { id: 'db-t1', title: 'AI Model Risk Documentation — Tender', description: 'Deutsche Bank is tendering for a partner to build EBA-compliant documentation and audit trails for its credit-scoring and fraud-detection models.', deadline: '2026-10-01', resources: '3 consultants (risk, ML, compliance), ~10 weeks', relevant: true, applied: false, source: 'auto' }
       ]
     },
     {
@@ -1162,6 +1162,7 @@
     addingTemplate: false,
     pendingTemplateFile: null,
     addingTender: false,
+    addingTenderImport: false,
     showAllTenders: false,
     aiAskOpen: false
   };
@@ -1242,6 +1243,7 @@
     };
     state.setupAdding = { contact: false, department: false, source: false };
     state.addingTender = false;
+    state.addingTenderImport = false;
     state.aiAskOpen = false;
     window.scrollTo(0,0);
     render();
@@ -1723,18 +1725,40 @@
 
   function daysUntil(dateStr){ return Math.round((new Date(dateStr) - new Date(todayStr())) / 86400000); }
 
-  function tenderRowHtml(t){
+  function guessTitleFromUrl(url){
+    try {
+      var path = url.replace(/^https?:\/\//i, '').split('?')[0].split('#')[0];
+      var parts = path.split('/').filter(Boolean);
+      var last = parts.length ? parts[parts.length - 1] : path;
+      var text = decodeURIComponent(last).replace(/[-_]+/g, ' ').replace(/\.(html?|pdf|aspx?)$/i, '').trim();
+      if (!text) text = parts[0] || path;
+      text = text.replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+      return text || 'Imported Call for Project';
+    } catch (e){
+      return 'Imported Call for Project';
+    }
+  }
+
+  function tenderSourceBadge(t){
+    if (t.source === 'auto') return '<span class="tag-pill">🔎 Auto-detected</span>';
+    if (t.source === 'import') return '<span class="tag-pill">🔗 Imported from link</span>';
+    return '<span class="tag-pill">✍️ Manually added</span>';
+  }
+
+  function tenderCardHtml(t){
     var days = daysUntil(t.deadline);
     var deadlineLabel = days < 0 ? 'Deadline passed' : (days === 0 ? 'Due today' : 'Due in ' + days + ' days');
     var deadlineCls = days < 0 ? 'overdue' : (days <= 14 ? 'soon' : 'ok');
-    return '<div class="timeline-item">' +
-      '<div class="timeline-date">' + t.deadline + '</div>' +
-      '<div>' +
-        '<span class="evidence-type c-tendertype">' + (t.applied ? 'Applied' : deadlineLabel) + '</span>' +
-        '<p><b>' + t.title + '</b><br>' + t.description + '</p>' +
-        '<div class="signal-source">🧰 ' + t.resources + '</div>' +
-        '<div style="margin-top:8px"><button class="btn small' + (t.applied ? '' : ' primary') + '" data-toggle-tender-applied="' + t.id + '">' + (t.applied ? 'Mark as not applied' : 'Apply') + '</button></div>' +
+    return '<div class="card" style="cursor:default">' +
+      '<div class="card-title-row"><h3>' + t.title + '</h3>' + (t.applied ? '<span class="pill sentiment-pill enthusiastic">Applied</span>' : '') + '</div>' +
+      '<p class="card-desc">' + t.description + '</p>' +
+      '<div class="badge-row">' +
+        '<span class="pill deadline-pill ' + deadlineCls + '">📅 ' + t.deadline + ' &middot; ' + deadlineLabel + '</span>' +
+        '<span class="tag-pill">🧰 ' + t.resources + '</span>' +
+        tenderSourceBadge(t) +
       '</div>' +
+      (t.sourceUrl ? '<p class="signal-source"><a href="' + escapeAttr(t.sourceUrl) + '" target="_blank" rel="noopener">View original ↗</a></p>' : '') +
+      '<div class="card-footer"><span></span><button class="btn small' + (t.applied ? '' : ' primary') + '" data-toggle-tender-applied="' + t.id + '">' + (t.applied ? 'Mark as not applied' : 'Apply') + '</button></div>' +
     '</div>';
   }
 
@@ -1749,19 +1773,29 @@
     '</div>';
   }
 
-  function tendersColumnHtml(account){
+  function tenderImportForm(){
+    return '<div class="inline-form">' +
+      '<p class="empty-note">Paste a link to a tender/RFP listing — we’ll draft a call from the URL (title guessed from the link) that you can edit afterward. This app has no backend, so the page itself isn’t fetched or scraped.</p>' +
+      '<div class="form-row"><input id="tender-import-url" type="url" placeholder="https://..."></div>' +
+      '<div class="form-actions"><button class="btn small" data-cancel-tender-import="1">Cancel</button><button class="btn small primary" data-save-tender-import="1">Import</button></div>' +
+    '</div>';
+  }
+
+  function tendersSectionHtml(account){
     var all = account.tenders || [];
     var relevant = all.filter(function(t){ return t.relevant !== false; });
     var hiddenCount = all.length - relevant.length;
     var shown = state.showAllTenders ? all : relevant;
-    var rows = shown.length ? shown.map(tenderRowHtml).join('') : '<p class="empty-note">No relevant calls for projects right now.</p>';
-    return '<div class="signal-col">' +
-      '<div class="signal-col-head"><span class="c-tendertype">●</span><h3>Calls for Projects</h3></div>' +
-      '<p class="col-sub">Tenders/RFPs kept to the ones relevant to our AI &amp; data consulting model' + (hiddenCount ? ' (' + hiddenCount + ' hidden)' : '') + '.</p>' +
-      (hiddenCount ? '<button class="add-row-btn" data-toggle-show-all-tenders="1" style="margin-bottom:10px">' + (state.showAllTenders ? 'Hide non-relevant' : 'Show all (' + all.length + ')') + '</button>' : '') +
-      rows +
-      (state.addingTender ? tenderAddForm() : '<button class="add-row-btn" data-toggle-tender="1" style="margin-top:10px">+ Add call for project</button>') +
+    var cards = shown.map(tenderCardHtml).join('');
+    var addButtons = '<div class="badge-row">' +
+      '<button class="add-row-btn" data-toggle-tender="1">+ Add call for project</button>' +
+      '<button class="add-row-btn" data-toggle-tender-import="1">🔗 Import from link</button>' +
     '</div>';
+    return '<div class="section-head" style="margin-top:28px"><h2>📋 Calls for Projects</h2></div>' +
+      '<p class="section-sub">Tenders and RFPs — auto-detected from the signal feed where possible, plus manually added or imported from a link — kept to the ones relevant to our AI &amp; data consulting model' + (hiddenCount ? ' (' + hiddenCount + ' filtered out as not relevant)' : '') + '.</p>' +
+      (hiddenCount ? '<button class="add-row-btn" data-toggle-show-all-tenders="1" style="margin-bottom:12px">' + (state.showAllTenders ? 'Hide non-relevant calls' : 'Show all calls (' + all.length + ')') + '</button>' : '') +
+      (shown.length ? '<div class="grid-3">' + cards + '</div>' : '<p class="empty-note">No relevant calls for projects right now.</p>') +
+      (state.addingTender ? tenderAddForm() : (state.addingTenderImport ? tenderImportForm() : addButtons));
   }
 
   function renderOverview(){
@@ -1799,8 +1833,8 @@
           '<p class="col-sub">Social media activity, published events, hires, and talent migration.</p>' +
           signalListHtml(account, 'social') +
         '</div>' +
-        tendersColumnHtml(account) +
       '</div>' +
+      tendersSectionHtml(account) +
       '<div class="section-head"><h2>🎯 Offer Scenarios for ' + account.name + '</h2></div>' +
       '<p class="section-sub">Where combinations of the signals above point to a concrete AI &amp; data consulting offer worth raising with the account.</p>' +
       (account.scenarios.length ? '<div class="grid-3">' + scenarioCards + '</div>' :
@@ -2602,7 +2636,7 @@
     var toggleShowAllTenders = e.target.closest('[data-toggle-show-all-tenders]');
     if (toggleShowAllTenders){ state.showAllTenders = !state.showAllTenders; render(); return; }
     var toggleTender = e.target.closest('[data-toggle-tender]');
-    if (toggleTender){ state.addingTender = true; render(); return; }
+    if (toggleTender){ state.addingTender = true; state.addingTenderImport = false; render(); return; }
     var cancelTender = e.target.closest('[data-cancel-tender]');
     if (cancelTender){ state.addingTender = false; render(); return; }
     var saveTender = e.target.closest('[data-save-tender]');
@@ -2617,11 +2651,31 @@
       tenderAccount.tenders = tenderAccount.tenders || [];
       tenderAccount.tenders.push({
         id: 'tender-' + Date.now(), title: tenderTitle, description: tenderDesc || 'No description provided.',
-        deadline: tenderDeadline, resources: tenderResources, relevant: tenderRelevant, applied: false
+        deadline: tenderDeadline, resources: tenderResources, relevant: tenderRelevant, applied: false, source: 'manual'
       });
       state.addingTender = false;
       render();
       showToast('Call for project added');
+      return;
+    }
+    var toggleTenderImport = e.target.closest('[data-toggle-tender-import]');
+    if (toggleTenderImport){ state.addingTenderImport = true; state.addingTender = false; render(); return; }
+    var cancelTenderImport = e.target.closest('[data-cancel-tender-import]');
+    if (cancelTenderImport){ state.addingTenderImport = false; render(); return; }
+    var saveTenderImport = e.target.closest('[data-save-tender-import]');
+    if (saveTenderImport){
+      var importAccount = currentAccount();
+      var importUrl = (byId('tender-import-url').value || '').trim();
+      if (!importUrl){ showToast('Paste a link first'); return; }
+      importAccount.tenders = importAccount.tenders || [];
+      importAccount.tenders.push({
+        id: 'tender-' + Date.now(), title: guessTitleFromUrl(importUrl),
+        description: 'Imported from a link — edit this description with details from the original listing.',
+        deadline: todayStr(), resources: 'Not specified', relevant: true, applied: false, source: 'import', sourceUrl: importUrl
+      });
+      state.addingTenderImport = false;
+      render();
+      showToast('Call imported — edit the details to match the original listing');
       return;
     }
     var toggleTenderApplied = e.target.closest('[data-toggle-tender-applied]');

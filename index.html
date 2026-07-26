@@ -226,6 +226,23 @@
   .relationship-pill.client { color: var(--good); background: var(--good-soft); border-color: transparent; }
   .relationship-pill.potential-client { color: var(--accent); background: var(--accent-soft); border-color: transparent; }
 
+  .global-search {
+    background: var(--panel2); border: 1px solid var(--border); color: var(--text);
+    font-size: 12.5px; padding: 8px 14px; border-radius: var(--radius-pill);
+    font-family: var(--font); min-width: 240px;
+  }
+  .global-search:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .ref-pill.yes { color: var(--good); background: var(--good-soft); border-color: transparent; }
+  .ref-pill.no { color: var(--warn); background: var(--warn-soft); border-color: transparent; }
+  .metric-line { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--good); margin: 6px 0; }
+
+  .econ-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0; }
+  .econ-cell { background: var(--panel2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+  .econ-cell .fact-label { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--text-faint); }
+  .econ-cell .econ-value { font-family: var(--mono); font-size: 15px; font-weight: 800; margin-top: 2px; }
+  .econ-value.good { color: var(--good); } .econ-value.warn { color: var(--warn); } .econ-value.bad { color: var(--danger); }
+
   .deadline-pill.ok { color: var(--good); background: var(--good-soft); border-color: transparent; }
   .deadline-pill.soon { color: var(--warn); background: var(--warn-soft); border-color: transparent; }
   .deadline-pill.overdue { color: var(--danger); background: var(--danger-soft); border-color: transparent; }
@@ -1119,11 +1136,58 @@
     var offset = (hashStr(sc.id) % variance) - Math.round(variance / 2);
     return Math.round((base + offset) / 5000) * 5000;
   }
+
+  /* Rate card: consulting economics behind a deal value.
+     Revenue = people x days x dayRate; cost uses the internal costRate. */
+  var DEFAULT_DAY_RATE = 1400;
+  var DEFAULT_COST_RATE = 880;
+  function seedRateCard(sc){
+    var target = (typeof sc.dealValue === 'number') ? sc.dealValue : defaultDealValue(sc);
+    var people = 2 + (hashStr(sc.id) % 3);            // 2-4 consultants
+    var totalDays = Math.max(10, Math.round(target / DEFAULT_DAY_RATE));
+    var days = Math.max(5, Math.round(totalDays / people));
+    sc.rateCard = { people: people, days: days, dayRate: DEFAULT_DAY_RATE, costRate: DEFAULT_COST_RATE };
+  }
+  function rcRevenue(rc){ return rc.people * rc.days * rc.dayRate; }
+  function rcCost(rc){ return rc.people * rc.days * rc.costRate; }
+  function rcMargin(rc){ return rcRevenue(rc) - rcCost(rc); }
+  function rcMarginPct(rc){
+    var rev = rcRevenue(rc);
+    return rev ? Math.round((rcMargin(rc) / rev) * 100) : 0;
+  }
+  function rcConsultantWeeks(rc){ return Math.round((rc.people * rc.days) / 5); }
+
   ACCOUNTS.forEach(function(a){
     a.scenarios.forEach(function(sc){
       if (typeof sc.dealValue !== 'number') sc.dealValue = defaultDealValue(sc);
+      if (!sc.rateCard) seedRateCard(sc);
+      sc.dealValue = rcRevenue(sc.rateCard);
     });
   });
+
+  /* Signal decay: a hiring post from 10 months ago is weaker evidence than
+     last week's. Confidence is the analyst's base score; the score actually
+     shown decays it by how stale the underlying signals are. */
+  function signalFreshness(ageDays){
+    if (ageDays <= 30) return 1;
+    if (ageDays >= 365) return 0.55;
+    return 1 - ((ageDays - 30) / (365 - 30)) * 0.45;
+  }
+  function scenarioFreshness(account, sc){
+    var ids = sc.signalIds || [];
+    if (!ids.length) return 1;
+    var total = 0, n = 0;
+    ids.forEach(function(id){
+      var s = findSignal(account, id);
+      if (!s) return;
+      total += signalFreshness(Math.max(0, daysAgo(s.date)));
+      n++;
+    });
+    return n ? (total / n) : 1;
+  }
+  function effectiveConfidence(account, sc){
+    return Math.max(1, Math.round(sc.confidence * scenarioFreshness(account, sc)));
+  }
 
   function formatMoney(n){
     n = Math.round(n || 0);
@@ -1137,14 +1201,85 @@
     return num * mult;
   }
   function computeWeightedValue(account){
-    return account.scenarios.reduce(function(sum, sc){ return sum + (sc.confidence / 100) * (sc.dealValue || 0); }, 0);
+    return account.scenarios.reduce(function(sum, sc){
+      return sum + (effectiveConfidence(account, sc) / 100) * (sc.dealValue || 0);
+    }, 0);
+  }
+
+  /* Proof points we can put in front of a prospect. */
+  var CASE_STUDIES = [
+    {
+      id: 'cs-eu-ai-act-bank', client: 'A European retail bank', sector: 'Finance', referenceable: false,
+      domainTags: ['AI Regulation & Consumer Lending', 'AI Regulation & Governance'],
+      challenge: 'Credit-scoring models had no documentation trail ahead of an EBA audit.',
+      outcome: 'Shipped an explainability layer and model-documentation pack; passed audit with no findings.',
+      metric: 'Audit passed, 0 findings', duration: '11 weeks', team: '3 consultants',
+      tech: ['Python', 'Snowflake', 'MLflow']
+    },
+    {
+      id: 'cs-turbine-maintenance', client: 'Siemens Gamesa (named with permission)', sector: 'Energy', referenceable: true,
+      domainTags: ['AI Regulation & Field Reliability', 'Renewable Grid Readiness'],
+      challenge: 'Predictive-maintenance model produced so many false alarms that field crews ignored it.',
+      outcome: 'Retrained on cleaned sensor data and added a confidence gate before alerting.',
+      metric: 'False alarms down 63%', duration: '8 weeks', team: '2 consultants',
+      tech: ['Databricks', 'PySpark', 'Azure ML']
+    },
+    {
+      id: 'cs-clinical-trial-quality', client: 'A top-10 pharma company', sector: 'Pharma', referenceable: false,
+      domainTags: ['Clinical AI Regulation', 'AI Regulation in R&D', 'Patient Data Regulation'],
+      challenge: 'Trial-data pipeline could not prove which AI tool touched which patient record.',
+      outcome: 'Built end-to-end data lineage plus an EMA-ready validation framework.',
+      metric: 'Submission prep cut from 6 weeks to 9 days', duration: '14 weeks', team: '4 consultants',
+      tech: ['dbt', 'Snowflake', 'Great Expectations']
+    },
+    {
+      id: 'cs-vehicle-governance', client: 'A German automotive OEM', sector: 'Automotive', referenceable: false,
+      domainTags: ['AI Regulation & Governance', 'Connected-Vehicle Data Regulation', 'AI Regulation & Product Quality'],
+      challenge: 'In-car assistant shipped without monitoring; complaints surfaced on social before engineering saw them.',
+      outcome: 'Stood up response-quality monitoring and a complaint-to-root-cause triage loop.',
+      metric: 'Issue detection moved from ~3 weeks to same-day', duration: '10 weeks', team: '3 consultants',
+      tech: ['Google Cloud', 'BigQuery', 'Looker']
+    },
+    {
+      id: 'cs-retail-personalisation', client: 'A European fashion e-commerce group', sector: 'Retail', referenceable: true,
+      domainTags: ['Retail AI Regulation & Customer Trust', 'Retail AI Regulation & Cloud Partnership'],
+      challenge: 'Sizing recommendations were inconsistent across brands and customers complained publicly.',
+      outcome: 'Recalibrated the model per brand and added plain-language disclosure of how it uses data.',
+      metric: 'Size-related returns down 18%', duration: '9 weeks', team: '3 consultants',
+      tech: ['AWS SageMaker', 'Airflow', 'Redshift']
+    },
+    {
+      id: 'cs-embedded-delivery', client: 'A DAX-listed industrial group', sector: 'Energy', referenceable: false,
+      domainTags: ['Talent Migration into Industrial AI', 'Talent Migration into Auto-Tech', 'Talent Migration into Banking AI', 'Talent Migration into Pharma R&D'],
+      challenge: 'Approved AI roadmap but a 9-month hiring ramp before anyone could start.',
+      outcome: 'Embedded a delivery pod that shipped the first two use cases and handed over to the new hires.',
+      metric: 'First production model live in 7 weeks', duration: '6 months', team: '4 consultants',
+      tech: ['Azure', 'Kubernetes', 'MLflow']
+    },
+    {
+      id: 'cs-patient-monitoring', client: 'A European hospital group', sector: 'Healthcare', referenceable: false,
+      domainTags: ['AI Regulation in Healthcare', 'AI Regulation & Clinical Accuracy'],
+      challenge: 'Patient-monitoring AI needed safety documentation before a multi-site rollout.',
+      outcome: 'Produced the MDR-aligned safety file and a live accuracy dashboard for clinical staff.',
+      metric: 'Rollout approved across 12 sites', duration: '12 weeks', team: '3 consultants',
+      tech: ['Azure Health Data', 'Python', 'Power BI']
+    }
+  ];
+
+  function matchingCaseStudies(account, sc){
+    var strong = [], weak = [];
+    CASE_STUDIES.forEach(function(cs){
+      if ((cs.domainTags || []).indexOf(sc.domainTag) !== -1) strong.push(cs);
+      else if (cs.sector === account.industry) weak.push(cs);
+    });
+    return { strong: strong, weak: weak };
   }
 
   var state = {
     accountId: 'vw',
     selectedSector: 'Automotive',
     view: 'sector', // 'sector' | 'partners' | 'pipeline' | 'overview' | 'setup' | 'activity' | 'scenario' | 'signal'
-    editingDealValue: false,
+    viewBeforeSearch: 'sector',
     scenarioId: null,
     signalId: null,
     signalOrigin: { view: 'overview', scenarioId: null },
@@ -1165,8 +1300,15 @@
     showAllTenders: false,
     tenderId: null,
     editingTender: false,
-    aiAskOpen: false
+    aiAskOpen: false,
+    addingCaseStudy: false,
+    editingRateCard: false,
+    scoreBreakdownOpen: false,
+    pendingOutcomeStage: null,
+    searchQuery: ''
   };
+
+  var OUTCOME_REASONS = ['Price / budget', 'Timing not right', 'Lost to competitor', 'No budget approved', 'Built in-house'];
 
   var TEMPLATES = [];
 
@@ -1237,7 +1379,6 @@
     state.discoveredSetup = null;
     state.addingActivity = false;
     state.addingManualOffer = false;
-    state.editingDealValue = false;
     state.signalFilters = {
       news: { category: 'all', timing: 'all' },
       social: { category: 'all', timing: 'all' }
@@ -1247,6 +1388,9 @@
     state.tenderId = null;
     state.editingTender = false;
     state.aiAskOpen = false;
+    state.editingRateCard = false;
+    state.scoreBreakdownOpen = false;
+    state.pendingOutcomeStage = null;
     window.scrollTo(0,0);
     render();
   }
@@ -1267,6 +1411,8 @@
     pills += '<button class="sector-nav-pill' + (recapActive ? ' active' : '') + '" data-select-sector="Recap">🗓️ Monthly Recap</button>';
     var templatesActive = state.selectedSector === 'Templates';
     pills += '<button class="sector-nav-pill' + (templatesActive ? ' active' : '') + '" data-select-sector="Templates">📄 Templates' + (TEMPLATES.length ? ' (' + TEMPLATES.length + ')' : '') + '</button>';
+    var casesActive = state.selectedSector === 'CaseStudies';
+    pills += '<button class="sector-nav-pill' + (casesActive ? ' active' : '') + '" data-select-sector="CaseStudies">🏆 Case Studies (' + CASE_STUDIES.length + ')</button>';
     return '<div class="sector-nav-row">' + pills + '</div>';
   }
 
@@ -1304,7 +1450,8 @@
     state.addingClient = false;
     state.discoveredSetup = null;
     state.view = (key === 'Partners') ? 'partners' : (key === 'Pipeline') ? 'pipeline' : (key === 'Triggers') ? 'triggers' :
-      (key === 'Recap') ? 'recap' : (key === 'Templates') ? 'templates' : 'sector';
+      (key === 'Recap') ? 'recap' : (key === 'Templates') ? 'templates' :
+      (key === 'CaseStudies') ? 'cases' : 'sector';
     window.scrollTo(0,0);
     render();
   }
@@ -1328,6 +1475,7 @@
     return '<div class="title-bar">' +
         '<h1 class="app-title"><span class="spark">✦</span> Market Intelligence <span class="pilot-tag">&mdash; ' + ACCOUNTS.length + ' Pilot Accounts Across ' + SECTORS.length + ' Sectors</span></h1>' +
         '<div class="title-actions">' +
+          '<input id="global-search" class="global-search" type="search" placeholder="Search accounts, signals, offers…" value="' + escapeAttr(state.searchQuery) + '">' +
           '<button class="pill primary-btn" data-toast="Signals refreshed (demo)">↻ Rescan Signals</button>' +
           '<span class="last-update">Last updated 2026-07-23</span>' +
           '<button class="pill outline theme-toggle-inline" data-toggle-theme="1" title="Toggle light / dark">' +
@@ -1833,14 +1981,15 @@
     var manualOffers = account.manualOffers || [];
 
     var scenarioCards = account.scenarios.length ? account.scenarios.map(function(sc){
-      var t = tier(sc.confidence);
+      var effC = effectiveConfidence(account, sc);
+      var t = tier(effC);
       var refPills = sc.signalIds.map(function(id){
         var s = findSignal(account, id);
         var cls = s.channel === 'news' ? 'c-newstype' : 'c-socialtype';
         return '<span class="sig-ref-pill ' + cls + '">' + s.subtype + ' &middot; ' + monthShort(s.date) + '</span>';
       }).join(' ');
       return '<div class="card" data-scenario-card="' + sc.id + '">' +
-        '<div class="card-title-row"><h3>' + sc.title + '</h3><span class="pill conf-pill ' + t + '">' + sc.confidence + '</span></div>' +
+        '<div class="card-title-row"><h3>' + sc.title + '</h3><span class="pill conf-pill ' + t + '">' + effC + '</span></div>' +
         '<div class="badge-row"><span class="tag-pill">' + sc.domainTag + '</span></div>' +
         '<p class="card-desc">' + sc.summary + '</p>' +
         '<div class="badge-row">' + refPills + '</div>' +
@@ -1951,6 +2100,28 @@
     '</div>';
   }
 
+  function outcomeBlockHtml(account){
+    if (state.pendingOutcomeStage){
+      var opts = OUTCOME_REASONS.map(function(r, i){
+        return '<label style="display:flex;align-items:center;gap:6px;font-size:12.5px;margin:4px 0">' +
+          '<input type="radio" name="outcome-reason" value="' + r + '"' + (i === 0 ? ' checked' : '') + ' style="width:auto"> ' + r + '</label>';
+      }).join('');
+      return '<div class="inline-form">' +
+        '<p class="empty-note">Marking this account as <b>' + state.pendingOutcomeStage + '</b> — why?</p>' +
+        opts +
+        '<div class="form-row"><input id="outcome-note" type="text" placeholder="Anything worth remembering next time (optional)"></div>' +
+        '<div class="form-actions"><button class="btn small" data-cancel-outcome="1">Cancel</button><button class="btn small primary" data-save-outcome="1">Save outcome</button></div>' +
+      '</div>';
+    }
+    if (!account.outcome) return '';
+    var isWon = account.outcome.stage === 'Won';
+    return '<div class="callout" style="margin-top:14px">' +
+      '<b class="label">' + (isWon ? 'Won' : 'Lost') + ' &middot; ' + account.outcome.reason + '</b>' +
+      (account.outcome.note ? '<br>' + account.outcome.note : '') +
+      '<br><span class="conf-sub">Recorded ' + account.outcome.date + '</span>' +
+    '</div>';
+  }
+
   function renderActivity(){
     var account = currentAccount();
     var stageOptions = ['Cold','Warm','In Conversation','Won','Lost'];
@@ -1973,6 +2144,7 @@
           momentumChart(account.signalHistory) +
           '<p class="section-label" style="margin-top:20px">Deal stage</p>' +
           '<div class="badge-row">' + stagePills + '</div>' +
+          outcomeBlockHtml(account) +
         '</div>' +
         '<div class="setup-panel">' +
           '<div class="setup-panel-head"><h3>📝 Activity Log</h3></div>' +
@@ -1997,7 +2169,8 @@
   function renderScenario(){
     var account = currentAccount();
     var sc = findScenario(account, state.scenarioId);
-    var t = tier(sc.confidence);
+    var effConf = effectiveConfidence(account, sc);
+    var t = tier(effConf);
     var evidence = sc.signalIds.map(function(id){
       var s = findSignal(account, id);
       var cls = s.channel === 'news' ? 'c-newstype' : 'c-socialtype';
@@ -2023,20 +2196,15 @@
           '<h2 class="opp-title">' + sc.title + '</h2>' +
           '<p class="opp-summary">' + sc.summary + '</p>' +
           '<div class="conf-row">' +
-            '<div style="flex:1"><div class="conf-number ' + t + '">' + sc.confidence + '</div><div class="conf-fill-track"><div class="conf-fill ' + t + '" style="width:' + sc.confidence + '%"></div></div><div class="conf-sub">' + tierLabel(t) + ' &middot; based on ' + sc.signalIds.length + ' signals across both channels</div></div>' +
+            '<div style="flex:1"><div class="conf-number ' + t + '">' + effConf + '</div><div class="conf-fill-track"><div class="conf-fill ' + t + '" style="width:' + effConf + '%"></div></div><div class="conf-sub">' + tierLabel(t) + ' &middot; based on ' + sc.signalIds.length + ' signals across both channels</div></div>' +
           '</div>' +
-          '<div class="dealvalue-row">' +
-            '<div><div class="fact-label">Estimated deal value</div><div class="dealvalue-amount">' + formatMoney(sc.dealValue) + '</div></div>' +
-            '<button class="btn small" data-toggle-dealvalue="1">✏️ Edit</button>' +
-          '</div>' +
-          (state.editingDealValue ?
-            '<div class="inline-form"><div class="form-row"><input id="edit-dealvalue-input" type="number" step="5000" min="0" value="' + sc.dealValue + '"></div>' +
-              '<div class="form-actions"><button class="btn small" data-cancel-dealvalue="1">Cancel</button><button class="btn small primary" data-save-dealvalue="1">Save</button></div></div>'
-            : '') +
-          '<p class="conf-sub" style="margin:6px 0 20px">Weighted value: ' + formatMoney((sc.confidence/100) * sc.dealValue) + ' (confidence &times; deal value)</p>' +
+          scoreBreakdownHtml(account, sc) +
+          rateCardHtml(sc) +
+          '<p class="conf-sub" style="margin:6px 0 20px">Weighted value: ' + formatMoney((effConf/100) * sc.dealValue) + ' (confidence &times; deal value)</p>' +
           '<p class="section-label">Included deliverables</p>' +
           '<div class="cap-row">' + capabilities + '</div>' +
           '<div class="callout accent"><b class="label">Recommended next step:</b> ' + sc.nextStep + '</div>' +
+          proofPointsHtml(account, sc) +
           renderContactBlock(account, sc) +
           '<div class="cta-row"><button class="btn primary" data-export-crm="' + sc.id + '" data-export-crm-account="' + account.id + '">📤 Export to CRM (demo)</button><button class="btn" data-toast="Marked as reviewed (demo)">Mark as reviewed</button></div>' +
           aiAskSectionHtml(account, sc) +
@@ -2153,6 +2321,174 @@
       (state.addingTemplate ? templateAddForm() : '<button class="add-row-btn" data-toggle-template="1">+ Add template</button>');
   }
 
+  function caseStudyCardHtml(cs, compact){
+    var refCls = cs.referenceable ? 'yes' : 'no';
+    var refLabel = cs.referenceable ? '✅ Nameable reference' : '🔒 Anonymised only';
+    return '<div class="card" style="cursor:default">' +
+      '<div class="card-title-row"><h3>' + cs.client + '</h3><span class="pill ref-pill ' + refCls + '">' + (cs.referenceable ? 'Nameable' : 'Anonymised') + '</span></div>' +
+      '<div class="badge-row"><span class="tag-pill">' + cs.sector + '</span><span class="tag-pill">⏱ ' + cs.duration + '</span><span class="tag-pill">👥 ' + cs.team + '</span></div>' +
+      '<p class="card-desc"><b>Challenge:</b> ' + cs.challenge + '</p>' +
+      '<p class="card-desc"><b>What we did:</b> ' + cs.outcome + '</p>' +
+      '<div class="metric-line">📈 ' + cs.metric + '</div>' +
+      (compact ? '' : '<div class="badge-row">' + (cs.tech || []).map(function(t){ return '<span class="tag-pill">' + t + '</span>'; }).join('') + '</div>') +
+      '<div class="card-footer"><span class="foot-meta">' + refLabel + '</span>' +
+        '<button class="btn small" data-copy-case="' + cs.id + '">📋 Copy for pitch</button></div>' +
+    '</div>';
+  }
+
+  function caseStudyAddForm(){
+    var sectorOpts = SECTORS.map(function(s){ return '<option value="' + s.key + '">' + s.key + '</option>'; }).join('');
+    return '<div class="inline-form">' +
+      '<div class="form-row"><input id="cs-client" type="text" placeholder="Client (or &quot;A European retail bank&quot; if anonymised)"></div>' +
+      '<div class="form-row"><select id="cs-sector">' + sectorOpts + '</select><input id="cs-domaintag" type="text" placeholder="Domain tag it proves (e.g. AI Regulation &amp; Governance)"></div>' +
+      '<div class="form-row"><input id="cs-challenge" type="text" placeholder="What problem did they have?"></div>' +
+      '<div class="form-row"><input id="cs-outcome" type="text" placeholder="What did we do?"></div>' +
+      '<div class="form-row"><input id="cs-metric" type="text" placeholder="Hard result (e.g. False alarms down 63%)"></div>' +
+      '<div class="form-row"><input id="cs-duration" type="text" placeholder="Duration (e.g. 8 weeks)"><input id="cs-team" type="text" placeholder="Team (e.g. 3 consultants)"></div>' +
+      '<div class="form-row"><input id="cs-tech" type="text" placeholder="Tech used, comma-separated"></div>' +
+      '<div class="form-row"><label style="font-size:12.5px;display:flex;align-items:center;gap:6px"><input id="cs-referenceable" type="checkbox" style="width:auto"> We may name this client publicly</label></div>' +
+      '<div class="form-actions"><button class="btn small" data-cancel-case="1">Cancel</button><button class="btn small primary" data-save-case="1">Save case study</button></div>' +
+    '</div>';
+  }
+
+  function renderCaseStudies(){
+    var nameable = CASE_STUDIES.filter(function(c){ return c.referenceable; }).length;
+    return header() + accountSwitcher() +
+      '<div class="section-head"><h2>🏆 Case Studies &amp; Proof Points</h2></div>' +
+      '<p class="section-sub">What we can put in front of a prospect when they ask “have you done this before?” — ' + CASE_STUDIES.length + ' engagements, ' + nameable + ' of which we may name publicly. Tagged so they surface automatically on matching offers.</p>' +
+      '<div class="grid-3">' + CASE_STUDIES.map(function(cs){ return caseStudyCardHtml(cs, false); }).join('') + '</div>' +
+      (state.addingCaseStudy ? caseStudyAddForm() : '<button class="add-row-btn" data-toggle-case="1">+ Add case study</button>');
+  }
+
+  function proofPointsHtml(account, sc){
+    var m = matchingCaseStudies(account, sc);
+    if (!m.strong.length && !m.weak.length) return '';
+    var html = '<p class="section-label">Proof points for this pitch</p>';
+    if (m.strong.length){
+      html += '<p class="conf-sub" style="margin-bottom:8px">Same problem — ' + m.strong.length + ' matching engagement' + (m.strong.length > 1 ? 's' : '') + ':</p>' +
+        m.strong.map(function(cs){
+          return '<div class="callout"><b class="label">' + cs.client + '</b> &middot; ' + cs.duration + '<br>' + cs.outcome +
+            '<br><span class="metric-line">📈 ' + cs.metric + '</span>' +
+            '<span class="pill ref-pill ' + (cs.referenceable ? 'yes' : 'no') + '">' + (cs.referenceable ? 'Nameable' : 'Anonymised only') + '</span></div>';
+        }).join('');
+    }
+    if (m.weak.length){
+      html += '<p class="empty-note">Also in ' + account.industry + ': ' + m.weak.map(function(cs){ return cs.client; }).join(' &middot; ') + '</p>';
+    }
+    return html;
+  }
+
+  function rateCardHtml(sc){
+    var rc = sc.rateCard;
+    var pct = rcMarginPct(rc);
+    var pctCls = pct >= 35 ? 'good' : (pct >= 20 ? 'warn' : 'bad');
+    if (state.editingRateCard){
+      return '<p class="section-label">Deal economics</p>' +
+        '<div class="inline-form">' +
+          '<div class="form-row">' +
+            '<label style="font-size:12px;flex:1">Consultants<br><input id="rc-people" type="number" min="1" step="1" value="' + rc.people + '"></label>' +
+            '<label style="font-size:12px;flex:1">Days each<br><input id="rc-days" type="number" min="1" step="1" value="' + rc.days + '"></label>' +
+          '</div>' +
+          '<div class="form-row">' +
+            '<label style="font-size:12px;flex:1">Bill rate / day<br><input id="rc-dayrate" type="number" min="0" step="50" value="' + rc.dayRate + '"></label>' +
+            '<label style="font-size:12px;flex:1">Internal cost / day<br><input id="rc-costrate" type="number" min="0" step="50" value="' + rc.costRate + '"></label>' +
+          '</div>' +
+          '<div class="form-actions"><button class="btn small" data-cancel-ratecard="1">Cancel</button><button class="btn small primary" data-save-ratecard="' + sc.id + '">Save economics</button></div>' +
+        '</div>';
+    }
+    return '<p class="section-label">Deal economics</p>' +
+      '<div class="econ-grid">' +
+        '<div class="econ-cell"><div class="fact-label">Revenue</div><div class="econ-value">' + formatMoney(rcRevenue(rc)) + '</div></div>' +
+        '<div class="econ-cell"><div class="fact-label">Delivery cost</div><div class="econ-value">' + formatMoney(rcCost(rc)) + '</div></div>' +
+        '<div class="econ-cell"><div class="fact-label">Gross margin</div><div class="econ-value ' + pctCls + '">' + pct + '%</div></div>' +
+      '</div>' +
+      '<p class="conf-sub">' + rc.people + ' consultants &times; ' + rc.days + ' days &times; ' + formatMoney(rc.dayRate) + '/day &middot; ' +
+        rcConsultantWeeks(rc) + ' consultant-weeks to staff &middot; margin ' + formatMoney(rcMargin(rc)) + '</p>' +
+      '<div style="margin:8px 0 18px"><button class="btn small" data-toggle-ratecard="1">✏️ Edit economics</button></div>';
+  }
+
+  function scoreBreakdownHtml(account, sc){
+    var eff = effectiveConfidence(account, sc);
+    var fresh = scenarioFreshness(account, sc);
+    var decayed = eff < sc.confidence;
+    if (!state.scoreBreakdownOpen){
+      return '<div style="margin:-6px 0 14px"><button class="btn small" data-toggle-score="1">🔍 Why ' + eff + '?</button>' +
+        (decayed ? '<span class="conf-sub" style="margin-left:8px">Decayed from ' + sc.confidence + ' — evidence is ageing</span>' : '') + '</div>';
+    }
+    var rows = (sc.signalIds || []).map(function(id){
+      var s = findSignal(account, id);
+      if (!s) return '';
+      var age = Math.max(0, daysAgo(s.date));
+      var f = Math.round(signalFreshness(age) * 100);
+      var fCls = f >= 90 ? 'good' : (f >= 70 ? 'warn' : 'bad');
+      return '<div class="hbar-row"><div class="hbar-label">' + s.subtype + ' &middot; ' + s.date + '</div>' +
+        '<div class="hbar-track"><div class="hbar-fill" style="width:' + f + '%;background:var(--accent)"></div></div>' +
+        '<div class="hbar-value"><span class="econ-value ' + fCls + '" style="font-size:12px">' + age + 'd &middot; ' + f + '%</span></div></div>';
+    }).join('');
+    return '<div class="callout" style="margin:-6px 0 14px">' +
+      '<b class="label">How this score is built</b><br>' +
+      'Analyst base score <b>' + sc.confidence + '</b> &times; evidence freshness <b>' + Math.round(fresh * 100) + '%</b> = <b>' + eff + '</b>.<br>' +
+      '<span class="conf-sub">Signals stay at full weight for 30 days, then decay to 55% by one year old.</span>' +
+      '<div style="margin-top:10px">' + rows + '</div>' +
+      '<button class="btn small" data-toggle-score="1" style="margin-top:8px">Hide</button>' +
+    '</div>';
+  }
+
+  function searchResultsHtml(){
+    var q = state.searchQuery.trim().toLowerCase();
+    if (q.length < 2) return '<p class="empty-note">Type at least 2 characters to search.</p>';
+    var accountHits = [], signalHits = [], scenarioHits = [], caseHits = [];
+    ACCOUNTS.forEach(function(a){
+      if ((a.name + ' ' + a.sector + ' ' + a.industry + ' ' + a.hq).toLowerCase().indexOf(q) !== -1) accountHits.push(a);
+      (a.signals || []).forEach(function(s){
+        if ((s.text + ' ' + s.subtype).toLowerCase().indexOf(q) !== -1) signalHits.push({ account: a, signal: s });
+      });
+      (a.scenarios || []).forEach(function(sc){
+        if ((sc.title + ' ' + sc.summary + ' ' + sc.domainTag).toLowerCase().indexOf(q) !== -1) scenarioHits.push({ account: a, sc: sc });
+      });
+    });
+    CASE_STUDIES.forEach(function(cs){
+      if ((cs.client + ' ' + cs.challenge + ' ' + cs.outcome + ' ' + cs.sector).toLowerCase().indexOf(q) !== -1) caseHits.push(cs);
+    });
+    var total = accountHits.length + signalHits.length + scenarioHits.length + caseHits.length;
+    if (!total) return '<p class="empty-note">Nothing matches “' + escapeAttr(state.searchQuery) + '”.</p>';
+
+    var html = '';
+    if (accountHits.length){
+      html += '<p class="section-label">Accounts (' + accountHits.length + ')</p><div class="badge-row" style="margin-bottom:16px">' +
+        accountHits.map(function(a){ return '<button class="tag-pill" data-account="' + a.id + '" style="cursor:pointer">' + a.icon + ' ' + a.name + '</button>'; }).join('') + '</div>';
+    }
+    if (scenarioHits.length){
+      html += '<p class="section-label">Offers (' + scenarioHits.length + ')</p>' +
+        scenarioHits.slice(0, 12).map(function(x){
+          return '<div class="timeline-item clickable" data-nav="scenario" data-account-nav="' + x.account.id + '" data-scenario-nav="' + x.sc.id + '">' +
+            '<div class="timeline-date">' + effectiveConfidence(x.account, x.sc) + '</div>' +
+            '<div><span class="evidence-type">' + x.account.name + '</span><p>' + x.sc.title + '</p></div></div>';
+        }).join('');
+    }
+    if (signalHits.length){
+      html += '<p class="section-label" style="margin-top:16px">Signals (' + signalHits.length + ')</p>' +
+        signalHits.slice(0, 15).map(function(x){
+          var cls = x.signal.channel === 'news' ? 'c-newstype' : 'c-socialtype';
+          return '<div class="timeline-item clickable" data-signal-card="' + x.signal.id + '" data-signal-account="' + x.account.id + '" data-signal-origin="overview">' +
+            '<div class="timeline-date">' + x.signal.date + '</div>' +
+            '<div><span class="evidence-type ' + cls + '">' + x.signal.subtype + '</span> &middot; ' + x.account.name + '<p>' + x.signal.text + '</p></div></div>';
+        }).join('');
+    }
+    if (caseHits.length){
+      html += '<p class="section-label" style="margin-top:16px">Case studies (' + caseHits.length + ')</p><div class="grid-3">' +
+        caseHits.map(function(cs){ return caseStudyCardHtml(cs, true); }).join('') + '</div>';
+    }
+    return html;
+  }
+
+  function renderSearch(){
+    return header() + accountSwitcher() +
+      '<div class="section-head"><h2>🔎 Search results</h2></div>' +
+      '<p class="section-sub">Across every account, signal, offer, and case study.</p>' +
+      searchResultsHtml();
+  }
+
   function hBarList(rows){
     var max = Math.max.apply(null, rows.map(function(r){ return r.value; })) || 1;
     return rows.map(function(r){
@@ -2181,9 +2517,9 @@
 
     var dots = items.map(function(x){
       var cx = pad + (x.sc.dealValue / maxVal) * (w - 2*pad);
-      var cy = pad + (1 - x.sc.confidence/100) * (h - 2*pad);
+      var cy = pad + (1 - effectiveConfidence(x.account, x.sc)/100) * (h - 2*pad);
       var color = SECTOR_COLOR[x.account.industry] || '#8b7cf6';
-      var title = x.account.name + ' — ' + x.sc.title + ': ' + x.sc.confidence + '% confidence, ' + formatMoney(x.sc.dealValue);
+      var title = x.account.name + ' — ' + x.sc.title + ': ' + effectiveConfidence(x.account, x.sc) + '% confidence, ' + formatMoney(x.sc.dealValue);
       return '<circle class="matrix-dot" cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="6" fill="' + color + '" fill-opacity="0.85" stroke="var(--panel)" stroke-width="1.5" data-scenario-account="' + x.account.id + '" data-scenario-card="' + x.sc.id + '"><title>' + title + '</title></circle>';
     }).join('');
 
@@ -2205,7 +2541,7 @@
 
   function renderPipeline(){
     var items = allScenariosFlat();
-    var totalWeighted = items.reduce(function(sum, x){ return sum + (x.sc.confidence/100) * x.sc.dealValue; }, 0);
+    var totalWeighted = items.reduce(function(sum, x){ return sum + (effectiveConfidence(x.account, x.sc)/100) * x.sc.dealValue; }, 0);
 
     var accountRows = ACCOUNTS.map(function(a){
       var sectorDef = SECTORS.filter(function(s){ return s.key === a.industry; })[0];
@@ -2284,6 +2620,8 @@
     else if (state.view === 'triggers') html = renderTriggers();
     else if (state.view === 'recap') html = renderMonthlyRecap();
     else if (state.view === 'templates') html = renderTemplates();
+    else if (state.view === 'cases') html = renderCaseStudies();
+    else if (state.view === 'search') html = renderSearch();
     else if (state.view === 'sector') html = renderSectorLanding();
     else if (state.view === 'setup') html = renderSetup();
     else if (state.view === 'activity') html = renderActivity();
@@ -2309,6 +2647,21 @@
   document.addEventListener('input', function(e){
     var key = NEW_CLIENT_FIELD_MAP[e.target.id];
     if (key){ state.newClientDraft[key] = e.target.value; }
+
+    if (e.target.id === 'global-search'){
+      var caret = e.target.selectionStart;
+      state.searchQuery = e.target.value;
+      if (state.searchQuery.trim()){
+        if (state.view !== 'search'){ state.viewBeforeSearch = state.view; }
+        state.view = 'search';
+      } else if (state.view === 'search'){
+        state.view = state.viewBeforeSearch || 'sector';
+      }
+      render();
+      // render() replaces innerHTML, so put the cursor back where it was.
+      var box = byId('global-search');
+      if (box){ box.focus(); try { box.setSelectionRange(caret, caret); } catch (err) {} }
+    }
   });
 
   document.addEventListener('change', function(e){
@@ -2384,20 +2737,79 @@
     var cancelEmail = e.target.closest('[data-cancel-email]');
     if (cancelEmail){ state.emailOpen = false; render(); return; }
 
-    var toggleDealValue = e.target.closest('[data-toggle-dealvalue]');
-    if (toggleDealValue){ state.editingDealValue = true; render(); return; }
-    var cancelDealValue = e.target.closest('[data-cancel-dealvalue]');
-    if (cancelDealValue){ state.editingDealValue = false; render(); return; }
-    var saveDealValue = e.target.closest('[data-save-dealvalue]');
-    if (saveDealValue){
-      var newVal = parseFloat(byId('edit-dealvalue-input').value);
-      if (isNaN(newVal) || newVal < 0){ showToast('Enter a valid deal value first'); return; }
-      var acct = currentAccount();
-      var scEdit = findScenario(acct, state.scenarioId);
-      scEdit.dealValue = newVal;
-      state.editingDealValue = false;
+    var toggleScore = e.target.closest('[data-toggle-score]');
+    if (toggleScore){ state.scoreBreakdownOpen = !state.scoreBreakdownOpen; render(); return; }
+
+    var toggleRateCard = e.target.closest('[data-toggle-ratecard]');
+    if (toggleRateCard){ state.editingRateCard = true; render(); return; }
+    var cancelRateCard = e.target.closest('[data-cancel-ratecard]');
+    if (cancelRateCard){ state.editingRateCard = false; render(); return; }
+    var saveRateCard = e.target.closest('[data-save-ratecard]');
+    if (saveRateCard){
+      var rcAcct = currentAccount();
+      var rcSc = findScenario(rcAcct, saveRateCard.getAttribute('data-save-ratecard'));
+      var people = parseInt(byId('rc-people').value, 10);
+      var days = parseInt(byId('rc-days').value, 10);
+      var dayRate = parseFloat(byId('rc-dayrate').value);
+      var costRate = parseFloat(byId('rc-costrate').value);
+      if (!(people > 0) || !(days > 0) || !(dayRate >= 0) || !(costRate >= 0)){
+        showToast('Enter valid numbers for people, days, and rates'); return;
+      }
+      if (costRate > dayRate){ showToast('Cost rate is above the bill rate — this deal loses money'); }
+      rcSc.rateCard = { people: people, days: days, dayRate: dayRate, costRate: costRate };
+      rcSc.dealValue = rcRevenue(rcSc.rateCard);
+      state.editingRateCard = false;
       render();
-      showToast('Deal value updated');
+      showToast('Economics updated — margin ' + rcMarginPct(rcSc.rateCard) + '%');
+      return;
+    }
+
+    var toggleCase = e.target.closest('[data-toggle-case]');
+    if (toggleCase){ state.addingCaseStudy = true; render(); return; }
+    var cancelCase = e.target.closest('[data-cancel-case]');
+    if (cancelCase){ state.addingCaseStudy = false; render(); return; }
+    var saveCase = e.target.closest('[data-save-case]');
+    if (saveCase){
+      var csClient = (byId('cs-client').value || '').trim();
+      if (!csClient){ showToast('Enter a client name (or an anonymised description)'); return; }
+      var csTag = (byId('cs-domaintag').value || '').trim();
+      CASE_STUDIES.push({
+        id: 'cs-' + Date.now(),
+        client: csClient,
+        sector: byId('cs-sector').value,
+        domainTags: csTag ? [csTag] : [],
+        challenge: (byId('cs-challenge').value || '').trim() || 'Not documented yet.',
+        outcome: (byId('cs-outcome').value || '').trim() || 'Not documented yet.',
+        metric: (byId('cs-metric').value || '').trim() || 'No hard metric recorded',
+        duration: (byId('cs-duration').value || '').trim() || 'Not recorded',
+        team: (byId('cs-team').value || '').trim() || 'Not recorded',
+        tech: (byId('cs-tech').value || '').split(',').map(function(x){ return x.trim(); }).filter(Boolean),
+        referenceable: !!byId('cs-referenceable').checked
+      });
+      state.addingCaseStudy = false;
+      render();
+      showToast('Case study added');
+      return;
+    }
+    var copyCase = e.target.closest('[data-copy-case]');
+    if (copyCase){
+      var cs = CASE_STUDIES.filter(function(x){ return x.id === copyCase.getAttribute('data-copy-case'); })[0];
+      var caseText = [
+        cs.client + ' (' + cs.sector + ')',
+        '',
+        'Challenge: ' + cs.challenge,
+        'What we did: ' + cs.outcome,
+        'Result: ' + cs.metric,
+        'Duration: ' + cs.duration + ' · Team: ' + cs.team,
+        (cs.tech || []).length ? 'Tech: ' + cs.tech.join(', ') : '',
+        '',
+        cs.referenceable ? 'This client may be named publicly.' : 'Use anonymised — client may not be named.'
+      ].filter(Boolean).join('\n');
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(caseText).then(function(){ showToast('Case study copied for your pitch'); }, function(){ showToast('Could not copy — select and copy manually'); });
+      } else {
+        showToast('Clipboard not available — select and copy manually');
+      }
       return;
     }
     var copyEmail = e.target.closest('[data-copy-email]');
@@ -2482,9 +2894,35 @@
 
     var setStage = e.target.closest('[data-set-stage]');
     if (setStage){
-      currentAccount().stage = setStage.getAttribute('data-set-stage');
+      var newStage = setStage.getAttribute('data-set-stage');
+      currentAccount().stage = newStage;
+      // Won/Lost is where the learning is — ask why before moving on.
+      if (newStage === 'Won' || newStage === 'Lost'){
+        state.pendingOutcomeStage = newStage;
+        render();
+        return;
+      }
+      state.pendingOutcomeStage = null;
       render();
-      showToast('Stage set to ' + currentAccount().stage);
+      showToast('Stage set to ' + newStage);
+      return;
+    }
+    var cancelOutcome = e.target.closest('[data-cancel-outcome]');
+    if (cancelOutcome){ state.pendingOutcomeStage = null; render(); return; }
+    var saveOutcome = e.target.closest('[data-save-outcome]');
+    if (saveOutcome){
+      var ocAccount = currentAccount();
+      var picked = document.querySelector('input[name="outcome-reason"]:checked');
+      var ocReason = picked ? picked.value : OUTCOME_REASONS[0];
+      var ocNote = (byId('outcome-note').value || '').trim();
+      ocAccount.outcome = { stage: state.pendingOutcomeStage, reason: ocReason, note: ocNote, date: todayStr() };
+      ocAccount.activityLog.push({
+        date: todayStr(), type: 'Note',
+        note: 'Marked ' + state.pendingOutcomeStage + ' — ' + ocReason + (ocNote ? '. ' + ocNote : '')
+      });
+      state.pendingOutcomeStage = null;
+      render();
+      showToast('Outcome recorded');
       return;
     }
     var toggleRelationship = e.target.closest('[data-toggle-relationship]');

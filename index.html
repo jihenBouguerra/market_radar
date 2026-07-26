@@ -220,6 +220,25 @@
   .sentiment-pill.hesitant { color: var(--warn); background: var(--warn-soft); border-color: transparent; }
   .sentiment-pill.skeptical { color: var(--danger); background: var(--danger-soft); border-color: transparent; }
 
+  /* Pipeline: horizontal bar lists */
+  .hbar-row { display: grid; grid-template-columns: 180px 1fr 110px; align-items: center; gap: 12px; padding: 8px 0; }
+  .hbar-label { font-size: 12.5px; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hbar-track { height: 14px; background: var(--panel2); border-radius: var(--radius-pill); overflow: hidden; }
+  .hbar-fill { height: 100%; border-radius: var(--radius-pill); }
+  .hbar-value { font-family: var(--mono); font-size: 12px; text-align: right; color: var(--muted); }
+
+  /* Priority matrix */
+  .matrix-wrap { width: 100%; overflow-x: auto; }
+  .matrix-dot { cursor: pointer; transition: r .1s; }
+  .matrix-dot:hover { r: 8; }
+  .matrix-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 12px; }
+  .matrix-legend-item { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+  .matrix-legend-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+
+  /* Deal value edit */
+  .dealvalue-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  .dealvalue-amount { font-family: var(--mono); font-size: 20px; font-weight: 800; }
+
   /* Account profile strip */
   .account-strip {
     background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
@@ -1040,10 +1059,34 @@
     }
   ];
 
+  // Give every offer a starting deal-value estimate (editable by sales on the offer page).
+  function hashStr(s){ var h = 0; for (var i = 0; i < s.length; i++){ h = (h * 31 + s.charCodeAt(i)) | 0; } return Math.abs(h); }
+  function tierBase(confidence){ return confidence >= 75 ? 280000 : confidence >= 55 ? 160000 : 80000; }
+  function defaultDealValue(sc){
+    var base = tierBase(sc.confidence);
+    var variance = Math.round(base * 0.4);
+    var offset = (hashStr(sc.id) % variance) - Math.round(variance / 2);
+    return Math.round((base + offset) / 5000) * 5000;
+  }
+  ACCOUNTS.forEach(function(a){
+    a.scenarios.forEach(function(sc){
+      if (typeof sc.dealValue !== 'number') sc.dealValue = defaultDealValue(sc);
+    });
+  });
+
+  function formatMoney(n){
+    n = Math.round(n || 0);
+    return '$' + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+  function computeWeightedValue(account){
+    return account.scenarios.reduce(function(sum, sc){ return sum + (sc.confidence / 100) * (sc.dealValue || 0); }, 0);
+  }
+
   var state = {
     accountId: 'vw',
     selectedSector: 'Automotive',
-    view: 'sector', // 'sector' | 'partners' | 'overview' | 'setup' | 'activity' | 'scenario' | 'signal'
+    view: 'sector', // 'sector' | 'partners' | 'pipeline' | 'overview' | 'setup' | 'activity' | 'scenario' | 'signal'
+    editingDealValue: false,
     scenarioId: null,
     signalId: null,
     signalOrigin: { view: 'overview', scenarioId: null },
@@ -1086,6 +1129,7 @@
     state.discoveredSetup = null;
     state.addingActivity = false;
     state.addingManualOffer = false;
+    state.editingDealValue = false;
     state.setupAdding = { contact: false, department: false, source: false };
     window.scrollTo(0,0);
     render();
@@ -1098,6 +1142,8 @@
     }).join('');
     var partnersActive = state.selectedSector === 'Partners';
     pills += '<button class="sector-nav-pill' + (partnersActive ? ' active' : '') + '" data-select-sector="Partners">🤝 Partners</button>';
+    var pipelineActive = state.selectedSector === 'Pipeline';
+    pills += '<button class="sector-nav-pill' + (pipelineActive ? ' active' : '') + '" data-select-sector="Pipeline">📊 Pipeline</button>';
     return '<div class="sector-nav-row">' + pills + '</div>';
   }
 
@@ -1134,7 +1180,7 @@
     state.selectedSector = key;
     state.addingClient = false;
     state.discoveredSetup = null;
-    state.view = (key === 'Partners') ? 'partners' : 'sector';
+    state.view = (key === 'Partners') ? 'partners' : (key === 'Pipeline') ? 'pipeline' : 'sector';
     window.scrollTo(0,0);
     render();
   }
@@ -1622,6 +1668,15 @@
           '<div class="conf-row">' +
             '<div style="flex:1"><div class="conf-number ' + t + '">' + sc.confidence + '</div><div class="conf-fill-track"><div class="conf-fill ' + t + '" style="width:' + sc.confidence + '%"></div></div><div class="conf-sub">' + tierLabel(t) + ' &middot; based on ' + sc.signalIds.length + ' signals across both channels</div></div>' +
           '</div>' +
+          '<div class="dealvalue-row">' +
+            '<div><div class="fact-label">Estimated deal value</div><div class="dealvalue-amount">' + formatMoney(sc.dealValue) + '</div></div>' +
+            '<button class="btn small" data-toggle-dealvalue="1">✏️ Edit</button>' +
+          '</div>' +
+          (state.editingDealValue ?
+            '<div class="inline-form"><div class="form-row"><input id="edit-dealvalue-input" type="number" step="5000" min="0" value="' + sc.dealValue + '"></div>' +
+              '<div class="form-actions"><button class="btn small" data-cancel-dealvalue="1">Cancel</button><button class="btn small primary" data-save-dealvalue="1">Save</button></div></div>'
+            : '') +
+          '<p class="conf-sub" style="margin:6px 0 20px">Weighted value: ' + formatMoney((sc.confidence/100) * sc.dealValue) + ' (confidence &times; deal value)</p>' +
           '<p class="section-label">Included deliverables</p>' +
           '<div class="cap-row">' + capabilities + '</div>' +
           '<div class="callout accent"><b class="label">Recommended next step:</b> ' + sc.nextStep + '</div>' +
@@ -1670,6 +1725,96 @@
       '<div class="grid-3">' + cards + '</div>';
   }
 
+  function hBarList(rows){
+    var max = Math.max.apply(null, rows.map(function(r){ return r.value; })) || 1;
+    return rows.map(function(r){
+      var pct = Math.max(2, (r.value / max) * 100);
+      return '<div class="hbar-row"><div class="hbar-label">' + r.label + '</div>' +
+        '<div class="hbar-track"><div class="hbar-fill" style="width:' + pct + '%;background:' + (r.color || 'var(--accent)') + '"></div></div>' +
+        '<div class="hbar-value">' + r.formattedValue + '</div></div>';
+    }).join('');
+  }
+
+  var SECTOR_COLOR = { Automotive: '#f87171', Energy: '#fbbf24', Pharma: '#34d399', Finance: '#60a5fa', Healthcare: '#f472b6' };
+
+  function allScenariosFlat(){
+    var out = [];
+    ACCOUNTS.forEach(function(a){ a.scenarios.forEach(function(sc){ out.push({ account: a, sc: sc }); }); });
+    return out;
+  }
+
+  function priorityMatrixSvg(){
+    var items = allScenariosFlat();
+    var w = 760, h = 340, pad = 46;
+    var maxVal = Math.max.apply(null, items.map(function(x){ return x.sc.dealValue; })) || 1;
+    var midVal = maxVal / 2;
+    var gridY70 = pad + (1 - 70/100) * (h - 2*pad);
+    var gridXMid = pad + (midVal/maxVal) * (w - 2*pad);
+
+    var dots = items.map(function(x){
+      var cx = pad + (x.sc.dealValue / maxVal) * (w - 2*pad);
+      var cy = pad + (1 - x.sc.confidence/100) * (h - 2*pad);
+      var color = SECTOR_COLOR[x.account.industry] || '#8b7cf6';
+      var title = x.account.name + ' — ' + x.sc.title + ': ' + x.sc.confidence + '% confidence, ' + formatMoney(x.sc.dealValue);
+      return '<circle class="matrix-dot" cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="6" fill="' + color + '" fill-opacity="0.85" stroke="var(--panel)" stroke-width="1.5" data-scenario-account="' + x.account.id + '" data-scenario-card="' + x.sc.id + '"><title>' + title + '</title></circle>';
+    }).join('');
+
+    var legend = SECTORS.map(function(s){
+      return '<span class="matrix-legend-item"><span class="matrix-legend-dot" style="background:' + (SECTOR_COLOR[s.key] || '#8b7cf6') + '"></span>' + s.key + '</span>';
+    }).join('');
+
+    return '<div class="matrix-wrap"><svg viewBox="0 0 ' + w + ' ' + h + '" width="100%" height="' + h + '">' +
+      '<line x1="' + pad + '" y1="' + (h-pad) + '" x2="' + (w-pad) + '" y2="' + (h-pad) + '" stroke="var(--border)" stroke-width="1"/>' +
+      '<line x1="' + pad + '" y1="' + pad + '" x2="' + pad + '" y2="' + (h-pad) + '" stroke="var(--border)" stroke-width="1"/>' +
+      '<line x1="' + pad + '" y1="' + gridY70.toFixed(1) + '" x2="' + (w-pad) + '" y2="' + gridY70.toFixed(1) + '" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,4"/>' +
+      '<line x1="' + gridXMid.toFixed(1) + '" y1="' + pad + '" x2="' + gridXMid.toFixed(1) + '" y2="' + (h-pad) + '" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,4"/>' +
+      '<text x="' + pad + '" y="' + (pad-14) + '" font-size="11" fill="var(--text-faint)">Confidence ↑</text>' +
+      '<text x="' + (w-pad) + '" y="' + (h-pad+22) + '" font-size="11" fill="var(--text-faint)" text-anchor="end">Estimated deal value →</text>' +
+      dots +
+      '</svg></div>' +
+      '<div class="matrix-legend">' + legend + '</div>';
+  }
+
+  function renderPipeline(){
+    var items = allScenariosFlat();
+    var totalWeighted = items.reduce(function(sum, x){ return sum + (x.sc.confidence/100) * x.sc.dealValue; }, 0);
+
+    var accountRows = ACCOUNTS.map(function(a){
+      var sectorDef = SECTORS.filter(function(s){ return s.key === a.industry; })[0];
+      var w = computeWeightedValue(a);
+      return { label: (sectorDef ? sectorDef.icon : '') + ' ' + a.name, value: w, formattedValue: formatMoney(w), color: SECTOR_COLOR[a.industry] };
+    }).sort(function(x, y){ return y.value - x.value; });
+
+    var stageOrder = ['Cold','Warm','In Conversation','Won','Lost'];
+    var stageColor = { Cold: 'var(--text-faint)', Warm: 'var(--warn)', 'In Conversation': 'var(--accent)', Won: 'var(--good)', Lost: 'var(--danger)' };
+    var stageRows = stageOrder.map(function(s){
+      var count = ACCOUNTS.filter(function(a){ return (a.stage || 'Cold') === s; }).length;
+      return { label: s, value: count, formattedValue: String(count), color: stageColor[s] };
+    });
+
+    return header() + accountSwitcher() +
+      '<div class="section-head"><h2>📊 Pipeline &amp; Forecast</h2></div>' +
+      '<p class="section-sub">Sales math across the whole portfolio. Deal-value estimates are editable per offer — open any offer page to set your own number.</p>' +
+      '<div class="callout accent"><b class="label">Total weighted pipeline:</b> ' + formatMoney(totalWeighted) + ' &middot; confidence-weighted across ' + items.length + ' offers</div>' +
+      '<div class="setup-grid">' +
+        '<div class="setup-panel">' +
+          '<div class="setup-panel-head"><h3>💰 Weighted Value by Account</h3></div>' +
+          '<p class="col-sub">Confidence % &times; estimated deal value, summed per account.</p>' +
+          hBarList(accountRows) +
+        '</div>' +
+        '<div class="setup-panel">' +
+          '<div class="setup-panel-head"><h3>📶 Accounts by Stage</h3></div>' +
+          '<p class="col-sub">Where each account sits in the pipeline today.</p>' +
+          hBarList(stageRows) +
+        '</div>' +
+      '</div>' +
+      '<div class="setup-panel" style="margin-top:18px">' +
+        '<div class="setup-panel-head"><h3>🎯 Priority Matrix</h3></div>' +
+        '<p class="col-sub">Every offer plotted by confidence vs. estimated deal value — top-right is where to focus first. Click a dot to open that offer.</p>' +
+        priorityMatrixSvg() +
+      '</div>';
+  }
+
   function renderSectorLanding(){
     var sectorKey = state.selectedSector;
     var sectorDef = SECTORS.filter(function(s){ return s.key === sectorKey; })[0];
@@ -1707,6 +1852,7 @@
   function render(){
     var html;
     if (state.view === 'partners') html = renderPartners();
+    else if (state.view === 'pipeline') html = renderPipeline();
     else if (state.view === 'sector') html = renderSectorLanding();
     else if (state.view === 'setup') html = renderSetup();
     else if (state.view === 'activity') html = renderActivity();
@@ -1755,7 +1901,7 @@
     if (viewTabBtn){ state.view = viewTabBtn.getAttribute('data-view-tab'); render(); return; }
 
     var scenarioCard = e.target.closest('[data-scenario-card]');
-    if (scenarioCard){ navigate(state.accountId, 'scenario', scenarioCard.getAttribute('data-scenario-card')); return; }
+    if (scenarioCard){ navigate(scenarioCard.getAttribute('data-scenario-account') || state.accountId, 'scenario', scenarioCard.getAttribute('data-scenario-card')); return; }
 
     var signalCard = e.target.closest('[data-signal-card]');
     if (signalCard){
@@ -1786,6 +1932,23 @@
     if (toggleEmail){ state.emailOpen = true; render(); return; }
     var cancelEmail = e.target.closest('[data-cancel-email]');
     if (cancelEmail){ state.emailOpen = false; render(); return; }
+
+    var toggleDealValue = e.target.closest('[data-toggle-dealvalue]');
+    if (toggleDealValue){ state.editingDealValue = true; render(); return; }
+    var cancelDealValue = e.target.closest('[data-cancel-dealvalue]');
+    if (cancelDealValue){ state.editingDealValue = false; render(); return; }
+    var saveDealValue = e.target.closest('[data-save-dealvalue]');
+    if (saveDealValue){
+      var newVal = parseFloat(byId('edit-dealvalue-input').value);
+      if (isNaN(newVal) || newVal < 0){ showToast('Enter a valid deal value first'); return; }
+      var acct = currentAccount();
+      var scEdit = findScenario(acct, state.scenarioId);
+      scEdit.dealValue = newVal;
+      state.editingDealValue = false;
+      render();
+      showToast('Deal value updated');
+      return;
+    }
     var copyEmail = e.target.closest('[data-copy-email]');
     if (copyEmail){
       var account2 = currentAccount();

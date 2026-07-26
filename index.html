@@ -224,6 +224,10 @@
   .relationship-pill.client { color: var(--good); background: var(--good-soft); border-color: transparent; }
   .relationship-pill.potential-client { color: var(--accent); background: var(--accent-soft); border-color: transparent; }
 
+  .deadline-pill.ok { color: var(--good); background: var(--good-soft); border-color: transparent; }
+  .deadline-pill.soon { color: var(--warn); background: var(--warn-soft); border-color: transparent; }
+  .deadline-pill.overdue { color: var(--danger); background: var(--danger-soft); border-color: transparent; }
+
   /* Pipeline: horizontal bar lists */
   .hbar-row { display: grid; grid-template-columns: 180px 1fr 110px; align-items: center; gap: 12px; padding: 8px 0; }
   .hbar-label { font-size: 12.5px; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -461,6 +465,10 @@
           capabilities: ['Cross-border data-flow risk mapping', 'EU vs. China AI-rule gap analysis', 'Shared-IP governance framework', 'Joint-venture compliance playbook'],
           nextStep: 'Engage through Volkswagen’s international legal/compliance team before deeper technical integration with Xpeng moves forward.'
         }
+      ],
+      tenders: [
+        { id: 'vw-t1', title: 'CARIAD AI Governance Framework — RFP', description: 'CARIAD is requesting proposals for an external partner to design and document its AI governance and safety-testing framework ahead of the 2028 AI Act deadline.', deadline: '2026-09-15', resources: '2 senior consultants, 1 compliance specialist, ~8 weeks', relevant: true, applied: false },
+        { id: 'vw-t2', title: 'CARIAD Fleet Telematics Hardware Refresh — RFQ', description: 'Request for quotation to replace in-vehicle telematics hardware across the fleet.', deadline: '2026-08-20', resources: 'Hardware sourcing team, logistics', relevant: false, applied: false }
       ]
     },
     {
@@ -814,6 +822,9 @@
           capabilities: ['Embedded delivery pod (2–3 consultants)', 'Fast working pilot in 4–6 weeks', 'Knowledge transfer to incoming risk hires'],
           nextStep: 'Offer a short pilot timed right after the CDO’s keynote, while executive attention is highest.'
         }
+      ],
+      tenders: [
+        { id: 'db-t1', title: 'AI Model Risk Documentation — Tender', description: 'Deutsche Bank is tendering for a partner to build EBA-compliant documentation and audit trails for its credit-scoring and fraud-detection models.', deadline: '2026-10-01', resources: '3 consultants (risk, ML, compliance), ~10 weeks', relevant: true, applied: false }
       ]
     },
     {
@@ -1145,8 +1156,15 @@
       news: { category: 'all', timing: 'all' },
       social: { category: 'all', timing: 'all' }
     },
-    setupAdding: { contact: false, department: false, source: false }
+    setupAdding: { contact: false, department: false, source: false },
+    addingTemplate: false,
+    pendingTemplateFile: null,
+    addingTender: false,
+    showAllTenders: false,
+    aiAskOpen: false
   };
+
+  var TEMPLATES = [];
 
   function byId(id){ return document.getElementById(id); }
   function findAccount(id){ return ACCOUNTS.filter(function(a){ return a.id === id; })[0]; }
@@ -1158,6 +1176,16 @@
     ACCOUNTS.forEach(function(a){
       (a.signals || []).forEach(function(s){
         if (s.trigger) out.push({ account: a, signal: s });
+      });
+    });
+    out.sort(function(x, y){ return x.signal.date < y.signal.date ? 1 : -1; });
+    return out;
+  }
+  function allSignalsLastMonth(){
+    var out = [];
+    ACCOUNTS.forEach(function(a){
+      (a.signals || []).forEach(function(s){
+        if (withinTiming(s.date, '30d')) out.push({ account: a, signal: s });
       });
     });
     out.sort(function(x, y){ return x.signal.date < y.signal.date ? 1 : -1; });
@@ -1211,6 +1239,8 @@
       social: { category: 'all', timing: 'all' }
     };
     state.setupAdding = { contact: false, department: false, source: false };
+    state.addingTender = false;
+    state.aiAskOpen = false;
     window.scrollTo(0,0);
     render();
   }
@@ -1227,6 +1257,10 @@
     var triggerCount = allTriggerSignals().length;
     var triggersActive = state.selectedSector === 'Triggers';
     pills += '<button class="sector-nav-pill' + (triggersActive ? ' active' : '') + '" data-select-sector="Triggers">🔥 Triggers' + (triggerCount ? ' (' + triggerCount + ')' : '') + '</button>';
+    var recapActive = state.selectedSector === 'Recap';
+    pills += '<button class="sector-nav-pill' + (recapActive ? ' active' : '') + '" data-select-sector="Recap">🗓️ Monthly Recap</button>';
+    var templatesActive = state.selectedSector === 'Templates';
+    pills += '<button class="sector-nav-pill' + (templatesActive ? ' active' : '') + '" data-select-sector="Templates">📄 Templates' + (TEMPLATES.length ? ' (' + TEMPLATES.length + ')' : '') + '</button>';
     return '<div class="sector-nav-row">' + pills + '</div>';
   }
 
@@ -1263,7 +1297,8 @@
     state.selectedSector = key;
     state.addingClient = false;
     state.discoveredSetup = null;
-    state.view = (key === 'Partners') ? 'partners' : (key === 'Pipeline') ? 'pipeline' : (key === 'Triggers') ? 'triggers' : 'sector';
+    state.view = (key === 'Partners') ? 'partners' : (key === 'Pipeline') ? 'pipeline' : (key === 'Triggers') ? 'triggers' :
+      (key === 'Recap') ? 'recap' : (key === 'Templates') ? 'templates' : 'sector';
     window.scrollTo(0,0);
     render();
   }
@@ -1684,6 +1719,46 @@
       '</div>' : '');
   }
 
+  function daysUntil(dateStr){ return Math.round((new Date(dateStr) - new Date(todayStr())) / 86400000); }
+
+  function tenderCardHtml(t){
+    var days = daysUntil(t.deadline);
+    var deadlineLabel = days < 0 ? 'Deadline passed' : (days === 0 ? 'Due today' : 'Due in ' + days + ' days');
+    var deadlineCls = days < 0 ? 'overdue' : (days <= 14 ? 'soon' : 'ok');
+    return '<div class="card" style="cursor:default">' +
+      '<div class="card-title-row"><h3>' + t.title + '</h3>' + (t.applied ? '<span class="pill sentiment-pill enthusiastic">Applied</span>' : '') + '</div>' +
+      '<p class="card-desc">' + t.description + '</p>' +
+      '<div class="badge-row">' +
+        '<span class="pill deadline-pill ' + deadlineCls + '">📅 ' + t.deadline + ' &middot; ' + deadlineLabel + '</span>' +
+        '<span class="tag-pill">🧰 ' + t.resources + '</span>' +
+      '</div>' +
+      '<div class="card-footer"><span></span><button class="btn small' + (t.applied ? '' : ' primary') + '" data-toggle-tender-applied="' + t.id + '">' + (t.applied ? 'Mark as not applied' : 'Apply') + '</button></div>' +
+    '</div>';
+  }
+
+  function tenderAddForm(){
+    return '<div class="inline-form">' +
+      '<div class="form-row"><input id="tender-title" type="text" placeholder="Call / tender title"></div>' +
+      '<div class="form-row"><input id="tender-desc" type="text" placeholder="What they’re asking for"></div>' +
+      '<div class="form-row"><input id="tender-deadline" type="date" value="' + todayStr() + '"><input id="tender-resources" type="text" placeholder="Resources needed (e.g. 2 consultants, 6 weeks)"></div>' +
+      '<div class="form-row"><label style="font-size:12.5px;display:flex;align-items:center;gap:6px"><input id="tender-relevant" type="checkbox" checked style="width:auto"> Relevant to our AI &amp; data consulting business</label></div>' +
+      '<div class="form-actions"><button class="btn small" data-cancel-tender="1">Cancel</button><button class="btn small primary" data-save-tender="1">Save call</button></div>' +
+    '</div>';
+  }
+
+  function tendersSectionHtml(account){
+    var all = account.tenders || [];
+    var relevant = all.filter(function(t){ return t.relevant !== false; });
+    var hiddenCount = all.length - relevant.length;
+    var shown = state.showAllTenders ? all : relevant;
+    var cards = shown.map(tenderCardHtml).join('');
+    return '<div class="section-head" style="margin-top:28px"><h2>📋 Calls for Projects</h2></div>' +
+      '<p class="section-sub">Tenders and RFPs published by this account, separate from the news/social feed — kept to the ones relevant to our AI &amp; data consulting model' + (hiddenCount ? ' (' + hiddenCount + ' filtered out as not relevant)' : '') + '.</p>' +
+      (hiddenCount ? '<button class="add-row-btn" data-toggle-show-all-tenders="1" style="margin-bottom:12px">' + (state.showAllTenders ? 'Hide non-relevant calls' : 'Show all calls (' + all.length + ')') + '</button>' : '') +
+      (shown.length ? '<div class="grid-3">' + cards + '</div>' : '<p class="empty-note">No relevant calls for projects right now.</p>') +
+      (state.addingTender ? tenderAddForm() : '<button class="add-row-btn" data-toggle-tender="1">+ Add call for project</button>');
+  }
+
   function renderOverview(){
     var account = currentAccount();
     var newsCount = account.signals.filter(function(s){ return s.channel === 'news'; }).length;
@@ -1720,6 +1795,7 @@
           signalListHtml(account, 'social') +
         '</div>' +
       '</div>' +
+      tendersSectionHtml(account) +
       '<div class="section-head"><h2>🎯 Offer Scenarios for ' + account.name + '</h2></div>' +
       '<p class="section-sub">Where combinations of the signals above point to a concrete AI &amp; data consulting offer worth raising with the account.</p>' +
       (account.scenarios.length ? '<div class="grid-3">' + scenarioCards + '</div>' :
@@ -1840,6 +1916,17 @@
       '</div>';
   }
 
+  function aiAskSectionHtml(account, sc){
+    if (!state.aiAskOpen){
+      return '<div style="margin-top:14px"><button class="btn small" data-toggle-ai-ask="1">🤖 Ask AI to improve this offer</button></div>';
+    }
+    return '<div class="inline-form" style="margin-top:14px">' +
+      '<p class="empty-note">Describe what you want help with — e.g. “make this land better with a skeptical CFO” or “tighten the ROI pitch.” This copies a full prompt (offer details + signals + your question) to paste into Claude, ChatGPT, or your AI tool of choice — there’s no live AI API wired into this static app.</p>' +
+      '<div class="form-row"><input id="ai-ask-question" type="text" placeholder="What do you want the AI to help improve?"></div>' +
+      '<div class="form-actions"><button class="btn small" data-cancel-ai-ask="1">Close</button><button class="btn small primary" data-copy-ai-prompt="' + sc.id + '" data-copy-ai-prompt-account="' + account.id + '">📋 Copy AI prompt</button></div>' +
+    '</div>';
+  }
+
   function renderScenario(){
     var account = currentAccount();
     var sc = findScenario(account, state.scenarioId);
@@ -1885,6 +1972,7 @@
           '<div class="callout accent"><b class="label">Recommended next step:</b> ' + sc.nextStep + '</div>' +
           renderContactBlock(account, sc) +
           '<div class="cta-row"><button class="btn primary" data-export-crm="' + sc.id + '" data-export-crm-account="' + account.id + '">📤 Export to CRM (demo)</button><button class="btn" data-toast="Marked as reviewed (demo)">Mark as reviewed</button></div>' +
+          aiAskSectionHtml(account, sc) +
         '</div>' +
       '</div>';
   }
@@ -1943,6 +2031,59 @@
       '<div class="section-head"><h2>🔥 Trigger Alerts</h2></div>' +
       '<p class="section-sub">High-priority buying-intent events across the whole portfolio — leadership changes, funding rounds, competitive moves, and other signals worth acting on today.</p>' +
       '<div class="panel" style="max-width:820px">' + rows + '</div>';
+  }
+
+  function renderMonthlyRecap(){
+    var items = allSignalsLastMonth();
+    var newsCount = items.filter(function(x){ return x.signal.channel === 'news'; }).length;
+    var socialCount = items.filter(function(x){ return x.signal.channel === 'social'; }).length;
+    var rows = items.length ? items.map(function(x){
+      var cls = x.signal.channel === 'news' ? 'c-newstype' : 'c-socialtype';
+      return '<div class="timeline-item clickable" data-signal-card="' + x.signal.id + '" data-signal-account="' + x.account.id + '" data-signal-origin="recap">' +
+        '<div class="timeline-date">' + x.signal.date + '</div>' +
+        '<div><span class="evidence-type ' + cls + '">' + (x.signal.channel === 'news' ? 'News' : 'Social') + ' &middot; ' + x.signal.subtype + '</span> &middot; <button class="tag-pill" data-account="' + x.account.id + '" style="cursor:pointer">' + x.account.icon + ' ' + x.account.name + '</button>' +
+        '<p>' + x.signal.text + '</p></div>' +
+      '</div>';
+    }).join('') : '<p class="empty-note">No signals recorded in the last 30 days.</p>';
+
+    return header() + accountSwitcher() +
+      '<div class="section-head"><h2>🗓️ Monthly Recap</h2></div>' +
+      '<p class="section-sub">Every signal ingested across the whole portfolio in the last 30 days — ' + newsCount + ' news &middot; ' + socialCount + ' social &amp; workforce.</p>' +
+      '<div class="panel" style="max-width:820px">' + rows + '</div>';
+  }
+
+  var TEMPLATE_CATEGORIES = ['Consulting Proposal', 'Statement of Work (SOW)', 'Pilot Agreement', 'Master Service Agreement', 'Other'];
+
+  function templateAddForm(){
+    var catOpts = TEMPLATE_CATEGORIES.map(function(c){ return '<option value="' + c + '">' + c + '</option>'; }).join('');
+    var fileLabel = state.pendingTemplateFile ? ('Selected: ' + state.pendingTemplateFile.fileName) : 'No file selected yet';
+    return '<div class="inline-form">' +
+      '<div class="form-row"><input id="tpl-name" type="text" placeholder="Template name (e.g. AI Governance Pilot — Standard Offer)"></div>' +
+      '<div class="form-row"><select id="tpl-category">' + catOpts + '</select></div>' +
+      '<div class="form-row"><input id="tpl-file" type="file" accept=".pdf,.doc,.docx,.txt,.md"></div>' +
+      '<p class="empty-note">' + fileLabel + '</p>' +
+      '<div class="form-row"><input id="tpl-notes" type="text" placeholder="Notes (when to use this, what it includes)"></div>' +
+      '<div class="form-actions"><button class="btn small" data-cancel-template="1">Cancel</button><button class="btn small primary" data-save-template="1">Save template</button></div>' +
+    '</div>';
+  }
+
+  function templateCardHtml(t){
+    var downloadHtml = t.fileDataUrl ? '<a class="btn small" href="' + t.fileDataUrl + '" download="' + escapeAttr(t.fileName) + '">⬇️ Download</a>' : '<span class="empty-note">No file attached</span>';
+    return '<div class="card" style="cursor:default">' +
+      '<div class="card-title-row"><h3>' + t.name + '</h3><span class="tag-pill">' + t.category + '</span></div>' +
+      '<p class="card-desc">' + (t.notes || 'No notes added.') + '</p>' +
+      '<div class="badge-row"><span class="tag-pill">📅 Uploaded ' + t.uploadDate + '</span>' + (t.fileName ? '<span class="tag-pill">📎 ' + t.fileName + '</span>' : '') + '</div>' +
+      '<div class="card-footer"><span></span>' + downloadHtml + '</div>' +
+    '</div>';
+  }
+
+  function renderTemplates(){
+    var cards = TEMPLATES.length ? TEMPLATES.map(templateCardHtml).join('') : '';
+    return header() + accountSwitcher() +
+      '<div class="section-head"><h2>📄 Contract &amp; Offer Templates</h2></div>' +
+      '<p class="section-sub">Upload past offers, SOWs, and contract templates here so they can be reused instead of rebuilt from scratch. Files stay in this browser session only.</p>' +
+      (TEMPLATES.length ? '<div class="grid-3">' + cards + '</div>' : '<p class="empty-note">No templates uploaded yet.</p>') +
+      (state.addingTemplate ? templateAddForm() : '<button class="add-row-btn" data-toggle-template="1">+ Add template</button>');
   }
 
   function hBarList(rows){
@@ -2074,6 +2215,8 @@
     if (state.view === 'partners') html = renderPartners();
     else if (state.view === 'pipeline') html = renderPipeline();
     else if (state.view === 'triggers') html = renderTriggers();
+    else if (state.view === 'recap') html = renderMonthlyRecap();
+    else if (state.view === 'templates') html = renderTemplates();
     else if (state.view === 'sector') html = renderSectorLanding();
     else if (state.view === 'setup') html = renderSetup();
     else if (state.view === 'activity') html = renderActivity();
@@ -2105,6 +2248,18 @@
     if (catChannel){ state.signalFilters[catChannel].category = e.target.value; render(); return; }
     var timingChannel = e.target.getAttribute && e.target.getAttribute('data-signal-filter-timing');
     if (timingChannel){ state.signalFilters[timingChannel].timing = e.target.value; render(); return; }
+    if (e.target.id === 'tpl-file' && e.target.files && e.target.files[0]){
+      var file = e.target.files[0];
+      var reader = new FileReader();
+      reader.onload = function(){
+        state.pendingTemplateFile = { fileName: file.name, fileDataUrl: reader.result };
+        render();
+        var input = byId('tpl-file');
+        if (input) input.focus();
+      };
+      reader.readAsDataURL(file);
+      return;
+    }
   });
 
   document.addEventListener('click', function(e){
@@ -2247,7 +2402,7 @@
         hq: hq, revenue: revenue, sector: industry + ' · newly configured account', techStack: [],
         relationship: 'Potential Client', stage: 'Cold', signalHistory: [0,0,0,0,0,0], activityLog: [],
         departments: d ? d.departments : [], contacts: d ? d.contacts : [], sources: d ? d.sources : [],
-        signals: [], scenarios: [], manualOffers: []
+        signals: [], scenarios: [], manualOffers: [], tenders: []
       };
       ACCOUNTS.push(newAccount);
       state.addingClient = false;
@@ -2397,6 +2552,108 @@
       } else {
         showToast('Clipboard not available — select and copy manually');
       }
+      return;
+    }
+
+    var toggleAiAsk = e.target.closest('[data-toggle-ai-ask]');
+    if (toggleAiAsk){ state.aiAskOpen = true; render(); return; }
+    var cancelAiAsk = e.target.closest('[data-cancel-ai-ask]');
+    if (cancelAiAsk){ state.aiAskOpen = false; render(); return; }
+    var copyAiPrompt = e.target.closest('[data-copy-ai-prompt]');
+    if (copyAiPrompt){
+      var aiAccount = findAccount(copyAiPrompt.getAttribute('data-copy-ai-prompt-account'));
+      var aiSc = findScenario(aiAccount, copyAiPrompt.getAttribute('data-copy-ai-prompt'));
+      var aiQuestion = (byId('ai-ask-question').value || '').trim() || 'How can I make this offer more compelling and easier to close?';
+      var evidenceLines = aiSc.signalIds.map(function(id){
+        var s = findSignal(aiAccount, id);
+        return '- [' + s.subtype + ', ' + s.date + '] ' + s.text;
+      }).join('\n');
+      var promptText = [
+        'You are helping a sales rep at a Data Engineering & Software Consulting firm improve a specific client offer.',
+        '',
+        'ACCOUNT: ' + aiAccount.name + ' (' + aiAccount.industry + ', ' + aiAccount.hq + ', revenue ' + aiAccount.revenue + ')',
+        'Tech stack: ' + (aiAccount.techStack || []).join(', '),
+        'Relationship: ' + (aiAccount.relationship || 'Potential Client') + ' · Deal stage: ' + aiAccount.stage,
+        '',
+        'OFFER: ' + aiSc.title + ' (' + aiSc.domainTag + ')',
+        'Confidence: ' + aiSc.confidence + '% · Estimated deal value: ' + formatMoney(aiSc.dealValue),
+        'Summary: ' + aiSc.summary,
+        'Included deliverables: ' + aiSc.capabilities.join('; '),
+        'Recommended next step: ' + aiSc.nextStep,
+        '',
+        'SIGNALS BEHIND THIS OFFER:',
+        evidenceLines,
+        '',
+        'MY QUESTION: ' + aiQuestion
+      ].join('\n');
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(promptText).then(function(){ showToast('AI prompt copied — paste into Claude, ChatGPT, or your AI assistant'); }, function(){ showToast('Could not copy — select and copy manually'); });
+      } else {
+        showToast('Clipboard not available — select and copy manually');
+      }
+      return;
+    }
+
+    var toggleShowAllTenders = e.target.closest('[data-toggle-show-all-tenders]');
+    if (toggleShowAllTenders){ state.showAllTenders = !state.showAllTenders; render(); return; }
+    var toggleTender = e.target.closest('[data-toggle-tender]');
+    if (toggleTender){ state.addingTender = true; render(); return; }
+    var cancelTender = e.target.closest('[data-cancel-tender]');
+    if (cancelTender){ state.addingTender = false; render(); return; }
+    var saveTender = e.target.closest('[data-save-tender]');
+    if (saveTender){
+      var tenderAccount = currentAccount();
+      var tenderTitle = (byId('tender-title').value || '').trim();
+      if (!tenderTitle){ showToast('Enter a call/tender title first'); return; }
+      var tenderDesc = (byId('tender-desc').value || '').trim();
+      var tenderDeadline = byId('tender-deadline').value || todayStr();
+      var tenderResources = (byId('tender-resources').value || 'Not specified').trim() || 'Not specified';
+      var tenderRelevant = !!byId('tender-relevant').checked;
+      tenderAccount.tenders = tenderAccount.tenders || [];
+      tenderAccount.tenders.push({
+        id: 'tender-' + Date.now(), title: tenderTitle, description: tenderDesc || 'No description provided.',
+        deadline: tenderDeadline, resources: tenderResources, relevant: tenderRelevant, applied: false
+      });
+      state.addingTender = false;
+      render();
+      showToast('Call for project added');
+      return;
+    }
+    var toggleTenderApplied = e.target.closest('[data-toggle-tender-applied]');
+    if (toggleTenderApplied){
+      var taAccount = currentAccount();
+      var taId = toggleTenderApplied.getAttribute('data-toggle-tender-applied');
+      var tender = (taAccount.tenders || []).filter(function(t){ return t.id === taId; })[0];
+      tender.applied = !tender.applied;
+      if (tender.applied){
+        taAccount.activityLog.push({ date: todayStr(), type: 'Note', note: 'Applied to call for project: "' + tender.title + '" (deadline ' + tender.deadline + ').' });
+      }
+      render();
+      showToast(tender.applied ? 'Marked as applied' : 'Marked as not applied');
+      return;
+    }
+
+    var toggleTemplate = e.target.closest('[data-toggle-template]');
+    if (toggleTemplate){ state.addingTemplate = true; state.pendingTemplateFile = null; render(); return; }
+    var cancelTemplate = e.target.closest('[data-cancel-template]');
+    if (cancelTemplate){ state.addingTemplate = false; state.pendingTemplateFile = null; render(); return; }
+    var saveTemplate = e.target.closest('[data-save-template]');
+    if (saveTemplate){
+      var tplName = (byId('tpl-name').value || '').trim();
+      if (!tplName){ showToast('Enter a template name first'); return; }
+      var tplCategory = byId('tpl-category').value || 'Other';
+      var tplNotes = (byId('tpl-notes').value || '').trim();
+      var tplFile = state.pendingTemplateFile;
+      TEMPLATES.push({
+        id: 'tpl-' + Date.now(),
+        name: tplName, category: tplCategory, notes: tplNotes,
+        fileName: tplFile ? tplFile.fileName : '', fileDataUrl: tplFile ? tplFile.fileDataUrl : '',
+        uploadDate: todayStr()
+      });
+      state.addingTemplate = false;
+      state.pendingTemplateFile = null;
+      render();
+      showToast('Template "' + tplName + '" saved');
       return;
     }
 

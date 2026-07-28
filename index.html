@@ -228,44 +228,45 @@
     color: var(--accent); background: var(--accent-soft); padding: 4px 10px; border-radius: var(--radius-pill);
   }
 
-  /* Two-column shell: tools on the left, sectors and content on the right. */
-  .app-body { display: flex; gap: 10px; align-items: flex-start; }
+  /* Two-column shell: tools on the left, sectors and content on the right.
+     side-link intentionally mirrors .sector-nav-pill's chip look (same
+     panel/border/pill-radius/weight) so the left menu reads as the same
+     design system as the sector row, not a separate, oddly-scaled widget. */
+  .app-body { display: flex; gap: 16px; align-items: flex-start; }
   .app-content { flex: 1; min-width: 0; }
   .side-nav {
-    flex: 0 0 100px; position: sticky; top: 18px;
-    display: flex; flex-direction: column; gap: 9px;
+    flex: 0 0 132px; position: sticky; top: 18px;
+    display: flex; flex-direction: column; gap: 14px;
   }
-  .side-group { display: flex; flex-direction: column; gap: 0; }
+  .side-group { display: flex; flex-direction: column; gap: 6px; }
   .side-group-title {
-    font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
-    color: var(--text-faint); padding: 0 5px 2px;
+    font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--text-faint); padding: 0 2px;
   }
   .side-link {
-    display: flex; align-items: center; gap: 4px; width: 100%;
-    background: none; border: none; border-radius: 6px; padding: 3px 5px;
-    font-family: var(--font); font-size: 10px; font-weight: 600; color: var(--muted);
-    cursor: pointer; text-align: left; line-height: 1.2;
+    display: block; width: 100%; text-align: left;
+    background: none; border: none; border-left: 3px solid transparent; color: var(--text);
+    padding: 8px 10px; border-radius: 0 8px 8px 0; font-size: 12.5px; font-weight: 600;
+    font-family: var(--font); cursor: pointer; transition: background .15s, border-color .15s;
   }
-  .side-link:hover { background: var(--panel2); color: var(--text); }
-  .side-link.active { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
-  .side-icon { font-size: 10px; line-height: 1; flex-shrink: 0; }
-  .side-label { flex: 1; min-width: 0; }
-  .side-badge {
-    font-size: 8px; font-weight: 800; padding: 0 4px; border-radius: var(--radius-pill);
-    background: var(--surface-3); color: var(--muted); flex-shrink: 0;
-  }
-  .side-link.active .side-badge { background: var(--accent); color: #fff; }
+  .side-link:hover { background: var(--panel2); }
+  .side-link.active { background: var(--accent-soft); border-left-color: var(--accent); color: var(--accent); font-weight: 700; }
 
   @media (max-width: 900px) {
     .app-body { flex-direction: column; gap: 14px; }
     .side-nav {
       position: static; flex: none; width: 100%;
-      flex-direction: row; flex-wrap: wrap; gap: 6px;
+      flex-direction: row; flex-wrap: wrap; gap: 8px;
     }
-    .side-group { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+    .side-group { flex-direction: row; flex-wrap: wrap; gap: 8px; }
     .side-group-title { display: none; }
-    .side-link { width: auto; border: 1px solid var(--border); }
+    .side-link { width: auto; border-left: none; border-bottom: 3px solid transparent; border-radius: 8px; }
+    .side-link.active { border-left-color: transparent; border-bottom-color: var(--accent); }
   }
+
+  .tech-picker { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 2px 0 4px; }
+  .tech-picker-item { display: flex; align-items: center; gap: 5px; font-size: 12px; cursor: pointer; }
+  .tech-picker-item input { width: auto; }
 
   .detail-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 6px; }
   .detail-facts > div { display: flex; flex-direction: column; gap: 3px; }
@@ -1412,6 +1413,7 @@
     editingOffer: false,
     boardOnlyImportant: false,
     boardTierFilter: 'All',
+    boardSectorFilter: 'All',
     addingOffer: false,
     scanSector: 'All',
     scanCountry: 'All',
@@ -1569,9 +1571,7 @@
         g.items.map(function(it){
           var active = state.selectedSector === it.key;
           return '<button class="side-link' + (active ? ' active' : '') + '" data-select-sector="' + it.key + '">' +
-            '<span class="side-icon">' + it.icon + '</span>' +
-            '<span class="side-label">' + it.label + '</span>' +
-            (it.badge ? '<span class="side-badge">' + it.badge + '</span>' : '') +
+            it.icon + ' ' + it.label + (it.badge ? ' (' + it.badge + ')' : '') +
           '</button>';
         }).join('') +
       '</div>';
@@ -2001,15 +2001,25 @@
      badge, so fixing a wrong pull there (data-cycle-cloud) is the one place
      it needs correcting. Data-platform tools (Snowflake, Databricks) aren't
      tied to a department, so any of those already on the account are kept. */
+  // The full pick-list for the Client Details "add cloud providers" control — cloud
+  // providers first (also settable per department), then the data-platform tools
+  // that aren't tied to any one department.
+  var TECH_STACK_OPTIONS = ['AWS', 'Microsoft Azure', 'Google Cloud', 'Databricks', 'Snowflake', 'Kubernetes', 'BigQuery', 'Redshift'];
   function deriveTechStack(account){
     var clouds = [];
     account.departments.forEach(function(d){
       if (d.cloudProvider && clouds.indexOf(d.cloudProvider) === -1) clouds.push(d.cloudProvider);
     });
-    var extras = (account.techStack || []).filter(function(t){ return CLOUD_PROVIDERS.indexOf(t) === -1; });
-    return clouds.concat(extras);
+    var manual = account.techStackManual || [];
+    return clouds.concat(manual.filter(function(t){ return clouds.indexOf(t) === -1; }));
   }
-  ACCOUNTS.forEach(function(a){ a.techStack = deriveTechStack(a); });
+  ACCOUNTS.forEach(function(a){
+    // Seed the manual list once from whatever wasn't already a per-department cloud pull.
+    if (!a.techStackManual){
+      a.techStackManual = (a.techStack || []).filter(function(t){ return CLOUD_PROVIDERS.indexOf(t) === -1; });
+    }
+    a.techStack = deriveTechStack(a);
+  });
 
   function nextSourceState(s){
     if (!s.active) return { active: true, priority: 'Low' };
@@ -2626,7 +2636,7 @@
           '<div><span class="fact-label">Relationship</span><span class="fact-value">' + (account.relationship || 'Potential Client') + '</span></div>' +
           '<div><span class="fact-label">Headquarters</span><span class="fact-value">' + account.hq + '</span></div>' +
           '<div><span class="fact-label">Revenue</span><span class="fact-value">' + account.revenue + '</span></div>' +
-          '<div><span class="fact-label">Tech stack</span><span class="fact-value">' + ((account.techStack || []).join(', ') || '—') + ' <span style="color:var(--text-faint)">(from departments below)</span></span></div>' +
+          '<div><span class="fact-label">Tech stack</span><span class="fact-value">' + ((account.techStack || []).join(', ') || '—') + '</span></div>' +
         '</div>' +
         (account.tierNote ? '<p class="col-sub" style="margin-top:10px"><b>Why T' + account.tier + ':</b> ' + account.tierNote + '</p>' : '') +
         '<p class="col-sub" style="margin-top:6px"><b>Goal:</b> ' + account.goal + '</p>' +
@@ -2658,7 +2668,11 @@
           '<input id="edit-client-revenue" type="text" placeholder="Revenue" value="' + escapeAttr(account.revenue) + '">' +
         '</div>' +
         '<div class="form-row"><input id="edit-client-descriptor" type="text" placeholder="Short descriptor" value="' + escapeAttr(account.sector) + '"></div>' +
-        '<p class="col-sub" style="margin:2px 0 0">Tech stack is built from the Departments diagram below — click a cloud badge there to fix a wrong pull.</p>' +
+        '<p class="col-sub" style="margin:2px 0 0">Tech stack — cloud providers also come from the Departments diagram below (click a badge there for a single team); add any others here, multiple at once.</p>' +
+        '<div class="tech-picker">' + TECH_STACK_OPTIONS.map(function(t){
+          var checked = (account.techStackManual || []).indexOf(t) !== -1;
+          return '<label class="tech-picker-item"><input type="checkbox" data-tech-option="' + escapeAttr(t) + '"' + (checked ? ' checked' : '') + '> ' + t + '</label>';
+        }).join('') + '</div>' +
         '<div class="form-row"><textarea id="edit-client-goal" rows="2" placeholder="What we\'re trying to achieve here">' + escapeAttr(account.goal) + '</textarea></div>' +
         '<div class="form-actions"><button class="btn small" data-cancel-client="1">Cancel</button><button class="btn small primary" data-save-client="1">Save details</button></div>' +
       '</div>' +
@@ -3217,18 +3231,16 @@
     var sectorKey = state.selectedSector;
     var sectorDef = SECTORS.filter(function(s){ return s.key === sectorKey; })[0];
     var sectorClients = ACCOUNTS.filter(function(a){ return a.industry === sectorKey; });
-    var tiersPresent = [1,2,3,4,5,6].filter(function(t){
-      return sectorClients.some(function(a){ return a.tier === t; });
-    });
     var clients = state.tierFilter === 'All' ? sectorClients :
       sectorClients.filter(function(a){ return a.tier === state.tierFilter; });
 
-    var tierFilterRow = tiersPresent.length > 1 ? '<div class="badge-row" style="margin-bottom:16px">' +
+    // Tier is a fixed client category, like sector — always show all six, not just the ones currently occupied.
+    var tierFilterRow = '<div class="badge-row" style="margin-bottom:16px">' +
       '<button class="pill' + (state.tierFilter === 'All' ? ' primary-btn' : ' outline') + '" data-set-tierfilter="All">All tiers</button>' +
-      tiersPresent.map(function(t){
+      [1,2,3,4,5,6].map(function(t){
         return '<button class="pill' + (state.tierFilter === t ? ' primary-btn' : ' outline') + '" data-set-tierfilter="' + t + '">T' + t + '</button>';
       }).join('') +
-    '</div>' : '';
+    '</div>';
 
     var cards = clients.map(function(a){
       var newsCount = a.signals.filter(function(s){ return s.channel === 'news'; }).length;
@@ -3329,6 +3341,9 @@
         '<input id="new-offer-dealvalue" type="number" step="5000" min="0" placeholder="Deal value ($)">' +
         '<input id="new-offer-confidence" type="number" step="5" min="1" max="100" placeholder="Confidence (%)">' +
       '</div>' +
+      '<label style="display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer">' +
+        '<input id="new-offer-important" type="checkbox" style="width:auto"> ★ Mark as favorite' +
+      '</label>' +
       '<div class="form-actions"><button class="btn small" data-cancel-new-offer="1">Cancel</button><button class="btn small primary" data-save-new-offer="1">Add offer</button></div>' +
     '</div>';
   }
@@ -3337,11 +3352,16 @@
     var items = allScenariosFlat();
     if (state.boardOnlyImportant) items = items.filter(function(x){ return x.sc.important; });
     if (state.boardTierFilter !== 'All') items = items.filter(function(x){ return x.account.tier === state.boardTierFilter; });
+    if (state.boardSectorFilter !== 'All') items = items.filter(function(x){ return x.account.industry === state.boardSectorFilter; });
 
-    var tiersPresent = [1,2,3,4,5,6].filter(function(t){ return ACCOUNTS.some(function(a){ return a.tier === t; }); });
+    // Tier is a fixed client category, like sector — always show all six, not just the ones currently occupied.
     var tierFilterRow = '<button class="pill' + (state.boardTierFilter === 'All' ? ' primary-btn' : ' outline') + '" data-set-board-tierfilter="All">All tiers</button>' +
-      tiersPresent.map(function(t){
+      [1,2,3,4,5,6].map(function(t){
         return '<button class="pill' + (state.boardTierFilter === t ? ' primary-btn' : ' outline') + '" data-set-board-tierfilter="' + t + '">T' + t + '</button>';
+      }).join('');
+    var sectorFilterRow = '<button class="pill' + (state.boardSectorFilter === 'All' ? ' primary-btn' : ' outline') + '" data-set-board-sectorfilter="All">All sectors</button>' +
+      SECTORS.map(function(s){
+        return '<button class="pill' + (state.boardSectorFilter === s.key ? ' primary-btn' : ' outline') + '" data-set-board-sectorfilter="' + escapeAttr(s.key) + '">' + s.icon + ' ' + s.key + '</button>';
       }).join('');
 
     var columns = OFFER_STAGES.map(function(stage){
@@ -3394,6 +3414,7 @@
         (stalledCount ? '<span class="tag-pill" style="color:var(--danger)">⚠ ' + stalledCount + ' with no reply</span>' : '') +
         (!state.addingOffer ? '<button class="pill outline" data-toggle-new-offer="1">+ New offer</button>' : '') +
       '</div>' +
+      '<div class="badge-row" style="margin-bottom:8px">' + sectorFilterRow + '</div>' +
       '<div class="badge-row" style="margin-bottom:16px">' + tierFilterRow + '</div>' +
       '<div class="board-scroll-nav">' +
         '<button class="board-scroll-btn" data-board-scroll="-1">← Scroll</button>' +
@@ -3882,6 +3903,12 @@
       render();
       return;
     }
+    var setBoardSectorFilter = e.target.closest('[data-set-board-sectorfilter]');
+    if (setBoardSectorFilter){
+      state.boardSectorFilter = setBoardSectorFilter.getAttribute('data-set-board-sectorfilter');
+      render();
+      return;
+    }
     var toggleNewOffer = e.target.closest('[data-toggle-new-offer]');
     if (toggleNewOffer){ state.addingOffer = true; render(); return; }
     var cancelNewOffer = e.target.closest('[data-cancel-new-offer]');
@@ -3907,7 +3934,7 @@
         nextStep: (byId('new-offer-nextstep').value || '').trim() || 'Follow up to scope the engagement.',
         dealValue: noDealValue || defaultDealValue({ id: noTitle, confidence: noConfidence }),
         boardStage: 'approved',
-        important: false
+        important: !!byId('new-offer-important').checked
       });
       state.addingOffer = false;
       render();
@@ -4051,6 +4078,8 @@
       ecAccount.sector = (byId('edit-client-descriptor').value || ecAccount.sector).trim();
       ecAccount.goal = (byId('edit-client-goal').value || ecAccount.goal).trim();
       ecAccount.tierNote = (byId('edit-client-tiernote').value || '').trim();
+      ecAccount.techStackManual = Array.from(document.querySelectorAll('[data-tech-option]:checked')).map(function(cb){ return cb.getAttribute('data-tech-option'); });
+      ecAccount.techStack = deriveTechStack(ecAccount);
       // Sector drives the icon, and either change can move the rule-based tier.
       var sectorDef2 = SECTORS.filter(function(x){ return x.key === newSector; })[0];
       if (sectorDef2) ecAccount.icon = sectorDef2.icon;

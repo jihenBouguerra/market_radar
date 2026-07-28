@@ -695,7 +695,7 @@
     {
       id: 'bayer',
       name: 'Bayer AG',
-      industry: 'Pharma',
+      industry: 'Pharma & Healthcare',
       icon: '💊',
       avatar: 'BAY',
       hq: 'Leverkusen, Germany',
@@ -902,7 +902,7 @@
     {
       id: 'fresenius',
       name: 'Fresenius SE',
-      industry: 'Healthcare',
+      industry: 'Pharma & Healthcare',
       icon: '🏥',
       avatar: 'FRE',
       hq: 'Bad Homburg, Germany',
@@ -971,7 +971,7 @@
     {
       id: 'siemens-healthineers',
       name: 'Siemens Healthineers AG',
-      industry: 'Healthcare',
+      industry: 'Pharma & Healthcare',
       icon: '🏥',
       avatar: 'SHL',
       hq: 'Erlangen, Germany',
@@ -1225,7 +1225,7 @@
       tech: ['Databricks', 'PySpark', 'Azure ML']
     },
     {
-      id: 'cs-clinical-trial-quality', client: 'A top-10 pharma company', sector: 'Pharma', referenceable: false,
+      id: 'cs-clinical-trial-quality', client: 'A top-10 pharma company', sector: 'Pharma & Healthcare', referenceable: false,
       domainTags: ['Clinical AI Regulation', 'AI Regulation in R&D', 'Patient Data Regulation'],
       challenge: 'Trial-data pipeline could not prove which AI tool touched which patient record.',
       outcome: 'Built end-to-end data lineage plus an EMA-ready validation framework.',
@@ -1257,7 +1257,7 @@
       tech: ['Azure', 'Kubernetes', 'MLflow']
     },
     {
-      id: 'cs-patient-monitoring', client: 'A European hospital group', sector: 'Healthcare', referenceable: false,
+      id: 'cs-patient-monitoring', client: 'A European hospital group', sector: 'Pharma & Healthcare', referenceable: false,
       domainTags: ['AI Regulation in Healthcare', 'AI Regulation & Clinical Accuracy'],
       challenge: 'Patient-monitoring AI needed safety documentation before a multi-site rollout.',
       outcome: 'Produced the MDR-aligned safety file and a live accuracy dashboard for clinical staff.',
@@ -1570,9 +1570,8 @@
   var SECTORS = [
     { key: 'Automotive', icon: '🚗' },
     { key: 'Energy', icon: '⚡' },
-    { key: 'Pharma', icon: '💊' },
     { key: 'Finance', icon: '🏦' },
-    { key: 'Healthcare', icon: '🏥' },
+    { key: 'Pharma & Healthcare', icon: '⚕️' },
     { key: 'Retail', icon: '🛍️' }
   ];
 
@@ -1591,17 +1590,15 @@
       { date: '2026-06-20', subtype: 'Law', source: 'EU Energy Directorate', text: 'The EU sets a new grid-interoperability standard requiring every utility to support AI-based demand forecasting by 2029, regardless of size.' },
       { date: '2026-04-18', subtype: 'Collaboration', source: 'European Energy Regulators Taskforce', text: 'European energy regulators launch a joint taskforce on AI use in critical infrastructure, covering every grid operator and generator in the bloc.' }
     ],
-    Pharma: [
+    'Pharma & Healthcare': [
       { date: '2026-06-28', subtype: 'Law', source: 'European Medicines Agency', text: 'The EMA issues industry-wide guidance requiring every AI-assisted drug-discovery tool to pass a new validation framework by 2027, regardless of vendor.' },
-      { date: '2026-04-30', subtype: 'Collaboration', source: 'European Federation of Pharmaceutical Industries', text: 'The European pharma industry association proposes shared standards for AI transparency in clinical trials, applying across all member companies.' }
+      { date: '2026-06-18', subtype: 'Law', source: 'EU Medical Device Regulation Body', text: 'The EU extends its medical device AI rules to require safety documentation for every AI system used in patient monitoring or diagnostics, across all providers.' },
+      { date: '2026-04-30', subtype: 'Collaboration', source: 'European Federation of Pharmaceutical Industries', text: 'The European pharma industry association proposes shared standards for AI transparency in clinical trials, applying across all member companies.' },
+      { date: '2026-04-15', subtype: 'Collaboration', source: 'European Hospital Federation', text: 'The European Hospital Federation calls for shared clinical-AI validation standards across all member hospitals and providers.' }
     ],
     Finance: [
       { date: '2026-06-25', subtype: 'Law', source: 'European Banking Authority', text: 'The EBA sets an industry-wide deadline of 2027 for every bank to document and test AI models used in credit risk scoring, not just early adopters.' },
       { date: '2026-04-20', subtype: 'Collaboration', source: 'European Banking Federation', text: 'The European Banking Federation proposes a shared framework for explainable AI in lending, so customers get consistent explanations across every bank.' }
-    ],
-    Healthcare: [
-      { date: '2026-06-18', subtype: 'Law', source: 'EU Medical Device Regulation Body', text: 'The EU extends its medical device AI rules to require safety documentation for every AI system used in patient monitoring or diagnostics, across all providers.' },
-      { date: '2026-04-15', subtype: 'Collaboration', source: 'European Hospital Federation', text: 'The European Hospital Federation calls for shared clinical-AI validation standards across all member hospitals and providers.' }
     ],
     Retail: [
       { date: '2026-06-22', subtype: 'Law', source: 'European Consumer Protection Authority', text: 'The EU requires every retailer using AI-driven personalized pricing or recommendations to disclose the logic behind them to consumers by 2027, regardless of size.' },
@@ -1619,14 +1616,14 @@
       roles: ['Head of Digital & Data', 'Regulatory Affairs Lead'],
       sourceReg: 'National/EU Energy Regulator updates'
     },
-    Pharma: {
+    'Pharma & Healthcare': {
       departments: [
-        { name: 'R&D Digital', focus: 'Runs AI tools for research and development.' },
-        { name: 'Clinical Operations', focus: 'Owns trial design and patient-data systems.' },
+        { name: 'R&D / Digital Health', focus: 'Runs AI tools for research, development, and clinical care.' },
+        { name: 'Clinical Operations', focus: 'Owns trial design, patient care, and patient-data systems.' },
         { name: 'Data Privacy & Compliance', focus: 'Tracks patient-data and AI documentation rules.' }
       ],
-      roles: ['Director, R&D Digital Innovation', 'Clinical Data Systems Lead'],
-      sourceReg: 'Relevant Medicines Agency updates'
+      roles: ['Director, R&D / Digital Health Innovation', 'Clinical Data Systems Lead'],
+      sourceReg: 'Medicines Agency & EU Medical Device AI Regulation Tracker'
     },
     Automotive: {
       departments: [
@@ -1645,15 +1642,6 @@
       ],
       roles: ['Head of Digital Innovation', 'Risk & Compliance Lead'],
       sourceReg: 'Financial Regulator updates'
-    },
-    Healthcare: {
-      departments: [
-        { name: 'Digital Health', focus: 'Runs AI initiatives for clinical and patient-care systems.' },
-        { name: 'Clinical Operations', focus: 'Owns patient care systems and clinical AI tools.' },
-        { name: 'Data Privacy & Compliance', focus: 'Tracks patient-data and AI documentation requirements.' }
-      ],
-      roles: ['Head of Digital Health', 'Clinical Data Systems Lead'],
-      sourceReg: 'EU Medical Device & AI Health Regulation Tracker'
     },
     Retail: {
       departments: [
@@ -1675,17 +1663,15 @@
       { title: 'Smart Grid Demand Forecasting', description: 'Improve load-forecasting accuracy to cut balancing costs and renewable curtailment.', defaultGainPct: 10 },
       { title: 'Predictive Maintenance for Turbines & Grid Assets', description: 'Reduce unplanned downtime and false-alarm rates on critical infrastructure.', defaultGainPct: 15 }
     ],
-    Pharma: [
+    'Pharma & Healthcare': [
       { title: 'AI-Assisted Drug Discovery Documentation', description: 'Speed up research-to-regulatory handoff with automated validation trails.', defaultGainPct: 14 },
-      { title: 'Clinical Trial Data Quality & Fairness Monitoring', description: 'Catch data-quality and bias issues in trial data before submission.', defaultGainPct: 11 }
+      { title: 'Clinical Trial Data Quality & Fairness Monitoring', description: 'Catch data-quality and bias issues in trial data before submission.', defaultGainPct: 11 },
+      { title: 'Patient Monitoring AI Safety & Validation', description: 'Reduce false alarms and produce the safety documentation regulators require.', defaultGainPct: 13 },
+      { title: 'Diagnostic Imaging Accuracy Improvement', description: 'Lower false-positive rates on AI-assisted diagnostic imaging tools.', defaultGainPct: 12 }
     ],
     Finance: [
       { title: 'Fraud Detection & Explainable Credit Decisioning', description: 'Cut false positives and produce audit-ready explanations for declined applications.', defaultGainPct: 16 },
       { title: 'AI Model Risk & Regulatory Documentation', description: 'Meet EBA model-documentation deadlines without slowing down model releases.', defaultGainPct: 9 }
-    ],
-    Healthcare: [
-      { title: 'Patient Monitoring AI Safety & Validation', description: 'Reduce false alarms and produce the safety documentation regulators require.', defaultGainPct: 13 },
-      { title: 'Diagnostic Imaging Accuracy Improvement', description: 'Lower false-positive rates on AI-assisted diagnostic imaging tools.', defaultGainPct: 12 }
     ],
     Retail: [
       { title: 'Personalized Recommendation Governance', description: 'Fix mismatched recommendations and add the disclosure layer new EU rules require.', defaultGainPct: 8 },
@@ -2499,7 +2485,7 @@
     }).join('');
   }
 
-  var SECTOR_COLOR = { Automotive: '#f87171', Energy: '#fbbf24', Pharma: '#34d399', Finance: '#60a5fa', Healthcare: '#f472b6' };
+  var SECTOR_COLOR = { Automotive: '#f87171', Energy: '#fbbf24', Finance: '#60a5fa', 'Pharma & Healthcare': '#34d399', Retail: '#f472b6' };
 
   function allScenariosFlat(){
     var out = [];

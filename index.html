@@ -553,6 +553,24 @@
   .signal-filter-bar select:hover { border-color: var(--border-strong); }
   .signal-filter-bar select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 
+  /* Compact one-line signal rows — the full text lives on the signal-detail
+     page (click through), so the feed itself stays scannable even with a lot
+     of signals piled up. */
+  .signal-compact-list { display: flex; flex-direction: column; }
+  .signal-row { display: flex; align-items: center; gap: 6px; border-bottom: 1px dashed var(--border); }
+  .signal-row:last-child { border-bottom: none; }
+  .signal-row-main {
+    flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px;
+    background: none; border: none; padding: 9px 4px; cursor: pointer; text-align: left; font-family: var(--font);
+  }
+  .signal-row-main:hover .signal-row-text { color: var(--accent); }
+  .signal-row-main .timeline-date { flex-shrink: 0; font-size: 10.5px; color: var(--text-faint); font-family: var(--mono); width: 44px; }
+  .signal-row-main .evidence-type { flex-shrink: 0; }
+  .signal-row-text {
+    flex: 1; min-width: 0; font-size: 12.5px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .signal-row-source { flex-shrink: 0; font-size: 10.5px; color: var(--text-faint); max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
   /* Detail / scenario view */
   .detail-grid { display: grid; grid-template-columns: 1fr 1.05fr; gap: 20px; align-items: start; margin-top: 6px; }
   .panel { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 26px; }
@@ -1431,8 +1449,8 @@
     addingActivity: false,
     addingManualOffer: false,
     signalFilters: {
-      news: { category: 'all', timing: 'all' },
-      social: { category: 'all', timing: 'all' }
+      news: { category: 'all', timing: 'all', favOnly: false },
+      social: { category: 'all', timing: 'all', favOnly: false }
     },
     setupAdding: { contact: false, department: false, source: false },
     addingTemplate: false,
@@ -1522,8 +1540,8 @@
     state.addingActivity = false;
     state.addingManualOffer = false;
     state.signalFilters = {
-      news: { category: 'all', timing: 'all' },
-      social: { category: 'all', timing: 'all' }
+      news: { category: 'all', timing: 'all', favOnly: false },
+      social: { category: 'all', timing: 'all', favOnly: false }
     };
     state.setupAdding = { contact: false, department: false, source: false };
     state.addingTenderImport = false;
@@ -2021,6 +2039,13 @@
     a.techStack = deriveTechStack(a);
   });
 
+  // Signals can be starred as important, same "favorite + filter" pattern as the Offer Board.
+  ACCOUNTS.forEach(function(a){
+    a.signals.forEach(function(s){
+      if (typeof s.important !== 'boolean') s.important = false;
+    });
+  });
+
   function nextSourceState(s){
     if (!s.active) return { active: true, priority: 'Low' };
     if (s.priority === 'Low') return { active: true, priority: 'Medium' };
@@ -2271,6 +2296,7 @@
     return '<div class="signal-filter-bar">' +
       '<select data-signal-filter-category="' + channel + '">' + categoryOpts + '</select>' +
       '<select data-signal-filter-timing="' + channel + '">' + timingOpts + '</select>' +
+      '<button class="pill' + (filter.favOnly ? ' primary-btn' : ' outline') + '" data-toggle-signal-favonly="' + channel + '">★ Favorites only</button>' +
     '</div>';
   }
 
@@ -2280,17 +2306,27 @@
     var filter = state.signalFilters[channel];
     var items = all.filter(function(s){
       var categoryOk = filter.category === 'all' || s.subtype === filter.category;
-      return categoryOk && withinTiming(s.date, filter.timing);
+      var favOk = !filter.favOnly || s.important;
+      return categoryOk && favOk && withinTiming(s.date, filter.timing);
     });
     if (!all.length) return '<p class="empty-note">No ' + channel + ' signals ingested yet.</p>';
     if (!items.length) return filterBar + '<p class="empty-note">No ' + channel + ' signals match this filter.</p>';
-    return filterBar + items.map(function(s){
+    // Compact one-line rows — lots of signals can pile up here, so the full text
+    // shows on the signal-detail page (click through) rather than inline every time.
+    return filterBar + '<div class="signal-compact-list">' + items.map(function(s){
       var cls = channel === 'news' ? 'c-newstype' : 'c-socialtype';
       var src = findSource(account, s.sourceId);
-      var srcHtml = src ? '<div class="signal-source">via ' + src.name + '</div>' : '';
-      return '<div class="timeline-item clickable" data-signal-card="' + s.id + '" data-signal-origin="overview"><div class="timeline-date">' + monthShort(s.date) + '</div>' +
-        '<div><span class="evidence-type ' + cls + '">' + s.subtype + '</span><p>' + s.text + '</p>' + srcHtml + '</div></div>';
-    }).join('');
+      var preview = s.text.length > 90 ? s.text.slice(0, 90).trim() + '…' : s.text;
+      return '<div class="signal-row">' +
+        '<button class="star-btn' + (s.important ? ' on' : '') + '" data-toggle-signal-important="' + s.id + '" title="Favorite this signal">' + (s.important ? '★' : '☆') + '</button>' +
+        '<button class="signal-row-main clickable" data-signal-card="' + s.id + '" data-signal-origin="overview">' +
+          '<span class="timeline-date">' + monthShort(s.date) + '</span>' +
+          '<span class="evidence-type ' + cls + '">' + s.subtype + '</span>' +
+          '<span class="signal-row-text" title="' + escapeAttr(s.text) + '">' + preview + '</span>' +
+          (src ? '<span class="signal-row-source">via ' + src.name + '</span>' : '') +
+        '</button>' +
+      '</div>';
+    }).join('') + '</div>';
   }
 
   function manualOfferAddForm(account){
@@ -3563,6 +3599,23 @@
     var scenarioCard = e.target.closest('[data-scenario-card]');
     if (scenarioCard){ navigate(scenarioCard.getAttribute('data-scenario-account') || state.accountId, 'scenario', scenarioCard.getAttribute('data-scenario-card')); return; }
 
+    var toggleSignalImportant = e.target.closest('[data-toggle-signal-important]');
+    if (toggleSignalImportant){
+      var tsAccount = currentAccount();
+      var tsSignal = tsAccount.signals.filter(function(s){ return s.id === toggleSignalImportant.getAttribute('data-toggle-signal-important'); })[0];
+      if (tsSignal){
+        tsSignal.important = !tsSignal.important;
+        render();
+      }
+      return;
+    }
+    var toggleSignalFavOnly = e.target.closest('[data-toggle-signal-favonly]');
+    if (toggleSignalFavOnly){
+      var favChannel = toggleSignalFavOnly.getAttribute('data-toggle-signal-favonly');
+      state.signalFilters[favChannel].favOnly = !state.signalFilters[favChannel].favOnly;
+      render();
+      return;
+    }
     var signalCard = e.target.closest('[data-signal-card]');
     if (signalCard){
       var origin = signalCard.getAttribute('data-signal-origin');

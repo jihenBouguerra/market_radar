@@ -227,6 +227,27 @@
     display: inline-block; font-size: 10.5px; font-weight: 800; letter-spacing: 0.03em;
     color: var(--accent); background: var(--accent-soft); padding: 4px 10px; border-radius: var(--radius-pill);
   }
+
+  .contact-row { padding: 12px 0; border-bottom: 1px dashed var(--border); }
+  .contact-row:last-of-type { border-bottom: none; }
+  .contact-row-meta { font-size: 10.5px; color: var(--text-faint); font-family: var(--mono); margin-top: 6px; line-height: 1.55; }
+
+  .persona-select {
+    margin-top: 7px; width: 100%; font-size: 10.5px; font-weight: 700;
+    color: var(--accent); background: var(--accent-soft); padding: 3px 22px 3px 10px;
+    border-radius: var(--radius-pill); border: 1px solid transparent;
+    -webkit-appearance: none; appearance: none; cursor: pointer; font-family: var(--font);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='6' viewBox='0 0 8 6'%3E%3Cpath d='M0 0L4 6L8 0Z' fill='%238b7cf6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 9px center;
+  }
+  .persona-select:hover, .persona-select:focus { border-color: var(--accent); outline: none; }
+
+  .linkedin-btn {
+    margin-top: 6px; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: var(--radius-pill);
+    border: 1px solid var(--border-strong); background: none; color: var(--muted); cursor: pointer; font-family: var(--font);
+  }
+  .linkedin-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .linkedin-btn.pulled { color: var(--good); border-color: var(--good); }
   .relationship-pill.client { color: var(--good); background: var(--good-soft); border-color: transparent; }
   .relationship-pill.potential-client { color: var(--accent); background: var(--accent-soft); border-color: transparent; }
 
@@ -1545,6 +1566,12 @@
     'Procurement Gatekeeper': { cares: 'Cost, contract terms, vendor risk', objection: '“Why not extend our existing vendor contract instead?”', angle: 'Lead with a fixed-scope pilot to de-risk before a larger commitment.' },
     'Champion': { cares: 'Visible wins, internal credibility, quick turnaround', objection: '“I need something to show leadership soon.”', angle: 'Lead with a fast, visible quick-win deliverable they can present internally.' }
   };
+  /* Job titles differ company to company, so every contact is mapped onto one
+     shared list of personas. It's derived automatically from their real title
+     (on add, and when pulling from LinkedIn) and can be reassigned by hand —
+     the same vocabulary everywhere, so a "Head of Data" at one client and a
+     "Director, Analytics" at another land in the same bucket. */
+  var PERSONA_KEYS = ['Economic Buyer','Technical Buyer','Risk & Compliance Gatekeeper','Procurement Gatekeeper','Champion'];
   function personaForRole(role){
     role = (role || '').toLowerCase();
     if (/compliance|risk|legal|privacy/.test(role)) return 'Risk & Compliance Gatekeeper';
@@ -1553,8 +1580,21 @@
     if (/head of|director|chief|\bvp\b/.test(role)) return 'Economic Buyer';
     return 'Champion';
   }
-  function battleCardHtml(role){
-    var persona = personaForRole(role);
+  // Respects a manual reassignment if one was made, otherwise falls back to the title match.
+  function personaFor(contact){
+    if (!contact) return 'Champion';
+    return contact.persona || personaForRole(contact.role);
+  }
+  ACCOUNTS.forEach(function(a){
+    a.contacts.forEach(function(c){
+      if (typeof c.persona !== 'string') c.persona = personaForRole(c.role);
+      if (typeof c.language !== 'string') c.language = 'German, English';
+      if (typeof c.linkedinPulled !== 'boolean') c.linkedinPulled = false;
+    });
+  });
+
+  function battleCardHtml(contact){
+    var persona = personaFor(contact);
     var card = BATTLE_CARDS[persona];
     return '<div class="callout" style="margin-top:8px">' +
       '<span class="pill outline">' + persona + '</span><br>' +
@@ -1777,10 +1817,10 @@
       return html;
     }
     html += '<div class="contact-card">' +
-      '<div><div class="list-row-name">' + primary.name + '</div><div class="list-row-sub">' + primary.role + ' &middot; ' + primary.department + '</div><div class="list-row-sub">' + primary.channel + '</div></div>' +
+      '<div><div class="list-row-name">' + primary.name + '</div><div class="list-row-sub">' + primary.role + ' &middot; ' + primary.department + '</div><div class="list-row-sub">' + primary.channel + ' &middot; speaks ' + primary.language + '</div></div>' +
       '<button class="btn small primary" data-toggle-email="1">✉️ Draft email</button>' +
     '</div>' +
-    battleCardHtml(primary.role);
+    battleCardHtml(primary);
     if (state.emailOpen){
       var draft = draftEmail(account, sc, primary);
       html += '<div class="inline-form" id="email-draft-block">' +
@@ -2052,7 +2092,16 @@
 
   function setupListRow(kind, item, idx){
     if (kind === 'contact'){
-      return '<div class="list-row"><div class="list-row-main"><div class="list-row-name">' + item.name + ' <span class="pill outline" style="font-size:10.5px">' + personaForRole(item.role) + '</span></div><div class="list-row-sub">' + item.role + ' &middot; ' + item.department + '</div></div><div class="list-row-meta">' + item.channel + '<br>last contact ' + item.lastContact + '</div></div>';
+      var personaOpts = PERSONA_KEYS.map(function(k){
+        return '<option value="' + escapeAttr(k) + '"' + (personaFor(item) === k ? ' selected' : '') + '>' + k + '</option>';
+      }).join('');
+      return '<div class="contact-row">' +
+          '<div class="list-row-name">' + item.name + '</div>' +
+          '<div class="list-row-sub">' + item.role + ' &middot; ' + item.department + '</div>' +
+          '<select class="persona-select" data-reassign-persona="' + idx + '" title="Shared across every client — reassign if the auto-match is wrong">' + personaOpts + '</select>' +
+          '<div class="contact-row-meta">' + item.channel + ' &middot; speaks ' + item.language + '<br>last contact ' + item.lastContact + '</div>' +
+          '<button class="linkedin-btn' + (item.linkedinPulled ? ' pulled' : '') + '" data-linkedin-pull="' + idx + '">' + (item.linkedinPulled ? '✓ Pulled from LinkedIn' : '🔗 Pull from LinkedIn') + '</button>' +
+        '</div>';
     }
     if (kind === 'department'){
       return '<div class="list-row"><div class="list-row-main"><div class="list-row-name">' + item.name + '</div><div class="list-row-sub">' + item.focus + '</div></div></div>';
@@ -2068,6 +2117,10 @@
       return '<div class="inline-form">' +
         '<div class="form-row"><input id="add-contact-name" type="text" placeholder="Name"><input id="add-contact-role" type="text" placeholder="Role / title"></div>' +
         '<div class="form-row"><input id="add-contact-dept" type="text" placeholder="Department"><input id="add-contact-channel" type="text" placeholder="Email or LinkedIn"></div>' +
+        '<div class="form-row">' +
+          '<select id="add-contact-persona"><option value="">Match persona from title</option>' + PERSONA_KEYS.map(function(k){ return '<option value="' + escapeAttr(k) + '">' + k + '</option>'; }).join('') + '</select>' +
+          '<input id="add-contact-language" type="text" placeholder="Language(s), e.g. German, English">' +
+        '</div>' +
         '<div class="form-actions"><button class="btn small" data-cancel-add="contact">Cancel</button><button class="btn small primary" data-save-add="contact">Add contact</button></div>' +
       '</div>';
     }
@@ -2090,7 +2143,7 @@
 
   function renderSetup(){
     var account = currentAccount();
-    var contactsHtml = account.contacts.length ? account.contacts.map(function(c){ return setupListRow('contact', c); }).join('') : '<p class="empty-note">No contacts added yet.</p>';
+    var contactsHtml = account.contacts.length ? account.contacts.map(function(c, i){ return setupListRow('contact', c, i); }).join('') : '<p class="empty-note">No contacts added yet.</p>';
     var deptHtml = account.departments.length ? account.departments.map(function(d){ return setupListRow('department', d); }).join('') : '<p class="empty-note">No departments added yet.</p>';
     var sourcesHtml = account.sources.length ? account.sources.map(function(s){ return setupListRow('source', s); }).join('') : '<p class="empty-note">No data sources added yet.</p>';
 
@@ -2718,6 +2771,15 @@
   });
 
   document.addEventListener('change', function(e){
+    var reassignPersona = e.target.closest && e.target.closest('[data-reassign-persona]');
+    if (reassignPersona){
+      var rpContact = currentAccount().contacts[parseInt(reassignPersona.getAttribute('data-reassign-persona'), 10)];
+      if (rpContact){
+        rpContact.persona = reassignPersona.value;
+        showToast(rpContact.name + ' reassigned to ' + rpContact.persona);
+      }
+      return;
+    }
     var catChannel = e.target.getAttribute && e.target.getAttribute('data-signal-filter-category');
     if (catChannel){ state.signalFilters[catChannel].category = e.target.value; render(); return; }
     var timingChannel = e.target.getAttribute && e.target.getAttribute('data-signal-filter-timing');
@@ -2985,6 +3047,18 @@
       refreshAutoTier(relAccount);
       render();
       showToast(relAccount.name + ' flagged as ' + relAccount.relationship + ' · tier now T' + relAccount.tier);
+      return;
+    }
+    var linkedinPull = e.target.closest('[data-linkedin-pull]');
+    if (linkedinPull){
+      var lpContact = currentAccount().contacts[parseInt(linkedinPull.getAttribute('data-linkedin-pull'), 10)];
+      if (lpContact){
+        // Simulated enrichment — a real build would call the LinkedIn API here.
+        lpContact.linkedinPulled = true;
+        lpContact.persona = personaForRole(lpContact.role);
+        render();
+        showToast('Pulled ' + lpContact.name + ' from LinkedIn (demo) — matched to ' + lpContact.persona);
+      }
       return;
     }
     var setTierFilter = e.target.closest('[data-set-tierfilter]');
@@ -3282,11 +3356,15 @@
       if (kind === 'contact'){
         var cName = (byId('add-contact-name').value || '').trim();
         if (!cName){ showToast('Enter a contact name first'); return; }
+        var cRole = (byId('add-contact-role').value || 'Role not set').trim() || 'Role not set';
         account.contacts.push({
           name: cName,
-          role: (byId('add-contact-role').value || 'Role not set').trim() || 'Role not set',
+          role: cRole,
+          persona: byId('add-contact-persona').value || personaForRole(cRole),
           department: (byId('add-contact-dept').value || 'Unassigned').trim() || 'Unassigned',
           channel: (byId('add-contact-channel').value || '—').trim() || '—',
+          language: (byId('add-contact-language').value || '').trim() || 'German, English',
+          linkedinPulled: false,
           lastContact: todayStr()
         });
       } else if (kind === 'department'){

@@ -228,6 +228,16 @@
     color: var(--accent); background: var(--accent-soft); padding: 4px 10px; border-radius: var(--radius-pill);
   }
 
+  .source-state-btn {
+    font-size: 10px; font-weight: 800; padding: 4px 11px; border-radius: var(--radius-pill);
+    border: 1px solid var(--border-strong); background: none; color: var(--muted);
+    cursor: pointer; white-space: nowrap; font-family: var(--font);
+  }
+  .source-state-btn.High { color: var(--warn); border-color: var(--warn); background: var(--warn-soft); }
+  .source-state-btn.Medium { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+  .source-state-btn.Low { color: var(--muted); }
+  .source-state-btn.off { color: var(--text-faint); border-style: dashed; }
+
   .contact-row { padding: 12px 0; border-bottom: 1px dashed var(--border); }
   .contact-row:last-of-type { border-bottom: none; }
   .contact-row-meta { font-size: 10.5px; color: var(--text-faint); font-family: var(--mono); margin-top: 6px; line-height: 1.55; }
@@ -1593,6 +1603,25 @@
     });
   });
 
+  /* A source is either off, or on at a priority — one control, not two, so the
+     Setup panel doesn't sprout a second row of switches. Higher-priority
+     sources are the ones we trust most when they disagree. */
+  var SOURCE_PRIORITIES = ['Low','Medium','High'];
+  ACCOUNTS.forEach(function(a){
+    a.sources.forEach(function(s){
+      if (typeof s.active !== 'boolean') s.active = (s.status !== 'Planned');
+      if (typeof s.priority !== 'string') s.priority = 'Medium';
+    });
+  });
+  function nextSourceState(s){
+    if (!s.active) return { active: true, priority: 'Low' };
+    if (s.priority === 'Low') return { active: true, priority: 'Medium' };
+    if (s.priority === 'Medium') return { active: true, priority: 'High' };
+    return { active: false, priority: s.priority };
+  }
+  function sourceStateLabel(s){ return s.active ? (s.priority + ' priority') : 'Off'; }
+  function sourceStateClass(s){ return s.active ? s.priority : 'off'; }
+
   function battleCardHtml(contact){
     var persona = personaFor(contact);
     var card = BATTLE_CARDS[persona];
@@ -2108,8 +2137,8 @@
     }
     // source
     var cls = item.channel === 'news' ? 'c-newstype' : 'c-socialtype';
-    var statusCls = item.status === 'Active' ? 'active' : 'planned';
-    return '<div class="list-row"><div class="list-row-main"><div class="list-row-name">' + item.name + '</div><div class="list-row-sub"><span class="' + cls + '">' + item.type + '</span> &middot; feeds ' + (item.channel === 'news' ? 'News' : 'Social & Workforce') + '</div></div><div class="list-row-meta"><span class="status-pill ' + statusCls + '">' + item.status + '</span></div></div>';
+    return '<div class="list-row"><div class="list-row-main"><div class="list-row-name">' + item.name + '</div><div class="list-row-sub"><span class="' + cls + '">' + item.type + '</span> &middot; feeds ' + (item.channel === 'news' ? 'News' : 'Social & Workforce') + '</div></div>' +
+      '<div class="list-row-meta"><button class="source-state-btn ' + sourceStateClass(item) + '" data-cycle-sourcestate="' + idx + '" title="Click to cycle: Off → Low → Medium → High">' + sourceStateLabel(item) + '</button></div></div>';
   }
 
   function setupAddForm(kind){
@@ -2145,7 +2174,7 @@
     var account = currentAccount();
     var contactsHtml = account.contacts.length ? account.contacts.map(function(c, i){ return setupListRow('contact', c, i); }).join('') : '<p class="empty-note">No contacts added yet.</p>';
     var deptHtml = account.departments.length ? account.departments.map(function(d){ return setupListRow('department', d); }).join('') : '<p class="empty-note">No departments added yet.</p>';
-    var sourcesHtml = account.sources.length ? account.sources.map(function(s){ return setupListRow('source', s); }).join('') : '<p class="empty-note">No data sources added yet.</p>';
+    var sourcesHtml = account.sources.length ? account.sources.map(function(s, i){ return setupListRow('source', s, i); }).join('') : '<p class="empty-note">No data sources added yet.</p>';
 
     return header() + accountSwitcher() + accountStrip(account, false) + viewTabs() +
       '<p class="section-sub">Who we talk to, which departments matter, and what we ingest to keep signals current for ' + account.name + '.</p>' +
@@ -3049,6 +3078,19 @@
       showToast(relAccount.name + ' flagged as ' + relAccount.relationship + ' · tier now T' + relAccount.tier);
       return;
     }
+    var cycleSourceState = e.target.closest('[data-cycle-sourcestate]');
+    if (cycleSourceState){
+      var csSource = currentAccount().sources[parseInt(cycleSourceState.getAttribute('data-cycle-sourcestate'), 10)];
+      if (csSource){
+        var nextState = nextSourceState(csSource);
+        csSource.active = nextState.active;
+        csSource.priority = nextState.priority;
+        csSource.status = csSource.active ? 'Active' : 'Planned';
+        render();
+        showToast(csSource.name + ': ' + sourceStateLabel(csSource));
+      }
+      return;
+    }
     var linkedinPull = e.target.closest('[data-linkedin-pull]');
     if (linkedinPull){
       var lpContact = currentAccount().contacts[parseInt(linkedinPull.getAttribute('data-linkedin-pull'), 10)];
@@ -3379,7 +3421,9 @@
           name: sName,
           type: (byId('add-source-type').value || 'General').trim() || 'General',
           channel: byId('add-source-channel').value === 'social' ? 'social' : 'news',
-          status: 'Planned'
+          status: 'Planned',
+          active: false,
+          priority: 'Medium'
         });
       }
       state.setupAdding[kind] = false;

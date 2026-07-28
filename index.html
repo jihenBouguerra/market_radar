@@ -229,29 +229,29 @@
   }
 
   /* Two-column shell: tools on the left, sectors and content on the right. */
-  .app-body { display: flex; gap: 22px; align-items: flex-start; }
+  .app-body { display: flex; gap: 14px; align-items: flex-start; }
   .app-content { flex: 1; min-width: 0; }
   .side-nav {
-    flex: 0 0 178px; position: sticky; top: 18px;
-    display: flex; flex-direction: column; gap: 16px;
+    flex: 0 0 128px; position: sticky; top: 18px;
+    display: flex; flex-direction: column; gap: 11px;
   }
-  .side-group { display: flex; flex-direction: column; gap: 2px; }
+  .side-group { display: flex; flex-direction: column; gap: 1px; }
   .side-group-title {
-    font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.09em;
-    color: var(--text-faint); padding: 0 10px 5px;
+    font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-faint); padding: 0 7px 3px;
   }
   .side-link {
-    display: flex; align-items: center; gap: 9px; width: 100%;
-    background: none; border: none; border-radius: 9px; padding: 8px 10px;
-    font-family: var(--font); font-size: 12.5px; font-weight: 600; color: var(--muted);
-    cursor: pointer; text-align: left;
+    display: flex; align-items: center; gap: 6px; width: 100%;
+    background: none; border: none; border-radius: 7px; padding: 5px 7px;
+    font-family: var(--font); font-size: 11px; font-weight: 600; color: var(--muted);
+    cursor: pointer; text-align: left; line-height: 1.25;
   }
   .side-link:hover { background: var(--panel2); color: var(--text); }
   .side-link.active { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
-  .side-icon { font-size: 13px; line-height: 1; flex-shrink: 0; }
+  .side-icon { font-size: 11px; line-height: 1; flex-shrink: 0; }
   .side-label { flex: 1; min-width: 0; }
   .side-badge {
-    font-size: 9.5px; font-weight: 800; padding: 1px 6px; border-radius: var(--radius-pill);
+    font-size: 8.5px; font-weight: 800; padding: 0 5px; border-radius: var(--radius-pill);
     background: var(--surface-3); color: var(--muted); flex-shrink: 0;
   }
   .side-link.active .side-badge { background: var(--accent); color: #fff; }
@@ -319,11 +319,11 @@
   .briefing { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--border); }
   .briefing-text { font-size: 12.5px; line-height: 1.6; margin: 0 0 12px; }
 
-  .board-scroll { overflow-x: auto; padding-bottom: 8px; }
-  .board-row { display: flex; gap: 14px; align-items: flex-start; min-width: min-content; }
+  .board-scroll { overflow-x: auto; padding: 2px 2px 10px; scroll-snap-type: x proximity; }
+  .board-row { display: flex; gap: 10px; align-items: flex-start; min-width: min-content; }
   .board-col {
-    flex: 0 0 232px; background: var(--panel); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 14px; min-height: 120px;
+    flex: 0 0 206px; background: var(--panel); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px; min-height: 120px; scroll-snap-align: start;
   }
   .board-col-head { margin-bottom: 10px; }
   .board-col-head h4 { margin: 0; font-size: 12.5px; display: flex; align-items: center; gap: 6px; }
@@ -352,12 +352,13 @@
   .star-btn.on { color: var(--warn); }
   .board-card-meta { font-size: 10.5px; color: var(--muted); margin-top: 5px; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
   .board-flag { font-size: 10px; font-weight: 700; color: var(--danger); margin-top: 6px; }
-  .board-card-actions { display: flex; gap: 5px; margin-top: 8px; }
+  .board-card-actions { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
   .board-move {
     background: none; border: 1px solid var(--border-strong); color: var(--muted); cursor: pointer;
-    border-radius: 6px; font-size: 11px; padding: 1px 8px; font-family: var(--font);
+    border-radius: 6px; font-size: 10.5px; padding: 1px 7px; font-family: var(--font);
   }
   .board-move:hover { color: var(--accent); border-color: var(--accent); }
+  .board-move.danger:hover { color: var(--danger); border-color: var(--danger); }
 
   .opp-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
   .opp-title-row .opp-title { flex: 1; min-width: 0; }
@@ -374,6 +375,18 @@
   }
   .cloud-badge:hover { border-color: var(--accent); color: var(--accent); }
   .cloud-badge.none { color: var(--text-faint); font-weight: 600; border-style: dashed; }
+
+  /* Department org-chart */
+  .org-chart { padding: 8px 0 2px; }
+  .org-root { display: flex; justify-content: center; margin-bottom: 2px; }
+  .org-root-box { background: var(--accent); color: #fff; font-weight: 700; font-size: 12.5px; padding: 8px 18px; border-radius: 10px; }
+  .org-stem { width: 2px; height: 14px; background: var(--border-strong); margin: 0 auto; }
+  .org-branches { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; padding-top: 12px; border-top: 2px solid var(--border-strong); }
+  .org-branch { display: flex; flex-direction: column; align-items: center; min-width: 150px; }
+  .org-branch-drop { width: 2px; height: 12px; background: var(--border-strong); margin-bottom: -1px; }
+  .org-branch-box { background: var(--panel2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; text-align: center; min-width: 150px; max-width: 200px; }
+  .org-branch-name { font-weight: 700; font-size: 12.5px; }
+  .org-branch-focus { color: var(--muted); font-size: 10.5px; margin-top: 3px; }
 
   .source-state-btn {
     font-size: 10px; font-weight: 800; padding: 4px 11px; border-radius: var(--radius-pill);
@@ -1387,6 +1400,8 @@
     tierFilter: 'All',
     editingOffer: false,
     boardOnlyImportant: false,
+    boardTierFilter: 'All',
+    addingOffer: false,
     scanSector: 'All',
     scanCountry: 'All',
     scanCount: 10,
@@ -1828,7 +1843,8 @@
     { key: 'first-call',label: 'First call',   hint: 'Intro conversation booked or held' },
     { key: 'offer-sent',label: 'Offer sent',   hint: 'Written offer is with the client' },
     { key: 'answered',  label: 'Answered',     hint: 'They came back to us' },
-    { key: 'won',       label: 'Won',          hint: 'Signed' },
+    { key: 'accepted',  label: 'Accepted',     hint: 'They said yes — contract in progress' },
+    { key: 'won',       label: 'Signed',       hint: 'Contract signed' },
     { key: 'lost',      label: 'Lost',         hint: 'Closed out — reason recorded' }
   ];
   function offerStageDef(key){
@@ -1944,6 +1960,21 @@
       if (typeof d.cloudProvider !== 'string') d.cloudProvider = (i === 0) ? accountCloud : '';
     });
   });
+
+  /* Tech stack is built from the departments, not typed in free-hand — the
+     cloud-provider portion always mirrors what's set on each department's
+     badge, so fixing a wrong pull there (data-cycle-cloud) is the one place
+     it needs correcting. Data-platform tools (Snowflake, Databricks) aren't
+     tied to a department, so any of those already on the account are kept. */
+  function deriveTechStack(account){
+    var clouds = [];
+    account.departments.forEach(function(d){
+      if (d.cloudProvider && clouds.indexOf(d.cloudProvider) === -1) clouds.push(d.cloudProvider);
+    });
+    var extras = (account.techStack || []).filter(function(t){ return CLOUD_PROVIDERS.indexOf(t) === -1; });
+    return clouds.concat(extras);
+  }
+  ACCOUNTS.forEach(function(a){ a.techStack = deriveTechStack(a); });
 
   function nextSourceState(s){
     if (!s.active) return { active: true, priority: 'Low' };
@@ -2448,15 +2479,6 @@
           '<button class="linkedin-btn' + (item.linkedinPulled ? ' pulled' : '') + '" data-linkedin-pull="' + idx + '">' + (item.linkedinPulled ? '✓ Pulled from LinkedIn' : '🔗 Pull from LinkedIn') + '</button>' +
         '</div>';
     }
-    if (kind === 'department'){
-      var cloudCls = item.cloudProvider ? 'cloud-badge' : 'cloud-badge none';
-      var cloudLabel = item.cloudProvider ? '☁️ ' + item.cloudProvider : '+ cloud provider';
-      return '<div class="list-row"><div class="list-row-main">' +
-          '<div class="list-row-name">' + item.name + '</div>' +
-          '<div class="list-row-sub">' + item.focus + '</div>' +
-          '<button class="' + cloudCls + '" data-cycle-cloud="' + idx + '" title="Which cloud this team runs on — click to change">' + cloudLabel + '</button>' +
-        '</div></div>';
-    }
     // source
     var cls = item.channel === 'news' ? 'c-newstype' : 'c-socialtype';
     return '<div class="list-row"><div class="list-row-main"><div class="list-row-name">' + item.name + '</div><div class="list-row-sub"><span class="' + cls + '">' + item.type + '</span> &middot; feeds ' + (item.channel === 'news' ? 'News' : 'Social & Workforce') + '</div></div>' +
@@ -2492,27 +2514,51 @@
     '</div>';
   }
 
+  /* Departments as a hub-and-spoke diagram rather than a plain list — the
+     account at the centre, each department a branch, with the cloud badge
+     giving a one-click way to correct a wrong pull. Tech stack (shown in
+     Client Details) is derived straight from these badges. */
+  function departmentDiagramHtml(account){
+    if (!account.departments.length) return '<p class="empty-note">No departments added yet.</p>';
+    var branches = account.departments.map(function(d, i){
+      var cloudCls = d.cloudProvider ? 'cloud-badge' : 'cloud-badge none';
+      var cloudLabel = d.cloudProvider ? '☁️ ' + d.cloudProvider : '+ cloud provider';
+      return '<div class="org-branch">' +
+        '<div class="org-branch-drop"></div>' +
+        '<div class="org-branch-box">' +
+          '<div class="org-branch-name">' + d.name + '</div>' +
+          '<div class="org-branch-focus">' + d.focus + '</div>' +
+          '<button class="' + cloudCls + '" data-cycle-cloud="' + i + '" title="Which cloud this team runs on — click to correct a wrong pull">' + cloudLabel + '</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    return '<div class="org-chart">' +
+      '<div class="org-root"><div class="org-root-box">' + account.icon + ' ' + account.name + '</div></div>' +
+      '<div class="org-stem"></div>' +
+      '<div class="org-branches">' + branches + '</div>' +
+    '</div>';
+  }
+
   function renderSetup(){
     var account = currentAccount();
     var contactsHtml = account.contacts.length ? account.contacts.map(function(c, i){ return setupListRow('contact', c, i); }).join('') : '<p class="empty-note">No contacts added yet.</p>';
-    var deptHtml = account.departments.length ? account.departments.map(function(d, i){ return setupListRow('department', d, i); }).join('') : '<p class="empty-note">No departments added yet.</p>';
     var sourcesHtml = account.sources.length ? account.sources.map(function(s, i){ return setupListRow('source', s, i); }).join('') : '<p class="empty-note">No data sources added yet.</p>';
 
     return accountSwitcher() + accountStrip(account, false) + viewTabs() +
       '<p class="section-sub">Who we talk to, which departments matter, and what we ingest to keep signals current for ' + account.name + '.</p>' +
       clientDetailsHtml(account) +
+      '<div class="setup-panel" style="margin-bottom:18px">' +
+        '<div class="setup-panel-head"><h3>🏢 Departments</h3></div>' +
+        '<p class="col-sub">Teams at this account whose activity we track. Cloud provider feeds the tech stack in Client Details.</p>' +
+        departmentDiagramHtml(account) +
+        (state.setupAdding.department ? setupAddForm('department') : '<button class="add-row-btn" data-toggle-add="department">+ Add department</button>') +
+      '</div>' +
       '<div class="setup-grid">' +
         '<div class="setup-panel">' +
           '<div class="setup-panel-head"><h3>👤 Contacts</h3></div>' +
           '<p class="col-sub">People we communicate with at this account.</p>' +
           contactsHtml +
           (state.setupAdding.contact ? setupAddForm('contact') : '<button class="add-row-btn" data-toggle-add="contact">+ Add contact</button>') +
-        '</div>' +
-        '<div class="setup-panel">' +
-          '<div class="setup-panel-head"><h3>🏢 Departments</h3></div>' +
-          '<p class="col-sub">Teams at this account whose activity we track.</p>' +
-          deptHtml +
-          (state.setupAdding.department ? setupAddForm('department') : '<button class="add-row-btn" data-toggle-add="department">+ Add department</button>') +
         '</div>' +
         '<div class="setup-panel">' +
           '<div class="setup-panel-head"><h3>🔌 Data Sources</h3></div>' +
@@ -2530,23 +2576,29 @@
      was filed under, what it runs on, whether it's a client yet, the goal. All
      of it editable in one place rather than scattered or hardcoded. */
   function clientDetailsHtml(account){
+    var suggestedTier = computeTierFromRules(account);
     if (!state.editingClient){
       return '<div class="setup-panel" style="margin-bottom:18px">' +
         '<div class="setup-panel-head"><h3>🏷 Client Details</h3></div>' +
         '<p class="col-sub">Everything we hold about this account — correct anything that\'s wrong or out of date.</p>' +
         '<div class="detail-facts">' +
           '<div><span class="fact-label">Sector</span><span class="fact-value">' + account.industry + '</span></div>' +
+          '<div><span class="fact-label">Tier</span><span class="fact-value">T' + account.tier + (account.tierManual ? ' (manual)' : '') + '</span></div>' +
           '<div><span class="fact-label">Relationship</span><span class="fact-value">' + (account.relationship || 'Potential Client') + '</span></div>' +
           '<div><span class="fact-label">Headquarters</span><span class="fact-value">' + account.hq + '</span></div>' +
           '<div><span class="fact-label">Revenue</span><span class="fact-value">' + account.revenue + '</span></div>' +
-          '<div><span class="fact-label">Tech stack</span><span class="fact-value">' + ((account.techStack || []).join(', ') || '—') + '</span></div>' +
+          '<div><span class="fact-label">Tech stack</span><span class="fact-value">' + ((account.techStack || []).join(', ') || '—') + ' <span style="color:var(--text-faint)">(from departments below)</span></span></div>' +
         '</div>' +
-        '<p class="col-sub" style="margin-top:10px"><b>Goal:</b> ' + account.goal + '</p>' +
+        (account.tierNote ? '<p class="col-sub" style="margin-top:10px"><b>Why T' + account.tier + ':</b> ' + account.tierNote + '</p>' : '') +
+        '<p class="col-sub" style="margin-top:6px"><b>Goal:</b> ' + account.goal + '</p>' +
         '<button class="add-row-btn" data-edit-client="1">✏️ Edit client details</button>' +
       '</div>';
     }
     var sectorOpts = SECTORS.map(function(s){
       return '<option value="' + escapeAttr(s.key) + '"' + (account.industry === s.key ? ' selected' : '') + '>' + s.icon + ' ' + s.key + '</option>';
+    }).join('');
+    var tierPills = [1,2,3,4,5,6].map(function(t){
+      return '<button class="pill' + (account.tier === t ? ' primary-btn' : ' outline') + '" data-set-client-tier="' + t + '" title="' + (t === suggestedTier ? 'Matches the rule' : 'Override the rule') + '">T' + t + (t === suggestedTier ? ' ★' : '') + '</button>';
     }).join('');
     return '<div class="setup-panel" style="margin-bottom:18px">' +
       '<div class="setup-panel-head"><h3>🏷 Client Details</h3></div>' +
@@ -2559,12 +2611,15 @@
             '<option value="Client"' + (account.relationship === 'Client' ? ' selected' : '') + '>Client</option>' +
           '</select>' +
         '</div>' +
+        '<p class="col-sub" style="margin:2px 0 0">Client tier <span style="color:var(--text-faint)">(a category of the client, not of any one offer — ★ is the rule\'s suggestion)</span></p>' +
+        '<div class="form-row">' + tierPills + '</div>' +
+        '<div class="form-row"><input id="edit-client-tiernote" type="text" placeholder="Why is this account T' + account.tier + '?" value="' + escapeAttr(account.tierNote) + '"></div>' +
         '<div class="form-row">' +
           '<input id="edit-client-hq" type="text" placeholder="Headquarters" value="' + escapeAttr(account.hq) + '">' +
           '<input id="edit-client-revenue" type="text" placeholder="Revenue" value="' + escapeAttr(account.revenue) + '">' +
         '</div>' +
         '<div class="form-row"><input id="edit-client-descriptor" type="text" placeholder="Short descriptor" value="' + escapeAttr(account.sector) + '"></div>' +
-        '<div class="form-row"><input id="edit-client-techstack" type="text" placeholder="Tech stack, comma-separated (e.g. AWS, Databricks)" value="' + escapeAttr((account.techStack || []).join(', ')) + '"></div>' +
+        '<p class="col-sub" style="margin:2px 0 0">Tech stack is built from the Departments diagram below — click a cloud badge there to fix a wrong pull.</p>' +
         '<div class="form-row"><textarea id="edit-client-goal" rows="2" placeholder="What we\'re trying to achieve here">' + escapeAttr(account.goal) + '</textarea></div>' +
         '<div class="form-actions"><button class="btn small" data-cancel-client="1">Cancel</button><button class="btn small primary" data-save-client="1">Save details</button></div>' +
       '</div>' +
@@ -3219,9 +3274,36 @@
       (rows || '<p class="empty-note">Nothing matches that combination — try a different country or widen the sector.</p>');
   }
 
+  function newOfferFormHtml(){
+    var acctOpts = ACCOUNTS.map(function(a){
+      return '<option value="' + a.id + '">' + a.icon + ' ' + a.name + '</option>';
+    }).join('');
+    return '<div class="inline-form" style="margin-bottom:16px">' +
+      '<p class="col-sub" style="margin:0 0 4px">New offer</p>' +
+      '<div class="form-row"><select id="new-offer-account">' + acctOpts + '</select></div>' +
+      '<div class="form-row"><input id="new-offer-title" type="text" placeholder="Offer title"></div>' +
+      '<div class="form-row"><input id="new-offer-domaintag" type="text" placeholder="Domain tag (e.g. AI Regulation & Governance)"></div>' +
+      '<div class="form-row"><textarea id="new-offer-summary" rows="3" placeholder="Summary"></textarea></div>' +
+      '<div class="form-row"><input id="new-offer-capabilities" type="text" placeholder="Deliverables, comma-separated"></div>' +
+      '<div class="form-row"><input id="new-offer-nextstep" type="text" placeholder="Recommended next step"></div>' +
+      '<div class="form-row">' +
+        '<input id="new-offer-dealvalue" type="number" step="5000" min="0" placeholder="Deal value ($)">' +
+        '<input id="new-offer-confidence" type="number" step="5" min="1" max="100" placeholder="Confidence (%)">' +
+      '</div>' +
+      '<div class="form-actions"><button class="btn small" data-cancel-new-offer="1">Cancel</button><button class="btn small primary" data-save-new-offer="1">Add offer</button></div>' +
+    '</div>';
+  }
+
   function renderOfferBoard(){
     var items = allScenariosFlat();
     if (state.boardOnlyImportant) items = items.filter(function(x){ return x.sc.important; });
+    if (state.boardTierFilter !== 'All') items = items.filter(function(x){ return x.account.tier === state.boardTierFilter; });
+
+    var tiersPresent = [1,2,3,4,5,6].filter(function(t){ return ACCOUNTS.some(function(a){ return a.tier === t; }); });
+    var tierFilterRow = '<button class="pill' + (state.boardTierFilter === 'All' ? ' primary-btn' : ' outline') + '" data-set-board-tierfilter="All">All tiers</button>' +
+      tiersPresent.map(function(t){
+        return '<button class="pill' + (state.boardTierFilter === t ? ' primary-btn' : ' outline') + '" data-set-board-tierfilter="' + t + '">T' + t + '</button>';
+      }).join('');
 
     var columns = OFFER_STAGES.map(function(stage){
       var inStage = items.filter(function(x){ return (x.sc.boardStage || 'suggested') === stage.key; });
@@ -3233,7 +3315,7 @@
         return '<div class="board-card' + (x.sc.important ? ' important' : '') + '">' +
           '<div class="board-card-head">' +
             '<button class="board-card-title" data-scenario-account="' + x.account.id + '" data-scenario-card="' + x.sc.id + '">' + x.sc.title + '</button>' +
-            '<button class="star-btn' + (x.sc.important ? ' on' : '') + '" data-toggle-important="' + x.sc.id + '" data-important-account="' + x.account.id + '" title="Flag as important">' + (x.sc.important ? '★' : '☆') + '</button>' +
+            '<button class="star-btn' + (x.sc.important ? ' on' : '') + '" data-toggle-important="' + x.sc.id + '" data-important-account="' + x.account.id + '" title="Favorite this offer">' + (x.sc.important ? '★' : '☆') + '</button>' +
           '</div>' +
           '<div class="board-card-meta">' + x.account.icon + ' ' + x.account.name + ' <span class="tier-pill">T' + x.account.tier + '</span></div>' +
           '<div class="board-card-meta">' + formatMoney(x.sc.dealValue) + ' &middot; ' + effectiveConfidence(x.account, x.sc) + '% confidence</div>' +
@@ -3241,6 +3323,8 @@
           '<div class="board-card-actions">' +
             (idx > 0 ? '<button class="board-move" data-move-offer="' + x.sc.id + '" data-move-account="' + x.account.id + '" data-move-dir="-1" title="Move back">←</button>' : '') +
             (idx < OFFER_STAGES.length - 1 ? '<button class="board-move" data-move-offer="' + x.sc.id + '" data-move-account="' + x.account.id + '" data-move-dir="1" title="Move forward">→</button>' : '') +
+            '<button class="board-move" data-duplicate-offer="' + x.sc.id + '" data-duplicate-account="' + x.account.id + '" title="Duplicate this offer">⧉</button>' +
+            '<button class="board-move danger" data-delete-offer="' + x.sc.id + '" data-delete-account="' + x.account.id + '" title="Delete this offer">🗑</button>' +
           '</div>' +
         '</div>';
       }).join('');
@@ -3258,15 +3342,20 @@
     var openItems = items.filter(function(x){ return x.sc.boardStage !== 'won' && x.sc.boardStage !== 'lost'; });
     var stalledCount = openItems.filter(function(x){ return offerIsStalled(x.account, x.sc); }).length;
     var awaitingApproval = items.filter(function(x){ return (x.sc.boardStage || 'suggested') === 'suggested'; }).length;
+    var signedCount = items.filter(function(x){ return x.sc.boardStage === 'won'; }).length;
 
     return sectorNav() +
       '<div class="section-head"><h2>🗂 Offer Board</h2></div>' +
-      '<p class="section-sub">Every offer from the moment the AI surfaces it through to won or lost. The AI proposes — a salesperson approves — so nothing becomes work until someone owns it. Use ← → to move an offer between columns.</p>' +
-      '<div class="badge-row" style="margin-bottom:16px">' +
-        '<button class="pill' + (state.boardOnlyImportant ? ' primary-btn' : ' outline') + '" data-toggle-board-important="1">★ Important only</button>' +
+      '<p class="section-sub">Every offer from the moment the AI surfaces it through to signed or lost. The AI proposes — a salesperson approves — so nothing becomes work until someone owns it. Use ← → to move an offer between columns.</p>' +
+      (state.addingOffer ? newOfferFormHtml() : '') +
+      '<div class="badge-row" style="margin-bottom:8px">' +
+        '<button class="pill' + (state.boardOnlyImportant ? ' primary-btn' : ' outline') + '" data-toggle-board-important="1">★ Favorites only</button>' +
         '<span class="tag-pill">' + awaitingApproval + ' awaiting approval</span>' +
+        '<span class="tag-pill" style="color:var(--good)">✓ ' + signedCount + ' signed</span>' +
         (stalledCount ? '<span class="tag-pill" style="color:var(--danger)">⚠ ' + stalledCount + ' with no reply</span>' : '') +
+        (!state.addingOffer ? '<button class="pill outline" data-toggle-new-offer="1">+ New offer</button>' : '') +
       '</div>' +
+      '<div class="badge-row" style="margin-bottom:16px">' + tierFilterRow + '</div>' +
       '<div class="board-scroll"><div class="board-row">' + columns + '</div></div>';
   }
 
@@ -3708,6 +3797,71 @@
       showToast(moScenario.title + ' → ' + OFFER_STAGES[newIdx].label);
       return;
     }
+    var duplicateOffer = e.target.closest('[data-duplicate-offer]');
+    if (duplicateOffer){
+      var dupAccount = findAccount(duplicateOffer.getAttribute('data-duplicate-account'));
+      var dupSource = findScenario(dupAccount, duplicateOffer.getAttribute('data-duplicate-offer'));
+      if (dupSource){
+        var dupCopy = JSON.parse(JSON.stringify(dupSource));
+        dupCopy.id = slugify(dupSource.title) + '-copy-' + Date.now();
+        dupCopy.title = dupSource.title + ' (copy)';
+        dupCopy.boardStage = 'suggested';
+        dupCopy.important = false;
+        dupAccount.scenarios.push(dupCopy);
+        render();
+        showToast('Duplicated — edit the copy to adapt it');
+      }
+      return;
+    }
+    var deleteOffer = e.target.closest('[data-delete-offer]');
+    if (deleteOffer){
+      var delAccount = findAccount(deleteOffer.getAttribute('data-delete-account'));
+      var delId = deleteOffer.getAttribute('data-delete-offer');
+      var delScenario = findScenario(delAccount, delId);
+      delAccount.scenarios = delAccount.scenarios.filter(function(s){ return s.id !== delId; });
+      render();
+      showToast((delScenario ? delScenario.title : 'Offer') + ' deleted');
+      return;
+    }
+    var setBoardTierFilter = e.target.closest('[data-set-board-tierfilter]');
+    if (setBoardTierFilter){
+      var btfVal = setBoardTierFilter.getAttribute('data-set-board-tierfilter');
+      state.boardTierFilter = (btfVal === 'All') ? 'All' : parseInt(btfVal, 10);
+      render();
+      return;
+    }
+    var toggleNewOffer = e.target.closest('[data-toggle-new-offer]');
+    if (toggleNewOffer){ state.addingOffer = true; render(); return; }
+    var cancelNewOffer = e.target.closest('[data-cancel-new-offer]');
+    if (cancelNewOffer){ state.addingOffer = false; render(); return; }
+    var saveNewOffer = e.target.closest('[data-save-new-offer]');
+    if (saveNewOffer){
+      var noTitle = (byId('new-offer-title').value || '').trim();
+      if (!noTitle){ showToast('Give the offer a title first'); return; }
+      var noAccount = findAccount(byId('new-offer-account').value);
+      if (!noAccount){ showToast('Pick an account first'); return; }
+      var noCapsRaw = (byId('new-offer-capabilities').value || '').trim();
+      var noConfidence = Math.max(1, Math.min(100, parseInt(byId('new-offer-confidence').value, 10) || 60));
+      var noDealValue = Math.max(0, parseFloat(byId('new-offer-dealvalue').value) || 0);
+      noAccount.scenarios.push({
+        id: slugify(noTitle) + '-' + Date.now(),
+        title: noTitle,
+        domainTag: (byId('new-offer-domaintag').value || 'Manually added').trim(),
+        confidence: noConfidence,
+        primaryContactId: noAccount.contacts.length ? noAccount.contacts[0].id : null,
+        signalIds: [],
+        summary: (byId('new-offer-summary').value || '').trim() || 'Added directly by sales, not surfaced from a signal.',
+        capabilities: noCapsRaw ? noCapsRaw.split(',').map(function(c){ return c.trim(); }).filter(Boolean) : [],
+        nextStep: (byId('new-offer-nextstep').value || '').trim() || 'Follow up to scope the engagement.',
+        dealValue: noDealValue || defaultDealValue({ id: noTitle, confidence: noConfidence }),
+        boardStage: 'approved',
+        important: false
+      });
+      state.addingOffer = false;
+      render();
+      showToast(noTitle + ' added to ' + noAccount.name);
+      return;
+    }
     var toggleImportant = e.target.closest('[data-toggle-important]');
     if (toggleImportant){
       var tiAccount = findAccount(toggleImportant.getAttribute('data-important-account'));
@@ -3755,10 +3909,12 @@
     }
     var cycleCloud = e.target.closest('[data-cycle-cloud]');
     if (cycleCloud){
-      var ccDept = currentAccount().departments[parseInt(cycleCloud.getAttribute('data-cycle-cloud'), 10)];
+      var ccAccount = currentAccount();
+      var ccDept = ccAccount.departments[parseInt(cycleCloud.getAttribute('data-cycle-cloud'), 10)];
       if (ccDept){
         var ccIdx = CLOUD_PROVIDERS.indexOf(ccDept.cloudProvider || '');
         ccDept.cloudProvider = CLOUD_PROVIDERS[(ccIdx + 1) % CLOUD_PROVIDERS.length];
+        ccAccount.techStack = deriveTechStack(ccAccount);
         render();
         if (ccDept.cloudProvider) showToast(ccDept.name + ' runs on ' + ccDept.cloudProvider);
       }
@@ -3796,10 +3952,11 @@
       render();
       return;
     }
-    var setTier = e.target.closest('[data-set-tier]');
+    var setTier = e.target.closest('[data-set-tier], [data-set-client-tier]');
     if (setTier){
       var tierAccount = currentAccount();
-      tierAccount.tier = parseInt(setTier.getAttribute('data-set-tier'), 10);
+      var tierAttr = setTier.getAttribute('data-set-tier') || setTier.getAttribute('data-set-client-tier');
+      tierAccount.tier = parseInt(tierAttr, 10);
       tierAccount.tierManual = (tierAccount.tier !== computeTierFromRules(tierAccount));
       render();
       showToast('Tier set to T' + tierAccount.tier + (tierAccount.tierManual ? ' (overrides the rule)' : ''));
@@ -3825,8 +3982,7 @@
       ecAccount.revenue = (byId('edit-client-revenue').value || ecAccount.revenue).trim();
       ecAccount.sector = (byId('edit-client-descriptor').value || ecAccount.sector).trim();
       ecAccount.goal = (byId('edit-client-goal').value || ecAccount.goal).trim();
-      var ecStack = (byId('edit-client-techstack').value || '').trim();
-      ecAccount.techStack = ecStack ? ecStack.split(',').map(function(x){ return x.trim(); }).filter(Boolean) : [];
+      ecAccount.tierNote = (byId('edit-client-tiernote').value || '').trim();
       // Sector drives the icon, and either change can move the rule-based tier.
       var sectorDef2 = SECTORS.filter(function(x){ return x.key === newSector; })[0];
       if (sectorDef2) ecAccount.icon = sectorDef2.icon;

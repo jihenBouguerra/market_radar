@@ -228,6 +228,46 @@
     color: var(--accent); background: var(--accent-soft); padding: 4px 10px; border-radius: var(--radius-pill);
   }
 
+  .board-scroll { overflow-x: auto; padding-bottom: 8px; }
+  .board-row { display: flex; gap: 14px; align-items: flex-start; min-width: min-content; }
+  .board-col {
+    flex: 0 0 232px; background: var(--panel); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px; min-height: 120px;
+  }
+  .board-col-head { margin-bottom: 10px; }
+  .board-col-head h4 { margin: 0; font-size: 12.5px; display: flex; align-items: center; gap: 6px; }
+  .board-count {
+    font-size: 10px; font-weight: 800; color: var(--accent); background: var(--accent-soft);
+    padding: 1px 7px; border-radius: var(--radius-pill);
+  }
+  .board-col-sub { font-size: 10.5px; color: var(--text-faint); margin-top: 3px; line-height: 1.4; }
+  .board-col-value { font-size: 10.5px; color: var(--muted); font-family: var(--mono); margin-top: 5px; }
+  .board-empty { font-size: 11.5px; color: var(--text-faint); margin: 6px 0 0; }
+  .board-card {
+    background: var(--panel2); border: 1px solid var(--border); border-left: 3px solid transparent;
+    border-radius: 10px; padding: 10px 11px; margin-bottom: 9px;
+  }
+  .board-card.important { border-left-color: var(--warn); }
+  .board-card-head { display: flex; align-items: flex-start; gap: 6px; }
+  .board-card-title {
+    flex: 1; text-align: left; background: none; border: none; padding: 0; cursor: pointer;
+    font-family: var(--font); font-size: 12px; font-weight: 650; color: var(--text); line-height: 1.35;
+  }
+  .board-card-title:hover { color: var(--accent); }
+  .star-btn {
+    background: none; border: none; cursor: pointer; font-size: 14px; line-height: 1;
+    color: var(--text-faint); padding: 0;
+  }
+  .star-btn.on { color: var(--warn); }
+  .board-card-meta { font-size: 10.5px; color: var(--muted); margin-top: 5px; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+  .board-flag { font-size: 10px; font-weight: 700; color: var(--danger); margin-top: 6px; }
+  .board-card-actions { display: flex; gap: 5px; margin-top: 8px; }
+  .board-move {
+    background: none; border: 1px solid var(--border-strong); color: var(--muted); cursor: pointer;
+    border-radius: 6px; font-size: 11px; padding: 1px 8px; font-family: var(--font);
+  }
+  .board-move:hover { color: var(--accent); border-color: var(--accent); }
+
   .opp-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
   .opp-title-row .opp-title { flex: 1; min-width: 0; }
   .inline-form textarea {
@@ -1367,6 +1407,7 @@
     viewBeforeSearch: 'sector',
     tierFilter: 'All',
     editingOffer: false,
+    boardOnlyImportant: false,
     scenarioId: null,
     signalId: null,
     signalOrigin: { view: 'overview', scenarioId: null },
@@ -1501,6 +1542,8 @@
     pills += '<button class="sector-nav-pill' + (templatesActive ? ' active' : '') + '" data-select-sector="Templates">📄 Templates' + (TEMPLATES.length ? ' (' + TEMPLATES.length + ')' : '') + '</button>';
     var casesActive = state.selectedSector === 'CaseStudies';
     pills += '<button class="sector-nav-pill' + (casesActive ? ' active' : '') + '" data-select-sector="CaseStudies">🏆 Case Studies (' + CASE_STUDIES.length + ')</button>';
+    var boardActive = state.selectedSector === 'OfferBoard';
+    pills += '<button class="sector-nav-pill' + (boardActive ? ' active' : '') + '" data-select-sector="OfferBoard">🗂 Offer Board</button>';
     var followupsActive = state.selectedSector === 'Followups';
     var overdueCount = openFollowUps().filter(function(r){ return r.status === 'overdue'; }).length;
     pills += '<button class="sector-nav-pill' + (followupsActive ? ' active' : '') + '" data-select-sector="Followups">🔔 Follow-ups' + (overdueCount ? ' (' + overdueCount + ')' : '') + '</button>';
@@ -1543,7 +1586,8 @@
     state.tierFilter = 'All';
     state.view = (key === 'Partners') ? 'partners' : (key === 'Pipeline') ? 'pipeline' : (key === 'Triggers') ? 'triggers' :
       (key === 'Recap') ? 'recap' : (key === 'Templates') ? 'templates' :
-      (key === 'CaseStudies') ? 'cases' : (key === 'Followups') ? 'followups' : 'sector';
+      (key === 'CaseStudies') ? 'cases' : (key === 'Followups') ? 'followups' :
+      (key === 'OfferBoard') ? 'offerboard' : 'sector';
     window.scrollTo(0,0);
     render();
   }
@@ -1634,6 +1678,44 @@
       if (typeof s.priority !== 'string') s.priority = 'Medium';
     });
   });
+  /* Offer tracking board. Every offer sits in exactly one column, from the
+     moment the AI surfaces it through to won or lost, so nothing stalls
+     invisibly. "Approved" is the gate: the AI proposes, a salesperson accepts
+     it, and only then does it become work someone owns. */
+  var OFFER_STAGES = [
+    { key: 'suggested', label: 'AI suggested', hint: 'Surfaced from signals, not yet reviewed' },
+    { key: 'approved',  label: 'Approved',     hint: 'A salesperson accepted it as worth pursuing' },
+    { key: 'first-call',label: 'First call',   hint: 'Intro conversation booked or held' },
+    { key: 'offer-sent',label: 'Offer sent',   hint: 'Written offer is with the client' },
+    { key: 'answered',  label: 'Answered',     hint: 'They came back to us' },
+    { key: 'won',       label: 'Won',          hint: 'Signed' },
+    { key: 'lost',      label: 'Lost',         hint: 'Closed out — reason recorded' }
+  ];
+  function offerStageDef(key){
+    return OFFER_STAGES.filter(function(s){ return s.key === key; })[0] || OFFER_STAGES[0];
+  }
+  function offerStageIndex(key){
+    for (var i = 0; i < OFFER_STAGES.length; i++){ if (OFFER_STAGES[i].key === key) return i; }
+    return 0;
+  }
+  // Seed each offer's board stage from how far along its account already is.
+  ACCOUNTS.forEach(function(a){
+    a.scenarios.forEach(function(sc){
+      if (typeof sc.important !== 'boolean') sc.important = false;
+      if (typeof sc.boardStage === 'string') return;
+      if (a.stage === 'Won') sc.boardStage = 'won';
+      else if (a.stage === 'Lost') sc.boardStage = 'lost';
+      else if (a.stage === 'In Conversation') sc.boardStage = 'first-call';
+      else if (a.stage === 'Warm') sc.boardStage = 'approved';
+      else sc.boardStage = 'suggested';
+    });
+  });
+  // An offer that's been sitting in a pre-close column past its follow-up date is stalling.
+  function offerIsStalled(account, sc){
+    if (sc.boardStage === 'won' || sc.boardStage === 'lost' || sc.boardStage === 'suggested') return false;
+    return (account.activityLog || []).some(function(entry){ return followUpStatus(entry) === 'overdue'; });
+  }
+
   /* What we're actually trying to achieve at each account. Offers get checked
      against it so sales can see whether an offer serves the stated goal or is
      just a plausible-looking distraction. */
@@ -2895,6 +2977,57 @@
       '<div class="signal-col">' + itemsHtml + '</div>';
   }
 
+  function renderOfferBoard(){
+    var items = allScenariosFlat();
+    if (state.boardOnlyImportant) items = items.filter(function(x){ return x.sc.important; });
+
+    var columns = OFFER_STAGES.map(function(stage){
+      var inStage = items.filter(function(x){ return (x.sc.boardStage || 'suggested') === stage.key; });
+      var stageValue = inStage.reduce(function(sum, x){ return sum + (effectiveConfidence(x.account, x.sc) / 100) * (x.sc.dealValue || 0); }, 0);
+      var idx = offerStageIndex(stage.key);
+
+      var cards = inStage.map(function(x){
+        var stalled = offerIsStalled(x.account, x.sc);
+        return '<div class="board-card' + (x.sc.important ? ' important' : '') + '">' +
+          '<div class="board-card-head">' +
+            '<button class="board-card-title" data-scenario-account="' + x.account.id + '" data-scenario-card="' + x.sc.id + '">' + x.sc.title + '</button>' +
+            '<button class="star-btn' + (x.sc.important ? ' on' : '') + '" data-toggle-important="' + x.sc.id + '" data-important-account="' + x.account.id + '" title="Flag as important">' + (x.sc.important ? '★' : '☆') + '</button>' +
+          '</div>' +
+          '<div class="board-card-meta">' + x.account.icon + ' ' + x.account.name + ' <span class="tier-pill">T' + x.account.tier + '</span></div>' +
+          '<div class="board-card-meta">' + formatMoney(x.sc.dealValue) + ' &middot; ' + effectiveConfidence(x.account, x.sc) + '% confidence</div>' +
+          (stalled ? '<div class="board-flag">⚠ No reply — follow-up overdue</div>' : '') +
+          '<div class="board-card-actions">' +
+            (idx > 0 ? '<button class="board-move" data-move-offer="' + x.sc.id + '" data-move-account="' + x.account.id + '" data-move-dir="-1" title="Move back">←</button>' : '') +
+            (idx < OFFER_STAGES.length - 1 ? '<button class="board-move" data-move-offer="' + x.sc.id + '" data-move-account="' + x.account.id + '" data-move-dir="1" title="Move forward">→</button>' : '') +
+          '</div>' +
+        '</div>';
+      }).join('');
+
+      return '<div class="board-col">' +
+        '<div class="board-col-head">' +
+          '<h4>' + stage.label + ' <span class="board-count">' + inStage.length + '</span></h4>' +
+          '<div class="board-col-sub">' + stage.hint + '</div>' +
+          (stageValue ? '<div class="board-col-value">' + formatMoney(stageValue) + ' weighted</div>' : '') +
+        '</div>' +
+        (cards || '<p class="board-empty">Nothing here</p>') +
+      '</div>';
+    }).join('');
+
+    var openItems = items.filter(function(x){ return x.sc.boardStage !== 'won' && x.sc.boardStage !== 'lost'; });
+    var stalledCount = openItems.filter(function(x){ return offerIsStalled(x.account, x.sc); }).length;
+    var awaitingApproval = items.filter(function(x){ return (x.sc.boardStage || 'suggested') === 'suggested'; }).length;
+
+    return header() + sectorNav() +
+      '<div class="section-head"><h2>🗂 Offer Board</h2></div>' +
+      '<p class="section-sub">Every offer from the moment the AI surfaces it through to won or lost. The AI proposes — a salesperson approves — so nothing becomes work until someone owns it. Use ← → to move an offer between columns.</p>' +
+      '<div class="badge-row" style="margin-bottom:16px">' +
+        '<button class="pill' + (state.boardOnlyImportant ? ' primary-btn' : ' outline') + '" data-toggle-board-important="1">★ Important only</button>' +
+        '<span class="tag-pill">' + awaitingApproval + ' awaiting approval</span>' +
+        (stalledCount ? '<span class="tag-pill" style="color:var(--danger)">⚠ ' + stalledCount + ' with no reply</span>' : '') +
+      '</div>' +
+      '<div class="board-scroll"><div class="board-row">' + columns + '</div></div>';
+  }
+
   function renderFollowups(){
     var rows = openFollowUps();
 
@@ -2936,6 +3069,7 @@
     else if (state.view === 'recap') html = renderMonthlyRecap();
     else if (state.view === 'templates') html = renderTemplates();
     else if (state.view === 'cases') html = renderCaseStudies();
+    else if (state.view === 'offerboard') html = renderOfferBoard();
     else if (state.view === 'followups') html = renderFollowups();
     else if (state.view === 'search') html = renderSearch();
     else if (state.view === 'sector') html = renderSectorLanding();
@@ -3259,6 +3393,29 @@
       showToast(relAccount.name + ' flagged as ' + relAccount.relationship + ' · tier now T' + relAccount.tier);
       return;
     }
+    var moveOffer = e.target.closest('[data-move-offer]');
+    if (moveOffer){
+      var moAccount = findAccount(moveOffer.getAttribute('data-move-account'));
+      var moScenario = findScenario(moAccount, moveOffer.getAttribute('data-move-offer'));
+      var dir = parseInt(moveOffer.getAttribute('data-move-dir'), 10);
+      var newIdx = Math.min(OFFER_STAGES.length - 1, Math.max(0, offerStageIndex(moScenario.boardStage) + dir));
+      moScenario.boardStage = OFFER_STAGES[newIdx].key;
+      render();
+      showToast(moScenario.title + ' → ' + OFFER_STAGES[newIdx].label);
+      return;
+    }
+    var toggleImportant = e.target.closest('[data-toggle-important]');
+    if (toggleImportant){
+      var tiAccount = findAccount(toggleImportant.getAttribute('data-important-account'));
+      var tiScenario = findScenario(tiAccount, toggleImportant.getAttribute('data-toggle-important'));
+      tiScenario.important = !tiScenario.important;
+      render();
+      showToast(tiScenario.important ? 'Flagged as important' : 'Importance cleared');
+      return;
+    }
+    var toggleBoardImportant = e.target.closest('[data-toggle-board-important]');
+    if (toggleBoardImportant){ state.boardOnlyImportant = !state.boardOnlyImportant; render(); return; }
+
     var toggleOfferEdit = e.target.closest('[data-toggle-offer-edit]');
     if (toggleOfferEdit){ state.editingOffer = true; render(); return; }
     var cancelOfferEdit = e.target.closest('[data-cancel-offer-edit]');

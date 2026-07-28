@@ -228,6 +228,14 @@
     color: var(--accent); background: var(--accent-soft); padding: 4px 10px; border-radius: var(--radius-pill);
   }
 
+  .cloud-badge {
+    display: inline-block; margin-top: 7px; font-size: 10px; font-weight: 700; padding: 3px 10px;
+    border-radius: var(--radius-pill); background: var(--panel2); border: 1px solid var(--border-strong);
+    color: var(--text); cursor: pointer; font-family: var(--font);
+  }
+  .cloud-badge:hover { border-color: var(--accent); color: var(--accent); }
+  .cloud-badge.none { color: var(--text-faint); font-weight: 600; border-style: dashed; }
+
   .source-state-btn {
     font-size: 10px; font-weight: 800; padding: 4px 11px; border-radius: var(--radius-pill);
     border: 1px solid var(--border-strong); background: none; color: var(--muted);
@@ -1613,6 +1621,18 @@
       if (typeof s.priority !== 'string') s.priority = 'Medium';
     });
   });
+  /* Which cloud a given department actually runs on. Seeded from the account's
+     tech stack where we know it, and editable by sales — they often learn this
+     in a call long before it shows up anywhere public. */
+  var CLOUD_PROVIDERS = ['', 'AWS', 'Microsoft Azure', 'Google Cloud'];
+  ACCOUNTS.forEach(function(a){
+    var accountCloud = (a.techStack || []).filter(function(t){ return CLOUD_PROVIDERS.indexOf(t) > 0; })[0] || '';
+    a.departments.forEach(function(d, i){
+      // Only the lead department inherits the account-wide cloud; the rest start blank.
+      if (typeof d.cloudProvider !== 'string') d.cloudProvider = (i === 0) ? accountCloud : '';
+    });
+  });
+
   function nextSourceState(s){
     if (!s.active) return { active: true, priority: 'Low' };
     if (s.priority === 'Low') return { active: true, priority: 'Medium' };
@@ -2133,7 +2153,13 @@
         '</div>';
     }
     if (kind === 'department'){
-      return '<div class="list-row"><div class="list-row-main"><div class="list-row-name">' + item.name + '</div><div class="list-row-sub">' + item.focus + '</div></div></div>';
+      var cloudCls = item.cloudProvider ? 'cloud-badge' : 'cloud-badge none';
+      var cloudLabel = item.cloudProvider ? '☁️ ' + item.cloudProvider : '+ cloud provider';
+      return '<div class="list-row"><div class="list-row-main">' +
+          '<div class="list-row-name">' + item.name + '</div>' +
+          '<div class="list-row-sub">' + item.focus + '</div>' +
+          '<button class="' + cloudCls + '" data-cycle-cloud="' + idx + '" title="Which cloud this team runs on — click to change">' + cloudLabel + '</button>' +
+        '</div></div>';
     }
     // source
     var cls = item.channel === 'news' ? 'c-newstype' : 'c-socialtype';
@@ -2173,7 +2199,7 @@
   function renderSetup(){
     var account = currentAccount();
     var contactsHtml = account.contacts.length ? account.contacts.map(function(c, i){ return setupListRow('contact', c, i); }).join('') : '<p class="empty-note">No contacts added yet.</p>';
-    var deptHtml = account.departments.length ? account.departments.map(function(d){ return setupListRow('department', d); }).join('') : '<p class="empty-note">No departments added yet.</p>';
+    var deptHtml = account.departments.length ? account.departments.map(function(d, i){ return setupListRow('department', d, i); }).join('') : '<p class="empty-note">No departments added yet.</p>';
     var sourcesHtml = account.sources.length ? account.sources.map(function(s, i){ return setupListRow('source', s, i); }).join('') : '<p class="empty-note">No data sources added yet.</p>';
 
     return header() + accountSwitcher() + accountStrip(account, false) + viewTabs() +
@@ -3078,6 +3104,17 @@
       showToast(relAccount.name + ' flagged as ' + relAccount.relationship + ' · tier now T' + relAccount.tier);
       return;
     }
+    var cycleCloud = e.target.closest('[data-cycle-cloud]');
+    if (cycleCloud){
+      var ccDept = currentAccount().departments[parseInt(cycleCloud.getAttribute('data-cycle-cloud'), 10)];
+      if (ccDept){
+        var ccIdx = CLOUD_PROVIDERS.indexOf(ccDept.cloudProvider || '');
+        ccDept.cloudProvider = CLOUD_PROVIDERS[(ccIdx + 1) % CLOUD_PROVIDERS.length];
+        render();
+        if (ccDept.cloudProvider) showToast(ccDept.name + ' runs on ' + ccDept.cloudProvider);
+      }
+      return;
+    }
     var cycleSourceState = e.target.closest('[data-cycle-sourcestate]');
     if (cycleSourceState){
       var csSource = currentAccount().sources[parseInt(cycleSourceState.getAttribute('data-cycle-sourcestate'), 10)];
@@ -3412,7 +3449,7 @@
       } else if (kind === 'department'){
         var dName = (byId('add-department-name').value || '').trim();
         if (!dName){ showToast('Enter a department name first'); return; }
-        account.departments.push({ name: dName, focus: (byId('add-department-focus').value || 'Not documented yet').trim() || 'Not documented yet' });
+        account.departments.push({ name: dName, focus: (byId('add-department-focus').value || 'Not documented yet').trim() || 'Not documented yet', cloudProvider: '' });
       } else if (kind === 'source'){
         var sName = (byId('add-source-name').value || '').trim();
         if (!sName){ showToast('Enter a source name first'); return; }

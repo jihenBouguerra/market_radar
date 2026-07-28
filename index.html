@@ -1206,6 +1206,40 @@
     }, 0);
   }
 
+  /* Client tier 1-6. Each tier is DEFINED by a rule — a minimum weighted-pipeline
+     threshold — rather than hand-assigned, so tiering stays consistent across the
+     book. An "existing relationship" flag from sales bumps an account one tier
+     higher-priority, because a warm account is worth more than its raw pipeline
+     suggests. Sales can still override the result outright on any account. */
+  var TIER_RULES = [
+    { tier: 1, minWeightedValue: 550000 },
+    { tier: 2, minWeightedValue: 450000 },
+    { tier: 3, minWeightedValue: 350000 },
+    { tier: 4, minWeightedValue: 250000 },
+    { tier: 5, minWeightedValue: 150000 },
+    { tier: 6, minWeightedValue: 0 }
+  ];
+  function tierRuleSummary(){
+    return TIER_RULES.map(function(r){
+      return 'T' + r.tier + (r.minWeightedValue ? ' ≥ ' + formatMoney(r.minWeightedValue) : ' below');
+    }).join(' · ');
+  }
+  function computeTierFromRules(account){
+    var w = computeWeightedValue(account);
+    var matched = TIER_RULES.filter(function(r){ return w >= r.minWeightedValue; })[0] || TIER_RULES[TIER_RULES.length - 1];
+    var t = matched.tier;
+    // An account we already have a relationship with counts one tier higher-priority.
+    if (account.relationship === 'Client') t = Math.max(1, t - 1);
+    return t;
+  }
+  function refreshAutoTier(account){
+    if (!account.tierManual) account.tier = computeTierFromRules(account);
+  }
+  ACCOUNTS.forEach(function(a){
+    if (typeof a.tierManual !== 'boolean') a.tierManual = false;
+    if (typeof a.tier !== 'number') a.tier = computeTierFromRules(a);
+  });
+
   /* Proof points we can put in front of a prospect. */
   var CASE_STUDIES = [
     {
@@ -2117,6 +2151,12 @@
       return '<button class="pill stage-pill ' + cls + (active ? ' active' : '') + '" data-set-stage="' + s + '">' + s + '</button>';
     }).join('');
 
+    var suggestedTier = computeTierFromRules(account);
+    var tierPills = [1,2,3,4,5,6].map(function(t){
+      var active = account.tier === t;
+      return '<button class="pill' + (active ? ' primary-btn' : ' outline') + '" data-set-tier="' + t + '" title="' + (t === suggestedTier ? 'Matches the rule' : 'Override the rule') + '">T' + t + (t === suggestedTier ? ' ★' : '') + '</button>';
+    }).join('');
+
     var sortedLog = (account.activityLog || []).slice().sort(function(a,b){ return a.date < b.date ? 1 : -1; });
     var logHtml = sortedLog.length ? sortedLog.map(function(a){
       return '<div class="timeline-item"><div class="timeline-date">' + a.date + '</div><div><span class="evidence-type">' + a.type + '</span><p>' + a.note + '</p></div></div>';
@@ -2130,6 +2170,14 @@
           momentumChart(account.signalHistory) +
           '<p class="section-label" style="margin-top:20px">Deal stage</p>' +
           '<div class="badge-row">' + stagePills + '</div>' +
+          '<p class="section-label" style="margin-top:20px">Client tier</p>' +
+          '<div class="badge-row">' + tierPills + '</div>' +
+          '<p class="col-sub" style="margin-top:8px">' +
+            'Rule-based suggestion: <b>T' + suggestedTier + '</b> — ' + formatMoney(computeWeightedValue(account)) + ' weighted pipeline' +
+            (account.relationship === 'Client' ? ', bumped one tier for being an existing client' : '') + '.' +
+            (account.tierManual ? ' Currently overridden by sales — <button class="btn small" data-reset-tier="1">use the rule</button>' : '') +
+            '<br><span style="color:var(--text-faint)">' + tierRuleSummary() + ' · an existing client counts one tier higher.</span>' +
+          '</p>' +
           outcomeBlockHtml(account) +
         '</div>' +
         '<div class="setup-panel">' +
@@ -2915,8 +2963,27 @@
     if (toggleRelationship){
       var relAccount = findAccount(toggleRelationship.getAttribute('data-toggle-relationship'));
       relAccount.relationship = relAccount.relationship === 'Client' ? 'Potential Client' : 'Client';
+      refreshAutoTier(relAccount);
       render();
-      showToast(relAccount.name + ' flagged as ' + relAccount.relationship);
+      showToast(relAccount.name + ' flagged as ' + relAccount.relationship + ' · tier now T' + relAccount.tier);
+      return;
+    }
+    var setTier = e.target.closest('[data-set-tier]');
+    if (setTier){
+      var tierAccount = currentAccount();
+      tierAccount.tier = parseInt(setTier.getAttribute('data-set-tier'), 10);
+      tierAccount.tierManual = (tierAccount.tier !== computeTierFromRules(tierAccount));
+      render();
+      showToast('Tier set to T' + tierAccount.tier + (tierAccount.tierManual ? ' (overrides the rule)' : ''));
+      return;
+    }
+    var resetTier = e.target.closest('[data-reset-tier]');
+    if (resetTier){
+      var rtAccount = currentAccount();
+      rtAccount.tierManual = false;
+      rtAccount.tier = computeTierFromRules(rtAccount);
+      render();
+      showToast('Back to the rule — T' + rtAccount.tier);
       return;
     }
     var toggleActivity = e.target.closest('[data-toggle-activity]');

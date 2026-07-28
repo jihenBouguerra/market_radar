@@ -228,6 +228,56 @@
     color: var(--accent); background: var(--accent-soft); padding: 4px 10px; border-radius: var(--radius-pill);
   }
 
+  /* Two-column shell: tools on the left, sectors and content on the right. */
+  .app-body { display: flex; gap: 22px; align-items: flex-start; }
+  .app-content { flex: 1; min-width: 0; }
+  .side-nav {
+    flex: 0 0 178px; position: sticky; top: 18px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .side-group { display: flex; flex-direction: column; gap: 2px; }
+  .side-group-title {
+    font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.09em;
+    color: var(--text-faint); padding: 0 10px 5px;
+  }
+  .side-link {
+    display: flex; align-items: center; gap: 9px; width: 100%;
+    background: none; border: none; border-radius: 9px; padding: 8px 10px;
+    font-family: var(--font); font-size: 12.5px; font-weight: 600; color: var(--muted);
+    cursor: pointer; text-align: left;
+  }
+  .side-link:hover { background: var(--panel2); color: var(--text); }
+  .side-link.active { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+  .side-icon { font-size: 13px; line-height: 1; flex-shrink: 0; }
+  .side-label { flex: 1; min-width: 0; }
+  .side-badge {
+    font-size: 9.5px; font-weight: 800; padding: 1px 6px; border-radius: var(--radius-pill);
+    background: var(--surface-3); color: var(--muted); flex-shrink: 0;
+  }
+  .side-link.active .side-badge { background: var(--accent); color: #fff; }
+
+  @media (max-width: 900px) {
+    .app-body { flex-direction: column; gap: 14px; }
+    .side-nav {
+      position: static; flex: none; width: 100%;
+      flex-direction: row; flex-wrap: wrap; gap: 6px;
+    }
+    .side-group { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+    .side-group-title { display: none; }
+    .side-link { width: auto; border: 1px solid var(--border); }
+  }
+
+  .detail-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 6px; }
+  .detail-facts > div { display: flex; flex-direction: column; gap: 3px; }
+  .detail-facts .fact-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-faint); }
+  .detail-facts .fact-value { font-size: 12.5px; color: var(--text); }
+
+  .tier-note {
+    margin-top: 10px; font-size: 12px; line-height: 1.55; color: var(--text);
+    background: var(--panel2); border: 1px solid var(--border); border-radius: 10px; padding: 9px 11px;
+  }
+  .tier-note b.label { color: var(--accent); }
+
   .scan-controls {
     background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
     padding: 16px 18px; margin-bottom: 18px; display: flex; flex-direction: column; gap: 14px;
@@ -534,7 +584,7 @@
     {
       id: 'vw',
       name: 'Volkswagen Group',
-      industry: 'Automotive',
+      industry: 'Auto & Manufacturing',
       icon: '🚗',
       avatar: 'VW',
       hq: 'Wolfsburg, Germany',
@@ -625,7 +675,7 @@
     {
       id: 'bmw',
       name: 'BMW Group',
-      industry: 'Automotive',
+      industry: 'Auto & Manufacturing',
       icon: '🚗',
       avatar: 'BMW',
       hq: 'Munich, Germany',
@@ -685,7 +735,7 @@
     {
       id: 'rwe',
       name: 'RWE AG',
-      industry: 'Energy',
+      industry: 'Energy & Telco',
       icon: '⚡',
       avatar: 'RWE',
       hq: 'Essen, Germany',
@@ -767,7 +817,7 @@
     {
       id: 'siemens-energy',
       name: 'Siemens Energy AG',
-      industry: 'Energy',
+      industry: 'Energy & Telco',
       icon: '⚡',
       avatar: 'SIE',
       hq: 'Munich, Germany',
@@ -908,7 +958,7 @@
     {
       id: 'deutsche-bank',
       name: 'Deutsche Bank AG',
-      industry: 'Finance',
+      industry: 'Finance & Insurance',
       icon: '🏦',
       avatar: 'DB',
       hq: 'Frankfurt, Germany',
@@ -981,7 +1031,7 @@
     {
       id: 'commerzbank',
       name: 'Commerzbank AG',
-      industry: 'Finance',
+      industry: 'Finance & Insurance',
       icon: '🏦',
       avatar: 'CBK',
       hq: 'Frankfurt, Germany',
@@ -1152,111 +1202,6 @@
         }
       ]
     },
-    {
-      id: 'rossmann',
-      name: 'Dirk Rossmann GmbH',
-      industry: 'Retail',
-      icon: '🛍️',
-      avatar: 'ROS',
-      hq: 'Burgwedel, Germany',
-      revenue: '$12B (FY2025)',
-      techStack: ['Google Cloud', 'Snowflake'],
-      sector: 'Drugstore & Health-Retail Chain · digital unit: Rossmann Digital',
-      relationship: 'Potential Client',
-      stage: 'Cold',
-      signalHistory: [2,3,3,4,4,5],
-      activityLog: [
-        { date:'2026-07-14', type:'Note', note:'Added Rossmann to the pilot after seeing AI-personalization hiring and loyalty-app signals.' }
-      ],
-      departments: [
-        { name: 'Digital & E-Commerce', focus: 'Runs AI-driven personalization and recommendation systems for the loyalty app and online store.' },
-        { name: 'Supply Chain & Logistics', focus: 'Owns inventory forecasting across stores and distribution centers.' }
-      ],
-      contacts: [
-        { id: 'lukas-meyer', name: 'Lukas Meyer', role: 'Head of Digital & E-Commerce', department: 'Digital & E-Commerce', channel: 'lukas.meyer@rossmann.example', lastContact: '2026-06-28' }
-      ],
-      sources: [
-        { id:'press', name: 'Rossmann Newsroom & Press Releases', type: 'Company News', channel: 'news', status: 'Active' },
-        { id:'jobs', name: 'Rossmann Careers (LinkedIn Jobs)', type: 'Job Postings', channel: 'social', status: 'Active' },
-        { id:'reg', name: 'European Consumer Protection Authority — Retail AI Tracker', type: 'Regulatory Tracker', channel: 'news', status: 'Active' },
-        { id:'execsocial', name: 'LinkedIn — Rossmann digital leadership', type: 'Executive Social Activity', channel: 'social', status: 'Planned' }
-      ],
-      signals: [
-        { id:'n1', channel:'news', subtype:'Law', date:'2026-06-22', sourceId:'reg', text:'New EU rule requires retailers to disclose the logic behind AI-driven personalized pricing and recommendations to customers.' },
-        { id:'n2', channel:'news', subtype:'Collaboration', date:'2026-05-30', sourceId:'press', text:'Rossmann partners with Google Cloud to power AI-driven personalized recommendations across its loyalty app and stores.' },
-        { id:'n3', channel:'news', subtype:'Competitive', date:'2026-07-18', sourceId:'press', text:'Trade press reports Rossmann is evaluating a rival consultancy to fix its loyalty-app recommendation accuracy.', trigger: true },
-        { id:'s1', channel:'social', subtype:'Hiring', date:'2026-06-10', sourceId:'jobs', text:'Rossmann posts a new role: "AI Personalization Product Manager" for its loyalty app.' },
-        { id:'s2', channel:'social', subtype:'Social Post', date:'2026-06-24', sourceId:'execsocial', text:'Customers on social media mention Rossmann’s loyalty app recommends products that don’t match their purchase history.' }
-      ],
-      scenarios: [
-        {
-          id: 'ros-personalization-transparency', title: 'Personalization AI Transparency & Accuracy', domainTag: 'Retail AI Regulation & Customer Trust', confidence: 62, primaryContactId: 'lukas-meyer',
-          signalIds: ['n1','s2'],
-          summary: 'Rossmann customers are already flagging mismatched recommendations in the loyalty app, and a new EU rule will soon require retailers to explain the logic behind personalized recommendations. We can fix the accuracy gap and build the disclosure layer together.',
-          capabilities: ['Recommendation-quality monitoring', 'Plain-language personalization disclosures', 'Customer-feedback triage'],
-          nextStep: 'Reach the Head of Digital & E-Commerce, using the loyalty-app complaints as the opening.'
-        },
-        {
-          id: 'ros-gcloud-governance', title: 'Governance Layer for the Google Cloud Personalization Partnership', domainTag: 'Retail AI Regulation & Cloud Partnership', confidence: 50, primaryContactId: 'lukas-meyer',
-          signalIds: ['n2','n1'],
-          summary: 'Rossmann’s new Google Cloud partnership gives it the infrastructure for AI-driven personalization — a natural moment to build in the disclosure and governance layer the cloud deal alone doesn’t provide.',
-          capabilities: ['Google Cloud-hosted model governance', 'EU retail AI compliance documentation'],
-          nextStep: 'Engage the digital & e-commerce team early, while the Google Cloud rollout is still underway.'
-        }
-      ]
-    },
-    {
-      id: 'zalando',
-      name: 'Zalando SE',
-      industry: 'Retail',
-      icon: '🛍️',
-      avatar: 'ZAL',
-      hq: 'Berlin, Germany',
-      revenue: '$11B (FY2025)',
-      techStack: ['AWS', 'Databricks'],
-      sector: 'Online Fashion & Lifestyle Retail · digital unit: Zalando Tech',
-      relationship: 'Potential Client',
-      stage: 'Cold',
-      signalHistory: [3,3,4,4,5,6],
-      activityLog: [
-        { date:'2026-07-16', type:'Note', note:'Added Zalando to the pilot after seeing AI-hiring signals around sizing and fit recommendations.' }
-      ],
-      departments: [
-        { name: 'Zalando Tech', focus: 'Runs AI-driven sizing, fit, and recommendation systems across the fashion platform.' },
-        { name: 'Fulfillment & Logistics', focus: 'Owns AI-driven demand forecasting and warehouse operations.' }
-      ],
-      contacts: [
-        { id: 'nina-krueger', name: 'Nina Krüger', role: 'Head of AI Personalization', department: 'Zalando Tech', channel: 'nina.krueger@zalando.example', lastContact: '2026-06-30' }
-      ],
-      sources: [
-        { id:'press', name: 'Zalando Newsroom & Press Releases', type: 'Company News', channel: 'news', status: 'Active' },
-        { id:'jobs', name: 'Zalando Careers (LinkedIn Jobs)', type: 'Job Postings', channel: 'social', status: 'Active' },
-        { id:'reg', name: 'European Retail Federation — AI & Consumer Regulation Tracker', type: 'Regulatory Tracker', channel: 'news', status: 'Active' },
-        { id:'execsocial', name: 'LinkedIn — Zalando Tech leadership', type: 'Executive Social Activity', channel: 'social', status: 'Active' }
-      ],
-      signals: [
-        { id:'n1', channel:'news', subtype:'Law', date:'2026-06-22', sourceId:'reg', text:'New EU rule requires online retailers to disclose how AI-driven sizing and recommendation systems use customer data.' },
-        { id:'n2', channel:'news', subtype:'Collaboration', date:'2026-06-02', sourceId:'press', text:'Zalando partners with AWS to run AI-driven sizing and fit recommendations across its fashion platform.' },
-        { id:'s1', channel:'social', subtype:'Hiring', date:'2026-06-12', sourceId:'jobs', text:'Zalando posts a new role: "AI Fit & Sizing Engineer" for its recommendation platform.' },
-        { id:'s2', channel:'social', subtype:'Social Post', date:'2026-06-27', sourceId:'execsocial', text:'Customers on social media report Zalando’s AI sizing tool gives inconsistent recommendations across brands.' }
-      ],
-      scenarios: [
-        {
-          id: 'zal-sizing-accuracy', title: 'Sizing & Fit AI Accuracy and Disclosure', domainTag: 'Retail AI Regulation & Customer Trust', confidence: 64, primaryContactId: 'nina-krueger',
-          signalIds: ['n1','s2'],
-          summary: 'Customers are already reporting inconsistent sizing recommendations across brands, and a new EU rule will soon require disclosure of how these AI systems use customer data. We can improve cross-brand accuracy and deliver the disclosure layer needed.',
-          capabilities: ['Cross-brand sizing model calibration', 'Plain-language data-use disclosures', 'Customer-feedback triage'],
-          nextStep: 'Reach the Head of AI Personalization, using the cross-brand sizing complaints as the opening.'
-        },
-        {
-          id: 'zal-aws-governance', title: 'Governance Layer for the AWS Sizing & Fit Partnership', domainTag: 'Retail AI Regulation & Cloud Partnership', confidence: 53, primaryContactId: 'nina-krueger',
-          signalIds: ['n2','n1'],
-          summary: 'Zalando’s new AWS partnership gives it the infrastructure for AI-driven sizing and fit recommendations — a good moment to build in the compliance and governance layer the cloud deal alone doesn’t provide.',
-          capabilities: ['AWS-hosted model governance', 'EU retail AI compliance documentation'],
-          nextStep: 'Engage the Zalando Tech team early, while the AWS rollout is still underway.'
-        }
-      ]
-    }
   ];
 
   // Give every offer a starting deal-value estimate (editable by sales on the offer page).
@@ -1369,13 +1314,14 @@
   }
   ACCOUNTS.forEach(function(a){
     if (typeof a.tierManual !== 'boolean') a.tierManual = false;
+    if (typeof a.tierNote !== 'string') a.tierNote = '';
     if (typeof a.tier !== 'number') a.tier = computeTierFromRules(a);
   });
 
   /* Proof points we can put in front of a prospect. */
   var CASE_STUDIES = [
     {
-      id: 'cs-eu-ai-act-bank', client: 'A European retail bank', sector: 'Finance', referenceable: false,
+      id: 'cs-eu-ai-act-bank', client: 'A European retail bank', sector: 'Finance & Insurance', referenceable: false,
       domainTags: ['AI Regulation & Consumer Lending', 'AI Regulation & Governance'],
       challenge: 'Credit-scoring models had no documentation trail ahead of an EBA audit.',
       outcome: 'Shipped an explainability layer and model-documentation pack; passed audit with no findings.',
@@ -1383,7 +1329,7 @@
       tech: ['Python', 'Snowflake', 'MLflow']
     },
     {
-      id: 'cs-turbine-maintenance', client: 'Siemens Gamesa (named with permission)', sector: 'Energy', referenceable: true,
+      id: 'cs-turbine-maintenance', client: 'Siemens Gamesa (named with permission)', sector: 'Energy & Telco', referenceable: true,
       domainTags: ['AI Regulation & Field Reliability', 'Renewable Grid Readiness'],
       challenge: 'Predictive-maintenance model produced so many false alarms that field crews ignored it.',
       outcome: 'Retrained on cleaned sensor data and added a confidence gate before alerting.',
@@ -1399,7 +1345,7 @@
       tech: ['dbt', 'Snowflake', 'Great Expectations']
     },
     {
-      id: 'cs-vehicle-governance', client: 'A German automotive OEM', sector: 'Automotive', referenceable: false,
+      id: 'cs-vehicle-governance', client: 'A German automotive OEM', sector: 'Auto & Manufacturing', referenceable: false,
       domainTags: ['AI Regulation & Governance', 'Connected-Vehicle Data Regulation', 'AI Regulation & Product Quality'],
       challenge: 'In-car assistant shipped without monitoring; complaints surfaced on social before engineering saw them.',
       outcome: 'Stood up response-quality monitoring and a complaint-to-root-cause triage loop.',
@@ -1407,15 +1353,7 @@
       tech: ['Google Cloud', 'BigQuery', 'Looker']
     },
     {
-      id: 'cs-retail-personalisation', client: 'A European fashion e-commerce group', sector: 'Retail', referenceable: true,
-      domainTags: ['Retail AI Regulation & Customer Trust', 'Retail AI Regulation & Cloud Partnership'],
-      challenge: 'Sizing recommendations were inconsistent across brands and customers complained publicly.',
-      outcome: 'Recalibrated the model per brand and added plain-language disclosure of how it uses data.',
-      metric: 'Size-related returns down 18%', duration: '9 weeks', team: '3 consultants',
-      tech: ['AWS SageMaker', 'Airflow', 'Redshift']
-    },
-    {
-      id: 'cs-embedded-delivery', client: 'A DAX-listed industrial group', sector: 'Energy', referenceable: false,
+      id: 'cs-embedded-delivery', client: 'A DAX-listed industrial group', sector: 'Energy & Telco', referenceable: false,
       domainTags: ['Talent Migration into Industrial AI', 'Talent Migration into Auto-Tech', 'Talent Migration into Banking AI', 'Talent Migration into Pharma R&D'],
       challenge: 'Approved AI roadmap but a 9-month hiring ramp before anyone could start.',
       outcome: 'Embedded a delivery pod that shipped the first two use cases and handed over to the new hires.',
@@ -1443,7 +1381,7 @@
 
   var state = {
     accountId: 'vw',
-    selectedSector: 'Automotive',
+    selectedSector: 'Auto & Manufacturing',
     view: 'sector', // 'sector' | 'partners' | 'pipeline' | 'overview' | 'setup' | 'activity' | 'scenario' | 'signal'
     viewBeforeSearch: 'sector',
     tierFilter: 'All',
@@ -1453,6 +1391,8 @@
     scanCountry: 'All',
     scanCount: 10,
     scanBriefing: null,
+    editingTierNote: false,
+    editingClient: false,
     scenarioId: null,
     signalId: null,
     signalOrigin: { view: 'overview', scenarioId: null },
@@ -1569,32 +1509,48 @@
     render();
   }
 
+  /* Sectors are the primary axis — they stay across the top. Everything else is
+     a tool that works across sectors, so it lives in the left menu. */
   function sectorNav(){
     var pills = SECTORS.map(function(s){
       var active = state.selectedSector === s.key;
-      return '<button class="sector-nav-pill' + (active ? ' active' : '') + '" data-select-sector="' + s.key + '">' + s.icon + ' ' + s.key + '</button>';
+      return '<button class="sector-nav-pill' + (active ? ' active' : '') + '" data-select-sector="' + escapeAttr(s.key) + '">' + s.icon + ' ' + s.key + '</button>';
     }).join('');
-    var partnersActive = state.selectedSector === 'Partners';
-    pills += '<button class="sector-nav-pill' + (partnersActive ? ' active' : '') + '" data-select-sector="Partners">🤝 Partners</button>';
-    var pipelineActive = state.selectedSector === 'Pipeline';
-    pills += '<button class="sector-nav-pill' + (pipelineActive ? ' active' : '') + '" data-select-sector="Pipeline">📊 Pipeline</button>';
-    var triggerCount = allTriggerSignals().length;
-    var triggersActive = state.selectedSector === 'Triggers';
-    pills += '<button class="sector-nav-pill' + (triggersActive ? ' active' : '') + '" data-select-sector="Triggers">🔥 Triggers' + (triggerCount ? ' (' + triggerCount + ')' : '') + '</button>';
-    var recapActive = state.selectedSector === 'Recap';
-    pills += '<button class="sector-nav-pill' + (recapActive ? ' active' : '') + '" data-select-sector="Recap">🗓️ Monthly Recap</button>';
-    var templatesActive = state.selectedSector === 'Templates';
-    pills += '<button class="sector-nav-pill' + (templatesActive ? ' active' : '') + '" data-select-sector="Templates">📄 Templates' + (TEMPLATES.length ? ' (' + TEMPLATES.length + ')' : '') + '</button>';
-    var casesActive = state.selectedSector === 'CaseStudies';
-    pills += '<button class="sector-nav-pill' + (casesActive ? ' active' : '') + '" data-select-sector="CaseStudies">🏆 Case Studies (' + CASE_STUDIES.length + ')</button>';
-    var scanActive = state.selectedSector === 'MarketScan';
-    pills += '<button class="sector-nav-pill' + (scanActive ? ' active' : '') + '" data-select-sector="MarketScan">🔍 Market Scan</button>';
-    var boardActive = state.selectedSector === 'OfferBoard';
-    pills += '<button class="sector-nav-pill' + (boardActive ? ' active' : '') + '" data-select-sector="OfferBoard">🗂 Offer Board</button>';
-    var followupsActive = state.selectedSector === 'Followups';
-    var overdueCount = openFollowUps().filter(function(r){ return r.status === 'overdue'; }).length;
-    pills += '<button class="sector-nav-pill' + (followupsActive ? ' active' : '') + '" data-select-sector="Followups">🔔 Follow-ups' + (overdueCount ? ' (' + overdueCount + ')' : '') + '</button>';
     return '<div class="sector-nav-row">' + pills + '</div>';
+  }
+
+  function sideNav(){
+    var overdueCount = openFollowUps().filter(function(r){ return r.status === 'overdue'; }).length;
+    var groups = [
+      { title: 'Work', items: [
+        { key: 'OfferBoard', icon: '🗂', label: 'Offer Board' },
+        { key: 'Followups',  icon: '🔔', label: 'Follow-ups', badge: overdueCount || '' },
+        { key: 'Triggers',   icon: '🔥', label: 'Triggers', badge: allTriggerSignals().length || '' },
+        { key: 'Pipeline',   icon: '📊', label: 'Pipeline' }
+      ]},
+      { title: 'Find', items: [
+        { key: 'MarketScan', icon: '🔍', label: 'Market Scan' },
+        { key: 'Partners',   icon: '🤝', label: 'Partners' }
+      ]},
+      { title: 'Library', items: [
+        { key: 'CaseStudies', icon: '🏆', label: 'Case Studies', badge: CASE_STUDIES.length },
+        { key: 'Templates',   icon: '📄', label: 'Templates', badge: TEMPLATES.length || '' },
+        { key: 'Recap',       icon: '🗓️', label: 'Monthly Recap' }
+      ]}
+    ];
+    var html = groups.map(function(g){
+      return '<div class="side-group"><div class="side-group-title">' + g.title + '</div>' +
+        g.items.map(function(it){
+          var active = state.selectedSector === it.key;
+          return '<button class="side-link' + (active ? ' active' : '') + '" data-select-sector="' + it.key + '">' +
+            '<span class="side-icon">' + it.icon + '</span>' +
+            '<span class="side-label">' + it.label + '</span>' +
+            (it.badge ? '<span class="side-badge">' + it.badge + '</span>' : '') +
+          '</button>';
+        }).join('') +
+      '</div>';
+    }).join('');
+    return '<aside class="side-nav">' + html + '</aside>';
   }
 
   function addClientPanel(){
@@ -1746,47 +1702,47 @@
 
   var MARKET_UNIVERSE = [
     // Automotive
-    { name: 'Mercedes-Benz Group', country: 'DE', sector: 'Automotive', revenue: '$160B' },
-    { name: 'Porsche AG', country: 'DE', sector: 'Automotive', revenue: '$45B' },
-    { name: 'Continental AG', country: 'DE', sector: 'Automotive', revenue: '$44B' },
-    { name: 'Robert Bosch GmbH', country: 'DE', sector: 'Automotive', revenue: '$98B' },
-    { name: 'Renault Group', country: 'FR', sector: 'Automotive', revenue: '$58B' },
-    { name: 'Valeo', country: 'FR', sector: 'Automotive', revenue: '$23B' },
-    { name: 'Michelin', country: 'FR', sector: 'Automotive', revenue: '$30B' },
-    { name: 'Stellantis', country: 'NL', sector: 'Automotive', revenue: '$195B' },
-    { name: 'Ferrari', country: 'IT', sector: 'Automotive', revenue: '$7B' },
-    { name: 'Iveco Group', country: 'IT', sector: 'Automotive', revenue: '$16B' },
-    { name: 'Pirelli', country: 'IT', sector: 'Automotive', revenue: '$7B' },
-    { name: 'Volvo Group', country: 'SE', sector: 'Automotive', revenue: '$52B' },
-    { name: 'Scania', country: 'SE', sector: 'Automotive', revenue: '$20B' },
+    { name: 'Mercedes-Benz Group', country: 'DE', sector: 'Auto & Manufacturing', revenue: '$160B' },
+    { name: 'Porsche AG', country: 'DE', sector: 'Auto & Manufacturing', revenue: '$45B' },
+    { name: 'Continental AG', country: 'DE', sector: 'Auto & Manufacturing', revenue: '$44B' },
+    { name: 'Robert Bosch GmbH', country: 'DE', sector: 'Auto & Manufacturing', revenue: '$98B' },
+    { name: 'Renault Group', country: 'FR', sector: 'Auto & Manufacturing', revenue: '$58B' },
+    { name: 'Valeo', country: 'FR', sector: 'Auto & Manufacturing', revenue: '$23B' },
+    { name: 'Michelin', country: 'FR', sector: 'Auto & Manufacturing', revenue: '$30B' },
+    { name: 'Stellantis', country: 'NL', sector: 'Auto & Manufacturing', revenue: '$195B' },
+    { name: 'Ferrari', country: 'IT', sector: 'Auto & Manufacturing', revenue: '$7B' },
+    { name: 'Iveco Group', country: 'IT', sector: 'Auto & Manufacturing', revenue: '$16B' },
+    { name: 'Pirelli', country: 'IT', sector: 'Auto & Manufacturing', revenue: '$7B' },
+    { name: 'Volvo Group', country: 'SE', sector: 'Auto & Manufacturing', revenue: '$52B' },
+    { name: 'Scania', country: 'SE', sector: 'Auto & Manufacturing', revenue: '$20B' },
     // Energy
-    { name: 'TotalEnergies', country: 'FR', sector: 'Energy', revenue: '$219B' },
-    { name: 'EDF', country: 'FR', sector: 'Energy', revenue: '$150B' },
-    { name: 'Engie', country: 'FR', sector: 'Energy', revenue: '$85B' },
-    { name: 'Enel', country: 'IT', sector: 'Energy', revenue: '$105B' },
-    { name: 'Eni', country: 'IT', sector: 'Energy', revenue: '$100B' },
-    { name: 'Iberdrola', country: 'ES', sector: 'Energy', revenue: '$54B' },
-    { name: 'Repsol', country: 'ES', sector: 'Energy', revenue: '$65B' },
-    { name: 'Ørsted', country: 'DK', sector: 'Energy', revenue: '$11B' },
-    { name: 'Vestas Wind Systems', country: 'DK', sector: 'Energy', revenue: '$17B' },
-    { name: 'Shell', country: 'NL', sector: 'Energy', revenue: '$284B' },
-    { name: 'E.ON', country: 'DE', sector: 'Energy', revenue: '$100B' },
-    { name: 'Vattenfall', country: 'SE', sector: 'Energy', revenue: '$25B' },
+    { name: 'TotalEnergies', country: 'FR', sector: 'Energy & Telco', revenue: '$219B' },
+    { name: 'EDF', country: 'FR', sector: 'Energy & Telco', revenue: '$150B' },
+    { name: 'Engie', country: 'FR', sector: 'Energy & Telco', revenue: '$85B' },
+    { name: 'Enel', country: 'IT', sector: 'Energy & Telco', revenue: '$105B' },
+    { name: 'Eni', country: 'IT', sector: 'Energy & Telco', revenue: '$100B' },
+    { name: 'Iberdrola', country: 'ES', sector: 'Energy & Telco', revenue: '$54B' },
+    { name: 'Repsol', country: 'ES', sector: 'Energy & Telco', revenue: '$65B' },
+    { name: 'Ørsted', country: 'DK', sector: 'Energy & Telco', revenue: '$11B' },
+    { name: 'Vestas Wind Systems', country: 'DK', sector: 'Energy & Telco', revenue: '$17B' },
+    { name: 'Shell', country: 'NL', sector: 'Energy & Telco', revenue: '$284B' },
+    { name: 'E.ON', country: 'DE', sector: 'Energy & Telco', revenue: '$100B' },
+    { name: 'Vattenfall', country: 'SE', sector: 'Energy & Telco', revenue: '$25B' },
     // Finance
-    { name: 'BNP Paribas', country: 'FR', sector: 'Finance', revenue: '$52B' },
-    { name: 'AXA', country: 'FR', sector: 'Finance', revenue: '$110B' },
-    { name: 'Société Générale', country: 'FR', sector: 'Finance', revenue: '$29B' },
-    { name: 'Crédit Agricole', country: 'FR', sector: 'Finance', revenue: '$40B' },
-    { name: 'Banco Santander', country: 'ES', sector: 'Finance', revenue: '$62B' },
-    { name: 'BBVA', country: 'ES', sector: 'Finance', revenue: '$35B' },
-    { name: 'UniCredit', country: 'IT', sector: 'Finance', revenue: '$25B' },
-    { name: 'Intesa Sanpaolo', country: 'IT', sector: 'Finance', revenue: '$27B' },
-    { name: 'Assicurazioni Generali', country: 'IT', sector: 'Finance', revenue: '$88B' },
-    { name: 'ING Group', country: 'NL', sector: 'Finance', revenue: '$23B' },
-    { name: 'ABN AMRO', country: 'NL', sector: 'Finance', revenue: '$10B' },
-    { name: 'UBS Group', country: 'CH', sector: 'Finance', revenue: '$45B' },
-    { name: 'Zurich Insurance Group', country: 'CH', sector: 'Finance', revenue: '$74B' },
-    { name: 'KBC Group', country: 'BE', sector: 'Finance', revenue: '$12B' },
+    { name: 'BNP Paribas', country: 'FR', sector: 'Finance & Insurance', revenue: '$52B' },
+    { name: 'AXA', country: 'FR', sector: 'Finance & Insurance', revenue: '$110B' },
+    { name: 'Société Générale', country: 'FR', sector: 'Finance & Insurance', revenue: '$29B' },
+    { name: 'Crédit Agricole', country: 'FR', sector: 'Finance & Insurance', revenue: '$40B' },
+    { name: 'Banco Santander', country: 'ES', sector: 'Finance & Insurance', revenue: '$62B' },
+    { name: 'BBVA', country: 'ES', sector: 'Finance & Insurance', revenue: '$35B' },
+    { name: 'UniCredit', country: 'IT', sector: 'Finance & Insurance', revenue: '$25B' },
+    { name: 'Intesa Sanpaolo', country: 'IT', sector: 'Finance & Insurance', revenue: '$27B' },
+    { name: 'Assicurazioni Generali', country: 'IT', sector: 'Finance & Insurance', revenue: '$88B' },
+    { name: 'ING Group', country: 'NL', sector: 'Finance & Insurance', revenue: '$23B' },
+    { name: 'ABN AMRO', country: 'NL', sector: 'Finance & Insurance', revenue: '$10B' },
+    { name: 'UBS Group', country: 'CH', sector: 'Finance & Insurance', revenue: '$45B' },
+    { name: 'Zurich Insurance Group', country: 'CH', sector: 'Finance & Insurance', revenue: '$74B' },
+    { name: 'KBC Group', country: 'BE', sector: 'Finance & Insurance', revenue: '$12B' },
     // Pharma & Healthcare
     { name: 'Roche', country: 'CH', sector: 'Pharma & Healthcare', revenue: '$66B' },
     { name: 'Novartis', country: 'CH', sector: 'Pharma & Healthcare', revenue: '$50B' },
@@ -1798,20 +1754,6 @@
     { name: 'Merck KGaA', country: 'DE', sector: 'Pharma & Healthcare', revenue: '$23B' },
     { name: 'Boehringer Ingelheim', country: 'DE', sector: 'Pharma & Healthcare', revenue: '$28B' },
     { name: 'UCB', country: 'BE', sector: 'Pharma & Healthcare', revenue: '$6B' },
-    // Retail & Consumer
-    { name: "L'Oréal", country: 'FR', sector: 'Retail', revenue: '$45B' },
-    { name: 'Carrefour', country: 'FR', sector: 'Retail', revenue: '$95B' },
-    { name: 'LVMH', country: 'FR', sector: 'Retail', revenue: '$92B' },
-    { name: 'Kering', country: 'FR', sector: 'Retail', revenue: '$21B' },
-    { name: 'Danone', country: 'FR', sector: 'Retail', revenue: '$29B' },
-    { name: 'Ahold Delhaize', country: 'NL', sector: 'Retail', revenue: '$95B' },
-    { name: 'Inditex (Zara)', country: 'ES', sector: 'Retail', revenue: '$39B' },
-    { name: 'Mercadona', country: 'ES', sector: 'Retail', revenue: '$38B' },
-    { name: 'H&M Group', country: 'SE', sector: 'Retail', revenue: '$22B' },
-    { name: 'IKEA (Ingka Group)', country: 'SE', sector: 'Retail', revenue: '$45B' },
-    { name: 'Schwarz Group (Lidl, Kaufland)', country: 'DE', sector: 'Retail', revenue: '$175B' },
-    { name: 'Metro AG', country: 'DE', sector: 'Retail', revenue: '$33B' },
-    { name: 'Nestlé', country: 'CH', sector: 'Retail', revenue: '$103B' }
   ];
 
   /* Fit is deterministic per company so the "scan" is stable between runs
@@ -1849,14 +1791,13 @@
   /* The briefing a salesperson actually needs before making contact: what to
      lead with, who to call, and what we can point to as proof. */
   var SECTOR_ANGLE = {
-    'Automotive': { need: 'AI in driver assistance and in-car assistants now falls under EU safety rules, and most OEMs are hiring governance staff faster than they can build the monitoring behind them.', lead: 'the gap between the AI oversight roles they are hiring for and the monitoring system those hires will need on day one', persona: 'Risk & Compliance Gatekeeper' },
-    'Energy': { need: 'Grid forecasting and predictive maintenance are moving to AI while regulators start demanding explainability for anything touching customer pricing.', lead: 'forecasting accuracy they can defend to a regulator, not just a model that scores well internally', persona: 'Technical Buyer' },
-    'Finance': { need: 'Credit and fraud models face documentation and explainability deadlines, and most banks have models in production that predate those rules.', lead: 'the model-documentation backlog they will have to clear before the next supervisory review', persona: 'Risk & Compliance Gatekeeper' },
+    'Auto & Manufacturing': { need: 'AI in driver assistance and in-car assistants now falls under EU safety rules, and most OEMs are hiring governance staff faster than they can build the monitoring behind them.', lead: 'the gap between the AI oversight roles they are hiring for and the monitoring system those hires will need on day one', persona: 'Risk & Compliance Gatekeeper' },
+    'Energy & Telco': { need: 'Grid forecasting and predictive maintenance are moving to AI while regulators start demanding explainability for anything touching customer pricing.', lead: 'forecasting accuracy they can defend to a regulator, not just a model that scores well internally', persona: 'Technical Buyer' },
+    'Finance & Insurance': { need: 'Credit and fraud models face documentation and explainability deadlines, and most banks have models in production that predate those rules.', lead: 'the model-documentation backlog they will have to clear before the next supervisory review', persona: 'Risk & Compliance Gatekeeper' },
     'Pharma & Healthcare': { need: 'Clinical and diagnostic AI needs validation evidence before deployment, and false-positive complaints tend to surface before the paperwork is ready.', lead: 'validation evidence for clinical AI already in use, framed around patient safety rather than compliance cost', persona: 'Risk & Compliance Gatekeeper' },
-    'Retail': { need: 'Personalisation and demand forecasting drive real margin, and new EU rules require retailers to explain automated pricing and recommendations to consumers.', lead: 'forecast accuracy and the disclosure layer the new consumer rules require, together rather than separately', persona: 'Economic Buyer' }
   };
   function prospectBriefingHtml(company){
-    var angle = SECTOR_ANGLE[company.sector] || SECTOR_ANGLE['Automotive'];
+    var angle = SECTOR_ANGLE[company.sector] || SECTOR_ANGLE['Auto & Manufacturing'];
     var country = countryDef(company.country);
     var useCases = (USE_CASE_PLAYBOOKS[company.sector] || []).slice(0, 2);
     var proof = CASE_STUDIES.filter(function(cs){ return cs.sector === company.sector; })[0];
@@ -1919,11 +1860,10 @@
      against it so sales can see whether an offer serves the stated goal or is
      just a plausible-looking distraction. */
   var DEFAULT_GOAL = {
-    'Automotive': 'Land a reference AI governance or data-engineering engagement with a major European automaker.',
-    'Energy': 'Build a foothold in AI-driven grid forecasting and predictive-maintenance compliance work.',
-    'Finance': 'Establish a reference engagement in explainable AI for lending or fraud detection.',
+    'Auto & Manufacturing': 'Land a reference AI governance or data-engineering engagement with a major European automaker.',
+    'Energy & Telco': 'Build a foothold in AI-driven grid forecasting and predictive-maintenance compliance work.',
+    'Finance & Insurance': 'Establish a reference engagement in explainable AI for lending or fraud detection.',
     'Pharma & Healthcare': 'Win a clinical or patient-safety AI governance engagement with a major provider.',
-    'Retail': 'Prove out AI-driven demand forecasting and recommendation governance with a large retailer.'
   };
   ACCOUNTS.forEach(function(a){
     if (typeof a.goal !== 'string') a.goal = DEFAULT_GOAL[a.industry] || 'Win a reference AI or data-engineering engagement with this account.';
@@ -2069,25 +2009,26 @@
   }
 
   var SECTORS = [
-    { key: 'Automotive', icon: '🚗' },
-    { key: 'Energy', icon: '⚡' },
-    { key: 'Finance', icon: '🏦' },
-    { key: 'Pharma & Healthcare', icon: '⚕️' },
-    { key: 'Retail', icon: '🛍️' }
+    { key: 'Auto & Manufacturing', icon: '🚗' },
+    { key: 'Energy & Telco', icon: '⚡' },
+    { key: 'Finance & Insurance', icon: '🏦' },
+    { key: 'Pharma & Healthcare', icon: '⚕️' }
   ];
+  // Keep the landing sector valid even if the category list is renamed later.
+  if (!SECTORS.some(function(x){ return x.key === state.selectedSector; })) state.selectedSector = SECTORS[0].key;
 
   var PARTNERS = [
     { id: 'microsoft', name: 'Microsoft (Azure)', icon: '🟦', type: 'Cloud & AI Infrastructure Partner', note: 'Powers the AI workloads behind several pilot accounts via Azure — a natural seam for us to sit on top of with governance and monitoring.', relatedAccountIds: ['bmw','rwe','fresenius'] },
-    { id: 'aws', name: 'Amazon Web Services (AWS)', icon: '🟧', type: 'Cloud & AI Infrastructure Partner', note: 'Runs AI workloads for several pilot accounts via AWS — same opening: infrastructure without the governance layer.', relatedAccountIds: ['siemens-energy','bayer','commerzbank','siemens-healthineers','zalando'] },
-    { id: 'google-cloud', name: 'Google Cloud', icon: '🟩', type: 'Cloud & AI Infrastructure Partner', note: 'Powers in-car, fraud-detection, and personalized-retail AI infrastructure across three of our pilot accounts.', relatedAccountIds: ['vw','deutsche-bank','rossmann'] }
+    { id: 'aws', name: 'Amazon Web Services (AWS)', icon: '🟧', type: 'Cloud & AI Infrastructure Partner', note: 'Runs AI workloads for several pilot accounts via AWS — same opening: infrastructure without the governance layer.', relatedAccountIds: ['siemens-energy','bayer','commerzbank','siemens-healthineers'] },
+    { id: 'google-cloud', name: 'Google Cloud', icon: '🟩', type: 'Cloud & AI Infrastructure Partner', note: 'Powers in-car, fraud-detection, and personalized-retail AI infrastructure across three of our pilot accounts.', relatedAccountIds: ['vw','deutsche-bank'] }
   ];
 
   var SECTOR_NEWS = {
-    Automotive: [
+    'Auto & Manufacturing': [
       { date: '2026-07-08', subtype: 'Law', source: 'European Commission — Industry Regulation', text: 'The EU expands its AI Act to explicitly cover Level 3+ autonomous driving systems industry-wide, with compliance required by 2028 for every manufacturer, not just early movers.' },
       { date: '2026-05-12', subtype: 'Collaboration', source: 'European Automobile Manufacturers Association', text: 'The European automotive industry association calls for a shared AI safety-testing standard across all manufacturers, rather than each OEM certifying separately.' }
     ],
-    Energy: [
+    'Energy & Telco': [
       { date: '2026-06-20', subtype: 'Law', source: 'EU Energy Directorate', text: 'The EU sets a new grid-interoperability standard requiring every utility to support AI-based demand forecasting by 2029, regardless of size.' },
       { date: '2026-04-18', subtype: 'Collaboration', source: 'European Energy Regulators Taskforce', text: 'European energy regulators launch a joint taskforce on AI use in critical infrastructure, covering every grid operator and generator in the bloc.' }
     ],
@@ -2097,18 +2038,14 @@
       { date: '2026-04-30', subtype: 'Collaboration', source: 'European Federation of Pharmaceutical Industries', text: 'The European pharma industry association proposes shared standards for AI transparency in clinical trials, applying across all member companies.' },
       { date: '2026-04-15', subtype: 'Collaboration', source: 'European Hospital Federation', text: 'The European Hospital Federation calls for shared clinical-AI validation standards across all member hospitals and providers.' }
     ],
-    Finance: [
+    'Finance & Insurance': [
       { date: '2026-06-25', subtype: 'Law', source: 'European Banking Authority', text: 'The EBA sets an industry-wide deadline of 2027 for every bank to document and test AI models used in credit risk scoring, not just early adopters.' },
       { date: '2026-04-20', subtype: 'Collaboration', source: 'European Banking Federation', text: 'The European Banking Federation proposes a shared framework for explainable AI in lending, so customers get consistent explanations across every bank.' }
     ],
-    Retail: [
-      { date: '2026-06-22', subtype: 'Law', source: 'European Consumer Protection Authority', text: 'The EU requires every retailer using AI-driven personalized pricing or recommendations to disclose the logic behind them to consumers by 2027, regardless of size.' },
-      { date: '2026-04-25', subtype: 'Collaboration', source: 'European Retail Federation', text: 'The European Retail Federation calls for shared standards on AI-driven demand forecasting and personalization across all member retailers.' }
-    ]
   };
 
   var DISCOVERY_TEMPLATES = {
-    Energy: {
+    'Energy & Telco': {
       departments: [
         { name: 'Digital & Data', focus: 'Runs analytics and AI initiatives across the business.' },
         { name: 'Grid / Field Operations', focus: 'Owns operational technology and infrastructure reliability.' },
@@ -2126,7 +2063,7 @@
       roles: ['Director, R&D / Digital Health Innovation', 'Clinical Data Systems Lead'],
       sourceReg: 'Medicines Agency & EU Medical Device AI Regulation Tracker'
     },
-    Automotive: {
+    'Auto & Manufacturing': {
       departments: [
         { name: 'Software & Digital', focus: 'Owns in-vehicle software and AI systems.' },
         { name: 'Legal & Compliance', focus: 'Tracks vehicle-safety and data regulation.' },
@@ -2135,7 +2072,7 @@
       roles: ['Head of Digital Partnerships', 'Compliance Counsel, AI & Data'],
       sourceReg: 'Vehicle Safety & Transport Regulator updates'
     },
-    Finance: {
+    'Finance & Insurance': {
       departments: [
         { name: 'Digital & Innovation', focus: 'Runs AI and digital transformation initiatives.' },
         { name: 'Risk & Compliance', focus: 'Tracks financial and AI-related regulation.' },
@@ -2144,23 +2081,14 @@
       roles: ['Head of Digital Innovation', 'Risk & Compliance Lead'],
       sourceReg: 'Financial Regulator updates'
     },
-    Retail: {
-      departments: [
-        { name: 'Digital & E-Commerce', focus: 'Runs AI-driven personalization, recommendation, and pricing systems.' },
-        { name: 'Supply Chain & Logistics', focus: 'Owns inventory forecasting and fulfillment systems.' },
-        { name: 'Data Privacy & Compliance', focus: 'Tracks consumer-data and AI regulation.' }
-      ],
-      roles: ['Head of Digital & E-Commerce', 'Data Privacy & Compliance Lead'],
-      sourceReg: 'EU Consumer & Retail AI Regulation Tracker'
-    }
   };
 
   var USE_CASE_PLAYBOOKS = {
-    Automotive: [
+    'Auto & Manufacturing': [
       { title: 'Predictive Maintenance & Quality Inference', description: 'Catch defects and mechanical failures earlier using production-line and sensor data.', defaultGainPct: 12 },
       { title: 'In-Vehicle AI Governance & Compliance Monitoring', description: 'Document and monitor in-vehicle AI systems to meet EU AI Act Level 3+ requirements.', defaultGainPct: 18 }
     ],
-    Energy: [
+    'Energy & Telco': [
       { title: 'Smart Grid Demand Forecasting', description: 'Improve load-forecasting accuracy to cut balancing costs and renewable curtailment.', defaultGainPct: 10 },
       { title: 'Predictive Maintenance for Turbines & Grid Assets', description: 'Reduce unplanned downtime and false-alarm rates on critical infrastructure.', defaultGainPct: 15 }
     ],
@@ -2170,18 +2098,14 @@
       { title: 'Patient Monitoring AI Safety & Validation', description: 'Reduce false alarms and produce the safety documentation regulators require.', defaultGainPct: 13 },
       { title: 'Diagnostic Imaging Accuracy Improvement', description: 'Lower false-positive rates on AI-assisted diagnostic imaging tools.', defaultGainPct: 12 }
     ],
-    Finance: [
+    'Finance & Insurance': [
       { title: 'Fraud Detection & Explainable Credit Decisioning', description: 'Cut false positives and produce audit-ready explanations for declined applications.', defaultGainPct: 16 },
       { title: 'AI Model Risk & Regulatory Documentation', description: 'Meet EBA model-documentation deadlines without slowing down model releases.', defaultGainPct: 9 }
     ],
-    Retail: [
-      { title: 'Personalized Recommendation Governance', description: 'Fix mismatched recommendations and add the disclosure layer new EU rules require.', defaultGainPct: 8 },
-      { title: 'Demand Forecasting & Inventory Optimization', description: 'Reduce stockouts and overstock with better AI-driven demand forecasts.', defaultGainPct: 10 }
-    ]
   };
 
   function generateStarterSetup(sector, companyName){
-    var t = DISCOVERY_TEMPLATES[sector] || DISCOVERY_TEMPLATES.Automotive;
+    var t = DISCOVERY_TEMPLATES[sector] || DISCOVERY_TEMPLATES['Auto & Manufacturing'];
     var name = companyName || 'This company';
     var stamp = Date.now();
     return {
@@ -2439,7 +2363,7 @@
     var deadlineLabel = days < 0 ? 'Deadline passed' : (days === 0 ? 'Due today' : 'Due in ' + days + ' days');
     var deadlineCls = days < 0 ? 'overdue' : (days <= 14 ? 'soon' : 'ok');
 
-    return header() +
+    return '' +
       '<div class="breadcrumb"><button data-nav="overview" data-account-nav="' + account.id + '">' + account.name + ' Signal Feed</button><span class="sep">/</span><span class="current">' + t.title + '</span></div>' +
       '<div class="panel" style="max-width:680px">' +
         '<div class="opp-eyebrow">Call for Project</div>' +
@@ -2484,7 +2408,7 @@
         '</div>';
     }).join('') : '';
 
-    return header() + accountSwitcher() + accountStrip(account, false) + viewTabs() +
+    return accountSwitcher() + accountStrip(account, false) + viewTabs() +
       '<div class="callout"><b class="label">News signals:</b> ' + newsCount + ' &middot; <b class="label">Social &amp; workforce signals:</b> ' + socialCount + ' &middot; <b class="label">Offer scenarios identified:</b> ' + account.scenarios.length + '</div>' +
       '<div class="signal-columns">' +
         '<div class="signal-col">' +
@@ -2574,8 +2498,9 @@
     var deptHtml = account.departments.length ? account.departments.map(function(d, i){ return setupListRow('department', d, i); }).join('') : '<p class="empty-note">No departments added yet.</p>';
     var sourcesHtml = account.sources.length ? account.sources.map(function(s, i){ return setupListRow('source', s, i); }).join('') : '<p class="empty-note">No data sources added yet.</p>';
 
-    return header() + accountSwitcher() + accountStrip(account, false) + viewTabs() +
+    return accountSwitcher() + accountStrip(account, false) + viewTabs() +
       '<p class="section-sub">Who we talk to, which departments matter, and what we ingest to keep signals current for ' + account.name + '.</p>' +
+      clientDetailsHtml(account) +
       '<div class="setup-grid">' +
         '<div class="setup-panel">' +
           '<div class="setup-panel-head"><h3>👤 Contacts</h3></div>' +
@@ -2596,6 +2521,70 @@
           (state.setupAdding.source ? setupAddForm('source') : '<button class="add-row-btn" data-toggle-add="source">+ Add source</button>') +
         '</div>' +
       '</div>';
+  }
+
+  /* Why an account sits in its tier. The rule explains the number, but the
+     reasoning behind an override lives in someone's head unless it's written
+     down — so it gets a note. */
+  /* Everything about a client that sales might need to correct — the sector it
+     was filed under, what it runs on, whether it's a client yet, the goal. All
+     of it editable in one place rather than scattered or hardcoded. */
+  function clientDetailsHtml(account){
+    if (!state.editingClient){
+      return '<div class="setup-panel" style="margin-bottom:18px">' +
+        '<div class="setup-panel-head"><h3>🏷 Client Details</h3></div>' +
+        '<p class="col-sub">Everything we hold about this account — correct anything that\'s wrong or out of date.</p>' +
+        '<div class="detail-facts">' +
+          '<div><span class="fact-label">Sector</span><span class="fact-value">' + account.industry + '</span></div>' +
+          '<div><span class="fact-label">Relationship</span><span class="fact-value">' + (account.relationship || 'Potential Client') + '</span></div>' +
+          '<div><span class="fact-label">Headquarters</span><span class="fact-value">' + account.hq + '</span></div>' +
+          '<div><span class="fact-label">Revenue</span><span class="fact-value">' + account.revenue + '</span></div>' +
+          '<div><span class="fact-label">Tech stack</span><span class="fact-value">' + ((account.techStack || []).join(', ') || '—') + '</span></div>' +
+        '</div>' +
+        '<p class="col-sub" style="margin-top:10px"><b>Goal:</b> ' + account.goal + '</p>' +
+        '<button class="add-row-btn" data-edit-client="1">✏️ Edit client details</button>' +
+      '</div>';
+    }
+    var sectorOpts = SECTORS.map(function(s){
+      return '<option value="' + escapeAttr(s.key) + '"' + (account.industry === s.key ? ' selected' : '') + '>' + s.icon + ' ' + s.key + '</option>';
+    }).join('');
+    return '<div class="setup-panel" style="margin-bottom:18px">' +
+      '<div class="setup-panel-head"><h3>🏷 Client Details</h3></div>' +
+      '<div class="inline-form">' +
+        '<div class="form-row"><input id="edit-client-name" type="text" placeholder="Client name" value="' + escapeAttr(account.name) + '"></div>' +
+        '<div class="form-row">' +
+          '<select id="edit-client-sector">' + sectorOpts + '</select>' +
+          '<select id="edit-client-relationship">' +
+            '<option value="Potential Client"' + (account.relationship !== 'Client' ? ' selected' : '') + '>Potential Client</option>' +
+            '<option value="Client"' + (account.relationship === 'Client' ? ' selected' : '') + '>Client</option>' +
+          '</select>' +
+        '</div>' +
+        '<div class="form-row">' +
+          '<input id="edit-client-hq" type="text" placeholder="Headquarters" value="' + escapeAttr(account.hq) + '">' +
+          '<input id="edit-client-revenue" type="text" placeholder="Revenue" value="' + escapeAttr(account.revenue) + '">' +
+        '</div>' +
+        '<div class="form-row"><input id="edit-client-descriptor" type="text" placeholder="Short descriptor" value="' + escapeAttr(account.sector) + '"></div>' +
+        '<div class="form-row"><input id="edit-client-techstack" type="text" placeholder="Tech stack, comma-separated (e.g. AWS, Databricks)" value="' + escapeAttr((account.techStack || []).join(', ')) + '"></div>' +
+        '<div class="form-row"><textarea id="edit-client-goal" rows="2" placeholder="What we\'re trying to achieve here">' + escapeAttr(account.goal) + '</textarea></div>' +
+        '<div class="form-actions"><button class="btn small" data-cancel-client="1">Cancel</button><button class="btn small primary" data-save-client="1">Save details</button></div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function tierNoteHtml(account){
+    if (state.editingTierNote){
+      return '<div class="inline-form" style="margin-top:10px">' +
+        '<div class="form-row"><input id="tier-note-input" type="text" placeholder="Why is this account T' + account.tier + '?" value="' + escapeAttr(account.tierNote) + '"></div>' +
+        '<div class="form-actions"><button class="btn small" data-cancel-tier-note="1">Cancel</button><button class="btn small primary" data-save-tier-note="1">Save note</button></div>' +
+      '</div>';
+    }
+    if (account.tierNote){
+      return '<div class="tier-note">' +
+        '<b class="label">Why T' + account.tier + ':</b> ' + account.tierNote +
+        ' <button class="btn small" data-edit-tier-note="1">Edit</button>' +
+      '</div>';
+    }
+    return '<button class="add-row-btn" data-edit-tier-note="1" style="margin-top:10px">+ Add a note on why this tier</button>';
   }
 
   function followUpBadgeHtml(entry, accountId){
@@ -2658,7 +2647,7 @@
       return '<div class="timeline-item"><div class="timeline-date">' + a.date + '</div><div><span class="evidence-type">' + a.type + '</span><p>' + a.note + '</p>' + followUpBadgeHtml(a, account.id) + '</div></div>';
     }).join('') : '<p class="empty-note">No activity logged yet.</p>';
 
-    return header() + accountSwitcher() + accountStrip(account, false) + viewTabs() +
+    return accountSwitcher() + accountStrip(account, false) + viewTabs() +
       '<div class="setup-grid" style="grid-template-columns: 1fr 1.4fr;">' +
         '<div class="setup-panel">' +
           '<div class="setup-panel-head"><h3>📈 Signal Momentum</h3></div>' +
@@ -2674,6 +2663,7 @@
             (account.tierManual ? ' Currently overridden by sales — <button class="btn small" data-reset-tier="1">use the rule</button>' : '') +
             '<br><span style="color:var(--text-faint)">' + tierRuleSummary() + ' · an existing client counts one tier higher.</span>' +
           '</p>' +
+          tierNoteHtml(account) +
           outcomeBlockHtml(account) +
         '</div>' +
         '<div class="setup-panel">' +
@@ -2727,7 +2717,7 @@
       return '<span class="cap-pill"><span class="dot"></span>' + cap + '</span>';
     }).join('');
 
-    return header() + renderBreadcrumb(account) +
+    return renderBreadcrumb(account) +
       '<div class="detail-grid">' +
         '<div class="panel">' +
           accountStrip(account, true) +
@@ -2768,7 +2758,7 @@
     var src = findSource(account, s.sourceId);
     var cls = s.channel === 'news' ? 'c-newstype' : 'c-socialtype';
     var channelLabel = s.channel === 'news' ? 'News' : 'Social & Workforce Movement';
-    return header() + renderBreadcrumb(account) +
+    return renderBreadcrumb(account) +
       '<div class="panel" style="max-width:680px">' +
         '<div class="opp-eyebrow">' + channelLabel + ' &middot; <span class="' + cls + '">' + s.subtype + '</span></div>' +
         '<h2 class="opp-title" style="font-size:17px">' + s.date + '</h2>' +
@@ -2795,7 +2785,7 @@
       '</div>';
     }).join('');
 
-    return header() + accountSwitcher() +
+    return accountSwitcher() +
       '<div class="section-head"><h2>🤝 Technology &amp; Delivery Partners</h2></div>' +
       '<p class="section-sub">Cloud and infrastructure partners already showing up across pilot accounts — useful when we position ourselves as sitting on top of their platforms rather than competing with them.</p>' +
       '<div class="grid-3">' + cards + '</div>';
@@ -2812,7 +2802,7 @@
       '</div>';
     }).join('') : '<p class="empty-note">No trigger events flagged right now.</p>';
 
-    return header() + accountSwitcher() +
+    return accountSwitcher() +
       '<div class="section-head"><h2>🔥 Trigger Alerts</h2></div>' +
       '<p class="section-sub">High-priority buying-intent events across the whole portfolio — leadership changes, funding rounds, competitive moves, and other signals worth acting on today.</p>' +
       '<div class="panel" style="max-width:820px">' + rows + '</div>';
@@ -2831,7 +2821,7 @@
       '</div>';
     }).join('') : '<p class="empty-note">No signals recorded in the last 30 days.</p>';
 
-    return header() + accountSwitcher() +
+    return accountSwitcher() +
       '<div class="section-head"><h2>🗓️ Monthly Recap</h2></div>' +
       '<p class="section-sub">Every signal ingested across the whole portfolio in the last 30 days — ' + newsCount + ' news &middot; ' + socialCount + ' social &amp; workforce.</p>' +
       '<div class="panel">' + rows + '</div>';
@@ -2864,7 +2854,7 @@
 
   function renderTemplates(){
     var cards = TEMPLATES.length ? TEMPLATES.map(templateCardHtml).join('') : '';
-    return header() + accountSwitcher() +
+    return accountSwitcher() +
       '<div class="section-head"><h2>📄 Contract &amp; Offer Templates</h2></div>' +
       '<p class="section-sub">Upload past offers, SOWs, and contract templates here so they can be reused instead of rebuilt from scratch. Files stay in this browser session only.</p>' +
       (TEMPLATES.length ? '<div class="grid-3">' + cards + '</div>' : '<p class="empty-note">No templates uploaded yet.</p>') +
@@ -2903,7 +2893,7 @@
 
   function renderCaseStudies(){
     var nameable = CASE_STUDIES.filter(function(c){ return c.referenceable; }).length;
-    return header() + accountSwitcher() +
+    return accountSwitcher() +
       '<div class="section-head"><h2>🏆 Case Studies &amp; Proof Points</h2></div>' +
       '<p class="section-sub">What we can put in front of a prospect when they ask “have you done this before?” — ' + CASE_STUDIES.length + ' engagements, ' + nameable + ' of which we may name publicly. Tagged so they surface automatically on matching offers.</p>' +
       '<div class="grid-3">' + CASE_STUDIES.map(function(cs){ return caseStudyCardHtml(cs, false); }).join('') + '</div>' +
@@ -3033,7 +3023,7 @@
   }
 
   function renderSearch(){
-    return header() + accountSwitcher() +
+    return accountSwitcher() +
       '<div class="section-head"><h2>🔎 Search results</h2></div>' +
       '<p class="section-sub">Across every account, signal, offer, and case study.</p>' +
       searchResultsHtml();
@@ -3049,7 +3039,7 @@
     }).join('');
   }
 
-  var SECTOR_COLOR = { Automotive: '#f87171', Energy: '#fbbf24', Finance: '#60a5fa', 'Pharma & Healthcare': '#34d399', Retail: '#f472b6' };
+  var SECTOR_COLOR = { 'Auto & Manufacturing': '#f87171', 'Energy & Telco': '#fbbf24', 'Finance & Insurance': '#60a5fa', 'Pharma & Healthcare': '#34d399' };
 
   function allScenariosFlat(){
     var out = [];
@@ -3106,7 +3096,7 @@
       return { label: s, value: count, formattedValue: String(count), color: stageColor[s] };
     });
 
-    return header() + accountSwitcher() +
+    return accountSwitcher() +
       '<div class="section-head"><h2>📊 Pipeline &amp; Forecast</h2></div>' +
       '<p class="section-sub">Sales math across the whole portfolio. Deal-value estimates are editable per offer — open any offer page to set your own number.</p>' +
       '<div class="callout accent"><b class="label">Total weighted pipeline:</b> ' + formatMoney(totalWeighted) + ' &middot; confidence-weighted across ' + items.length + ' offers</div>' +
@@ -3165,7 +3155,7 @@
         '<div><span class="evidence-type c-newstype">' + s.subtype + '</span> <span class="tag-pill">🌐 Industry-Wide</span><p>' + s.text + '</p><div class="signal-source">via ' + s.source + '</div></div></div>';
     }).join('') : '<p class="empty-note">No industry-wide news yet for this sector.</p>';
 
-    return header() + sectorNav() +
+    return sectorNav() +
       '<div class="section-head"><h2>' + (sectorDef ? sectorDef.icon : '') + ' ' + sectorKey + ' Clients</h2></div>' +
       '<p class="section-sub">Select a client to see its full signal feed and offers. Filter by tier to focus on your priority accounts.</p>' +
       tierFilterRow +
@@ -3217,7 +3207,7 @@
       '</div>';
     }).join('');
 
-    return header() + sectorNav() +
+    return sectorNav() +
       '<div class="section-head"><h2>🔍 Market Scan</h2></div>' +
       '<p class="section-sub">Scan the European market for companies worth approaching — by sector, by country, or both. Ranked by how winnable they look for us, not just by size. Simulated for this demo; the real build would run this against a live company-data provider.</p>' +
       '<div class="scan-controls">' +
@@ -3269,7 +3259,7 @@
     var stalledCount = openItems.filter(function(x){ return offerIsStalled(x.account, x.sc); }).length;
     var awaitingApproval = items.filter(function(x){ return (x.sc.boardStage || 'suggested') === 'suggested'; }).length;
 
-    return header() + sectorNav() +
+    return sectorNav() +
       '<div class="section-head"><h2>🗂 Offer Board</h2></div>' +
       '<p class="section-sub">Every offer from the moment the AI surfaces it through to won or lost. The AI proposes — a salesperson approves — so nothing becomes work until someone owns it. Use ← → to move an offer between columns.</p>' +
       '<div class="badge-row" style="margin-bottom:16px">' +
@@ -3305,7 +3295,7 @@
       '</div>';
     }
 
-    return header() + sectorNav() +
+    return sectorNav() +
       '<div class="section-head"><h2>🔔 Follow-Ups</h2></div>' +
       '<p class="section-sub">Every call or email still waiting on a reply, across all accounts — so nothing goes quiet by accident. Set a “follow up by” date when logging activity on any account.</p>' +
       section('🔴 Overdue — chase these', 'overdue', 'Nothing overdue. Good shape.') +
@@ -3332,7 +3322,8 @@
     else if (state.view === 'tender') html = renderTenderDetail();
     else if (state.view === 'signal') html = renderSignal();
     else html = renderOverview();
-    byId('main').innerHTML = html;
+    byId('main').innerHTML = header() +
+      '<div class="app-body">' + sideNav() + '<div class="app-content">' + html + '</div></div>';
   }
 
   var toastTimer;
@@ -3812,6 +3803,51 @@
       tierAccount.tierManual = (tierAccount.tier !== computeTierFromRules(tierAccount));
       render();
       showToast('Tier set to T' + tierAccount.tier + (tierAccount.tierManual ? ' (overrides the rule)' : ''));
+      return;
+    }
+    var editClient = e.target.closest('[data-edit-client]');
+    if (editClient){ state.editingClient = true; render(); return; }
+    var cancelClient = e.target.closest('[data-cancel-client]');
+    if (cancelClient){ state.editingClient = false; render(); return; }
+    var saveClient = e.target.closest('[data-save-client]');
+    if (saveClient){
+      var ecAccount = currentAccount();
+      var ecName = (byId('edit-client-name').value || '').trim();
+      if (!ecName){ showToast('The client needs a name'); return; }
+      ecAccount.name = ecName;
+      var newSector = byId('edit-client-sector').value;
+      var sectorChanged = newSector !== ecAccount.industry;
+      ecAccount.industry = newSector;
+      var newRel = byId('edit-client-relationship').value;
+      var relChanged = newRel !== ecAccount.relationship;
+      ecAccount.relationship = newRel;
+      ecAccount.hq = (byId('edit-client-hq').value || ecAccount.hq).trim();
+      ecAccount.revenue = (byId('edit-client-revenue').value || ecAccount.revenue).trim();
+      ecAccount.sector = (byId('edit-client-descriptor').value || ecAccount.sector).trim();
+      ecAccount.goal = (byId('edit-client-goal').value || ecAccount.goal).trim();
+      var ecStack = (byId('edit-client-techstack').value || '').trim();
+      ecAccount.techStack = ecStack ? ecStack.split(',').map(function(x){ return x.trim(); }).filter(Boolean) : [];
+      // Sector drives the icon, and either change can move the rule-based tier.
+      var sectorDef2 = SECTORS.filter(function(x){ return x.key === newSector; })[0];
+      if (sectorDef2) ecAccount.icon = sectorDef2.icon;
+      if (relChanged || sectorChanged) refreshAutoTier(ecAccount);
+      if (sectorChanged) state.selectedSector = newSector;
+      state.editingClient = false;
+      render();
+      showToast(ecAccount.name + ' updated');
+      return;
+    }
+
+    var editTierNote = e.target.closest('[data-edit-tier-note]');
+    if (editTierNote){ state.editingTierNote = true; render(); return; }
+    var cancelTierNote = e.target.closest('[data-cancel-tier-note]');
+    if (cancelTierNote){ state.editingTierNote = false; render(); return; }
+    var saveTierNote = e.target.closest('[data-save-tier-note]');
+    if (saveTierNote){
+      currentAccount().tierNote = (byId('tier-note-input').value || '').trim();
+      state.editingTierNote = false;
+      render();
+      showToast('Tier note saved');
       return;
     }
     var resetTier = e.target.closest('[data-reset-tier]');

@@ -228,6 +228,14 @@
     color: var(--accent); background: var(--accent-soft); padding: 4px 10px; border-radius: var(--radius-pill);
   }
 
+  .opp-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .opp-title-row .opp-title { flex: 1; min-width: 0; }
+  .inline-form textarea {
+    flex: 1; min-width: 200px; background: var(--panel); border: 1px solid var(--border); color: var(--text);
+    font-size: 12.5px; padding: 8px 10px; border-radius: 8px; font-family: var(--font); resize: vertical;
+  }
+  .inline-form textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
   .cloud-badge {
     display: inline-block; margin-top: 7px; font-size: 10px; font-weight: 700; padding: 3px 10px;
     border-radius: var(--radius-pill); background: var(--panel2); border: 1px solid var(--border-strong);
@@ -1358,6 +1366,7 @@
     view: 'sector', // 'sector' | 'partners' | 'pipeline' | 'overview' | 'setup' | 'activity' | 'scenario' | 'signal'
     viewBeforeSearch: 'sector',
     tierFilter: 'All',
+    editingOffer: false,
     scenarioId: null,
     signalId: null,
     signalOrigin: { view: 'overview', scenarioId: null },
@@ -1448,6 +1457,7 @@
   function escapeAttr(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 
   function navigate(accountId, view, scenarioId){
+    state.editingOffer = false;
     state.accountId = accountId; state.view = view; state.scenarioId = scenarioId || null;
     var acc = findAccount(accountId);
     if (acc) state.selectedSector = acc.industry;
@@ -1624,6 +1634,47 @@
       if (typeof s.priority !== 'string') s.priority = 'Medium';
     });
   });
+  /* What we're actually trying to achieve at each account. Offers get checked
+     against it so sales can see whether an offer serves the stated goal or is
+     just a plausible-looking distraction. */
+  var DEFAULT_GOAL = {
+    'Automotive': 'Land a reference AI governance or data-engineering engagement with a major European automaker.',
+    'Energy': 'Build a foothold in AI-driven grid forecasting and predictive-maintenance compliance work.',
+    'Finance': 'Establish a reference engagement in explainable AI for lending or fraud detection.',
+    'Pharma & Healthcare': 'Win a clinical or patient-safety AI governance engagement with a major provider.',
+    'Retail': 'Prove out AI-driven demand forecasting and recommendation governance with a large retailer.'
+  };
+  ACCOUNTS.forEach(function(a){
+    if (typeof a.goal !== 'string') a.goal = DEFAULT_GOAL[a.industry] || 'Win a reference AI or data-engineering engagement with this account.';
+  });
+  function offerServesGoal(account, sc){
+    var goalWords = (account.goal || '').toLowerCase().split(/\W+/).filter(function(w){ return w.length > 4; });
+    var offerText = (sc.domainTag + ' ' + (sc.capabilities || []).join(' ') + ' ' + sc.summary).toLowerCase();
+    return goalWords.some(function(w){ return offerText.indexOf(w) !== -1; });
+  }
+  function goalCalloutHtml(account, sc){
+    var aligned = offerServesGoal(account, sc);
+    return '<div class="callout" style="margin-bottom:14px">' +
+      '<b class="label">' + (aligned ? '🎯 Serves the account goal' : '🎯 Account goal') + ':</b> ' + account.goal +
+      (aligned ? '' : '<br><span style="color:var(--text-faint)">This offer doesn\'t obviously advance that goal — worth a sanity check before spending time on it.</span>') +
+    '</div>';
+  }
+
+  /* We resell infrastructure through our own cloud partnerships, so when a
+     department already runs on a cloud we partner with, that's leverage on price. */
+  var CLOUD_TO_PARTNER = { 'AWS': 'aws', 'Microsoft Azure': 'microsoft', 'Google Cloud': 'google-cloud' };
+  function partnerLeverageHtml(account){
+    var dept = (account.departments || []).filter(function(d){ return d.cloudProvider; })[0];
+    if (!dept) return '';
+    var partnerId = CLOUD_TO_PARTNER[dept.cloudProvider];
+    var partner = PARTNERS.filter(function(p){ return p.id === partnerId; })[0];
+    if (!partner) return '';
+    return '<div class="callout" style="margin-bottom:14px">' +
+      '<b class="label">🤝 Partner leverage:</b> ' + dept.name + ' runs on ' + dept.cloudProvider +
+      ', and we\'re a ' + partner.name + ' partner — we can pass through better infrastructure pricing than they\'d get direct.' +
+    '</div>';
+  }
+
   /* Follow-ups. A call or email with no reply is the most common way a deal
      quietly dies, so any logged activity can carry a "follow up by" date and
      surfaces as overdue once that date passes. */
@@ -2364,6 +2415,20 @@
     '</div>';
   }
 
+  /* An offer the AI framed isn't always right — sales can rewrite it in place
+     rather than working around wording they don't believe in. */
+  function offerEditFormHtml(sc){
+    return '<div class="inline-form" style="margin-bottom:16px">' +
+      '<p class="col-sub" style="margin:0 0 4px">Editing this offer</p>' +
+      '<div class="form-row"><input id="edit-offer-title" type="text" placeholder="Offer title" value="' + escapeAttr(sc.title) + '"></div>' +
+      '<div class="form-row"><input id="edit-offer-domaintag" type="text" placeholder="Domain tag" value="' + escapeAttr(sc.domainTag) + '"></div>' +
+      '<div class="form-row"><textarea id="edit-offer-summary" rows="4" placeholder="Summary">' + escapeAttr(sc.summary) + '</textarea></div>' +
+      '<div class="form-row"><input id="edit-offer-capabilities" type="text" placeholder="Deliverables, comma-separated" value="' + escapeAttr((sc.capabilities || []).join(', ')) + '"></div>' +
+      '<div class="form-row"><input id="edit-offer-nextstep" type="text" placeholder="Recommended next step" value="' + escapeAttr(sc.nextStep) + '"></div>' +
+      '<div class="form-actions"><button class="btn small" data-cancel-offer-edit="1">Cancel</button><button class="btn small primary" data-save-offer-edit="1">Save offer</button></div>' +
+    '</div>';
+  }
+
   function renderScenario(){
     var account = currentAccount();
     var sc = findScenario(account, state.scenarioId);
@@ -2389,16 +2454,22 @@
           evidence +
         '</div>' +
         '<div class="panel">' +
-          '<div class="opp-eyebrow">Recommended offer &middot; ' + sc.domainTag + '</div>' +
-          '<span class="pill outline" style="margin-bottom:12px">🛠 Framed as Data Engineering &amp; Software Consulting</span>' +
-          '<h2 class="opp-title">' + sc.title + '</h2>' +
-          '<p class="opp-summary">' + sc.summary + '</p>' +
+          (state.editingOffer ? offerEditFormHtml(sc) :
+            '<div class="opp-eyebrow">Recommended offer &middot; ' + sc.domainTag + '</div>' +
+            '<span class="pill outline" style="margin-bottom:12px">🛠 Framed as Data Engineering &amp; Software Consulting</span>' +
+            '<div class="opp-title-row">' +
+              '<h2 class="opp-title">' + sc.title + '</h2>' +
+              '<button class="btn small" data-toggle-offer-edit="1">✏️ Edit</button>' +
+            '</div>' +
+            '<p class="opp-summary">' + sc.summary + '</p>') +
           '<div class="conf-row">' +
             '<div style="flex:1"><div class="conf-number ' + t + '">' + effConf + '</div><div class="conf-fill-track"><div class="conf-fill ' + t + '" style="width:' + effConf + '%"></div></div><div class="conf-sub">' + tierLabel(t) + ' &middot; based on ' + sc.signalIds.length + ' signals across both channels</div></div>' +
           '</div>' +
           scoreBreakdownHtml(account, sc) +
           rateCardHtml(sc) +
           '<p class="conf-sub" style="margin:6px 0 20px">Weighted value: ' + formatMoney((effConf/100) * sc.dealValue) + ' (confidence &times; deal value)</p>' +
+          goalCalloutHtml(account, sc) +
+          partnerLeverageHtml(account) +
           '<p class="section-label">Included deliverables</p>' +
           '<div class="cap-row">' + capabilities + '</div>' +
           '<div class="callout accent"><b class="label">Recommended next step:</b> ' + sc.nextStep + '</div>' +
@@ -3188,6 +3259,27 @@
       showToast(relAccount.name + ' flagged as ' + relAccount.relationship + ' · tier now T' + relAccount.tier);
       return;
     }
+    var toggleOfferEdit = e.target.closest('[data-toggle-offer-edit]');
+    if (toggleOfferEdit){ state.editingOffer = true; render(); return; }
+    var cancelOfferEdit = e.target.closest('[data-cancel-offer-edit]');
+    if (cancelOfferEdit){ state.editingOffer = false; render(); return; }
+    var saveOfferEdit = e.target.closest('[data-save-offer-edit]');
+    if (saveOfferEdit){
+      var eoTitle = (byId('edit-offer-title').value || '').trim();
+      if (!eoTitle){ showToast('Give the offer a title first'); return; }
+      var eoScenario = findScenario(currentAccount(), state.scenarioId);
+      eoScenario.title = eoTitle;
+      eoScenario.domainTag = (byId('edit-offer-domaintag').value || eoScenario.domainTag).trim();
+      eoScenario.summary = (byId('edit-offer-summary').value || eoScenario.summary).trim();
+      eoScenario.nextStep = (byId('edit-offer-nextstep').value || eoScenario.nextStep).trim();
+      var eoCaps = (byId('edit-offer-capabilities').value || '').trim();
+      if (eoCaps) eoScenario.capabilities = eoCaps.split(',').map(function(c){ return c.trim(); }).filter(Boolean);
+      state.editingOffer = false;
+      render();
+      showToast('Offer updated');
+      return;
+    }
+
     var markFollowUpDone = e.target.closest('[data-mark-followup-done]');
     if (markFollowUpDone){
       var fuAccount = findAccount(markFollowUpDone.getAttribute('data-followup-account'));

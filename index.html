@@ -228,6 +228,47 @@
     color: var(--accent); background: var(--accent-soft); padding: 4px 10px; border-radius: var(--radius-pill);
   }
 
+  .scan-controls {
+    background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px 18px; margin-bottom: 18px; display: flex; flex-direction: column; gap: 14px;
+  }
+  .scan-group { display: flex; flex-direction: column; gap: 7px; }
+  .scan-label {
+    font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-faint);
+  }
+  .country-grid { display: flex; flex-wrap: wrap; gap: 7px; }
+  .country-pill {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 650;
+    padding: 6px 12px; border-radius: var(--radius-pill); border: 1px solid var(--border);
+    background: var(--panel2); color: var(--text); cursor: pointer; font-family: var(--font);
+  }
+  .country-pill:hover { border-color: var(--accent); }
+  .country-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .country-pill.empty { opacity: 0.45; }
+  .country-count {
+    font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: var(--radius-pill);
+    background: var(--surface-3); color: var(--muted);
+  }
+  .country-pill.active .country-count { background: rgba(255,255,255,0.25); color: #fff; }
+
+  .prospect-card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px 16px; margin-bottom: 10px;
+  }
+  .prospect-head { display: flex; align-items: center; gap: 12px; }
+  .prospect-rank {
+    flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--surface-3);
+    color: var(--muted); font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center;
+  }
+  .prospect-id { flex: 1; min-width: 0; }
+  .prospect-name { font-weight: 700; font-size: 13.5px; }
+  .prospect-meta { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+  .prospect-fit { text-align: center; flex-shrink: 0; }
+  .prospect-fit-num { font-size: 17px; font-weight: 800; color: var(--accent); line-height: 1; font-family: var(--mono); }
+  .prospect-fit-label { font-size: 9.5px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.06em; }
+  .briefing { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--border); }
+  .briefing-text { font-size: 12.5px; line-height: 1.6; margin: 0 0 12px; }
+
   .board-scroll { overflow-x: auto; padding-bottom: 8px; }
   .board-row { display: flex; gap: 14px; align-items: flex-start; min-width: min-content; }
   .board-col {
@@ -1408,6 +1449,10 @@
     tierFilter: 'All',
     editingOffer: false,
     boardOnlyImportant: false,
+    scanSector: 'All',
+    scanCountry: 'All',
+    scanCount: 10,
+    scanBriefing: null,
     scenarioId: null,
     signalId: null,
     signalOrigin: { view: 'overview', scenarioId: null },
@@ -1542,6 +1587,8 @@
     pills += '<button class="sector-nav-pill' + (templatesActive ? ' active' : '') + '" data-select-sector="Templates">📄 Templates' + (TEMPLATES.length ? ' (' + TEMPLATES.length + ')' : '') + '</button>';
     var casesActive = state.selectedSector === 'CaseStudies';
     pills += '<button class="sector-nav-pill' + (casesActive ? ' active' : '') + '" data-select-sector="CaseStudies">🏆 Case Studies (' + CASE_STUDIES.length + ')</button>';
+    var scanActive = state.selectedSector === 'MarketScan';
+    pills += '<button class="sector-nav-pill' + (scanActive ? ' active' : '') + '" data-select-sector="MarketScan">🔍 Market Scan</button>';
     var boardActive = state.selectedSector === 'OfferBoard';
     pills += '<button class="sector-nav-pill' + (boardActive ? ' active' : '') + '" data-select-sector="OfferBoard">🗂 Offer Board</button>';
     var followupsActive = state.selectedSector === 'Followups';
@@ -1587,7 +1634,7 @@
     state.view = (key === 'Partners') ? 'partners' : (key === 'Pipeline') ? 'pipeline' : (key === 'Triggers') ? 'triggers' :
       (key === 'Recap') ? 'recap' : (key === 'Templates') ? 'templates' :
       (key === 'CaseStudies') ? 'cases' : (key === 'Followups') ? 'followups' :
-      (key === 'OfferBoard') ? 'offerboard' : 'sector';
+      (key === 'OfferBoard') ? 'offerboard' : (key === 'MarketScan') ? 'marketscan' : 'sector';
     window.scrollTo(0,0);
     render();
   }
@@ -1678,6 +1725,158 @@
       if (typeof s.priority !== 'string') s.priority = 'Medium';
     });
   });
+  /* ── Market scan ────────────────────────────────────────────────────────
+     A universe of large European companies we could prospect, so sales can ask
+     "who are the top N in this sector / this country?" rather than only working
+     the accounts already loaded. Mocked for the demo — the real build would pull
+     this from a company-data provider — but the companies and countries are real
+     so the output reads the way it eventually would. */
+  var EU_COUNTRIES = [
+    { code: 'DE', name: 'Germany', flag: '🇩🇪' },
+    { code: 'FR', name: 'France', flag: '🇫🇷' },
+    { code: 'NL', name: 'Netherlands', flag: '🇳🇱' },
+    { code: 'IT', name: 'Italy', flag: '🇮🇹' },
+    { code: 'ES', name: 'Spain', flag: '🇪🇸' },
+    { code: 'SE', name: 'Sweden', flag: '🇸🇪' },
+    { code: 'CH', name: 'Switzerland', flag: '🇨🇭' },
+    { code: 'DK', name: 'Denmark', flag: '🇩🇰' },
+    { code: 'BE', name: 'Belgium', flag: '🇧🇪' }
+  ];
+  function countryDef(code){ return EU_COUNTRIES.filter(function(c){ return c.code === code; })[0]; }
+
+  var MARKET_UNIVERSE = [
+    // Automotive
+    { name: 'Mercedes-Benz Group', country: 'DE', sector: 'Automotive', revenue: '$160B' },
+    { name: 'Porsche AG', country: 'DE', sector: 'Automotive', revenue: '$45B' },
+    { name: 'Continental AG', country: 'DE', sector: 'Automotive', revenue: '$44B' },
+    { name: 'Robert Bosch GmbH', country: 'DE', sector: 'Automotive', revenue: '$98B' },
+    { name: 'Renault Group', country: 'FR', sector: 'Automotive', revenue: '$58B' },
+    { name: 'Valeo', country: 'FR', sector: 'Automotive', revenue: '$23B' },
+    { name: 'Michelin', country: 'FR', sector: 'Automotive', revenue: '$30B' },
+    { name: 'Stellantis', country: 'NL', sector: 'Automotive', revenue: '$195B' },
+    { name: 'Ferrari', country: 'IT', sector: 'Automotive', revenue: '$7B' },
+    { name: 'Iveco Group', country: 'IT', sector: 'Automotive', revenue: '$16B' },
+    { name: 'Pirelli', country: 'IT', sector: 'Automotive', revenue: '$7B' },
+    { name: 'Volvo Group', country: 'SE', sector: 'Automotive', revenue: '$52B' },
+    { name: 'Scania', country: 'SE', sector: 'Automotive', revenue: '$20B' },
+    // Energy
+    { name: 'TotalEnergies', country: 'FR', sector: 'Energy', revenue: '$219B' },
+    { name: 'EDF', country: 'FR', sector: 'Energy', revenue: '$150B' },
+    { name: 'Engie', country: 'FR', sector: 'Energy', revenue: '$85B' },
+    { name: 'Enel', country: 'IT', sector: 'Energy', revenue: '$105B' },
+    { name: 'Eni', country: 'IT', sector: 'Energy', revenue: '$100B' },
+    { name: 'Iberdrola', country: 'ES', sector: 'Energy', revenue: '$54B' },
+    { name: 'Repsol', country: 'ES', sector: 'Energy', revenue: '$65B' },
+    { name: 'Ørsted', country: 'DK', sector: 'Energy', revenue: '$11B' },
+    { name: 'Vestas Wind Systems', country: 'DK', sector: 'Energy', revenue: '$17B' },
+    { name: 'Shell', country: 'NL', sector: 'Energy', revenue: '$284B' },
+    { name: 'E.ON', country: 'DE', sector: 'Energy', revenue: '$100B' },
+    { name: 'Vattenfall', country: 'SE', sector: 'Energy', revenue: '$25B' },
+    // Finance
+    { name: 'BNP Paribas', country: 'FR', sector: 'Finance', revenue: '$52B' },
+    { name: 'AXA', country: 'FR', sector: 'Finance', revenue: '$110B' },
+    { name: 'Société Générale', country: 'FR', sector: 'Finance', revenue: '$29B' },
+    { name: 'Crédit Agricole', country: 'FR', sector: 'Finance', revenue: '$40B' },
+    { name: 'Banco Santander', country: 'ES', sector: 'Finance', revenue: '$62B' },
+    { name: 'BBVA', country: 'ES', sector: 'Finance', revenue: '$35B' },
+    { name: 'UniCredit', country: 'IT', sector: 'Finance', revenue: '$25B' },
+    { name: 'Intesa Sanpaolo', country: 'IT', sector: 'Finance', revenue: '$27B' },
+    { name: 'Assicurazioni Generali', country: 'IT', sector: 'Finance', revenue: '$88B' },
+    { name: 'ING Group', country: 'NL', sector: 'Finance', revenue: '$23B' },
+    { name: 'ABN AMRO', country: 'NL', sector: 'Finance', revenue: '$10B' },
+    { name: 'UBS Group', country: 'CH', sector: 'Finance', revenue: '$45B' },
+    { name: 'Zurich Insurance Group', country: 'CH', sector: 'Finance', revenue: '$74B' },
+    { name: 'KBC Group', country: 'BE', sector: 'Finance', revenue: '$12B' },
+    // Pharma & Healthcare
+    { name: 'Roche', country: 'CH', sector: 'Pharma & Healthcare', revenue: '$66B' },
+    { name: 'Novartis', country: 'CH', sector: 'Pharma & Healthcare', revenue: '$50B' },
+    { name: 'Lonza Group', country: 'CH', sector: 'Pharma & Healthcare', revenue: '$7B' },
+    { name: 'Sanofi', country: 'FR', sector: 'Pharma & Healthcare', revenue: '$47B' },
+    { name: 'Novo Nordisk', country: 'DK', sector: 'Pharma & Healthcare', revenue: '$42B' },
+    { name: 'Coloplast', country: 'DK', sector: 'Pharma & Healthcare', revenue: '$4B' },
+    { name: 'Philips', country: 'NL', sector: 'Pharma & Healthcare', revenue: '$20B' },
+    { name: 'Merck KGaA', country: 'DE', sector: 'Pharma & Healthcare', revenue: '$23B' },
+    { name: 'Boehringer Ingelheim', country: 'DE', sector: 'Pharma & Healthcare', revenue: '$28B' },
+    { name: 'UCB', country: 'BE', sector: 'Pharma & Healthcare', revenue: '$6B' },
+    // Retail & Consumer
+    { name: "L'Oréal", country: 'FR', sector: 'Retail', revenue: '$45B' },
+    { name: 'Carrefour', country: 'FR', sector: 'Retail', revenue: '$95B' },
+    { name: 'LVMH', country: 'FR', sector: 'Retail', revenue: '$92B' },
+    { name: 'Kering', country: 'FR', sector: 'Retail', revenue: '$21B' },
+    { name: 'Danone', country: 'FR', sector: 'Retail', revenue: '$29B' },
+    { name: 'Ahold Delhaize', country: 'NL', sector: 'Retail', revenue: '$95B' },
+    { name: 'Inditex (Zara)', country: 'ES', sector: 'Retail', revenue: '$39B' },
+    { name: 'Mercadona', country: 'ES', sector: 'Retail', revenue: '$38B' },
+    { name: 'H&M Group', country: 'SE', sector: 'Retail', revenue: '$22B' },
+    { name: 'IKEA (Ingka Group)', country: 'SE', sector: 'Retail', revenue: '$45B' },
+    { name: 'Schwarz Group (Lidl, Kaufland)', country: 'DE', sector: 'Retail', revenue: '$175B' },
+    { name: 'Metro AG', country: 'DE', sector: 'Retail', revenue: '$33B' },
+    { name: 'Nestlé', country: 'CH', sector: 'Retail', revenue: '$103B' }
+  ];
+
+  /* Fit is deterministic per company so the "scan" is stable between runs
+     rather than reshuffling every click. Bigger revenue and a sector we already
+     have proof in score higher — that's what actually makes a prospect winnable. */
+  function revenueScale(rev){
+    var m = String(rev).match(/([\d.]+)/);
+    var n = m ? parseFloat(m[1]) : 0;
+    return Math.min(1, n / 200);
+  }
+  function haveProofIn(sector){
+    return CASE_STUDIES.some(function(cs){ return cs.sector === sector; });
+  }
+  function prospectFit(company){
+    var base = 48;
+    base += Math.round(revenueScale(company.revenue) * 26);
+    if (haveProofIn(company.sector)) base += 9;
+    if (PARTNERS.length) base += 3;
+    base += (hashStr(company.name) % 11) - 5;
+    return Math.max(35, Math.min(96, base));
+  }
+  function isAlreadyTracked(company){
+    return ACCOUNTS.some(function(a){
+      return a.name.toLowerCase().indexOf(company.name.toLowerCase().split(' ')[0]) === 0;
+    });
+  }
+  function runMarketScan(){
+    var list = MARKET_UNIVERSE.slice();
+    if (state.scanSector !== 'All') list = list.filter(function(c){ return c.sector === state.scanSector; });
+    if (state.scanCountry !== 'All') list = list.filter(function(c){ return c.country === state.scanCountry; });
+    list.sort(function(x, y){ return prospectFit(y) - prospectFit(x); });
+    return state.scanCount === 'All' ? list : list.slice(0, state.scanCount);
+  }
+
+  /* The briefing a salesperson actually needs before making contact: what to
+     lead with, who to call, and what we can point to as proof. */
+  var SECTOR_ANGLE = {
+    'Automotive': { need: 'AI in driver assistance and in-car assistants now falls under EU safety rules, and most OEMs are hiring governance staff faster than they can build the monitoring behind them.', lead: 'the gap between the AI oversight roles they are hiring for and the monitoring system those hires will need on day one', persona: 'Risk & Compliance Gatekeeper' },
+    'Energy': { need: 'Grid forecasting and predictive maintenance are moving to AI while regulators start demanding explainability for anything touching customer pricing.', lead: 'forecasting accuracy they can defend to a regulator, not just a model that scores well internally', persona: 'Technical Buyer' },
+    'Finance': { need: 'Credit and fraud models face documentation and explainability deadlines, and most banks have models in production that predate those rules.', lead: 'the model-documentation backlog they will have to clear before the next supervisory review', persona: 'Risk & Compliance Gatekeeper' },
+    'Pharma & Healthcare': { need: 'Clinical and diagnostic AI needs validation evidence before deployment, and false-positive complaints tend to surface before the paperwork is ready.', lead: 'validation evidence for clinical AI already in use, framed around patient safety rather than compliance cost', persona: 'Risk & Compliance Gatekeeper' },
+    'Retail': { need: 'Personalisation and demand forecasting drive real margin, and new EU rules require retailers to explain automated pricing and recommendations to consumers.', lead: 'forecast accuracy and the disclosure layer the new consumer rules require, together rather than separately', persona: 'Economic Buyer' }
+  };
+  function prospectBriefingHtml(company){
+    var angle = SECTOR_ANGLE[company.sector] || SECTOR_ANGLE['Automotive'];
+    var country = countryDef(company.country);
+    var useCases = (USE_CASE_PLAYBOOKS[company.sector] || []).slice(0, 2);
+    var proof = CASE_STUDIES.filter(function(cs){ return cs.sector === company.sector; })[0];
+    var fit = prospectFit(company);
+    return '<div class="briefing">' +
+      '<p class="col-sub" style="margin:0 0 10px">Simulated briefing — assembled from sector rules and our own case-study library, not live research on ' + company.name + '.</p>' +
+      '<p class="section-label">Why them</p>' +
+      '<p class="briefing-text">' + angle.need + ' At ' + company.revenue + ' revenue in ' + (country ? country.name : company.country) + ', ' + company.name + ' is large enough that this is a budgeted programme rather than a side project — fit score ' + fit + '.</p>' +
+      '<p class="section-label">What to lead with</p>' +
+      '<p class="briefing-text">Open on ' + angle.lead + '.</p>' +
+      (useCases.length ? '<p class="section-label">Offers that fit</p><div class="cap-row">' + useCases.map(function(u){
+        return '<span class="cap-pill"><span class="dot"></span>' + u.title + '</span>';
+      }).join('') + '</div>' : '') +
+      '<p class="section-label">Who to approach</p>' +
+      '<p class="briefing-text">Start with the <b>' + angle.persona + '</b>. ' + (BATTLE_CARDS[angle.persona] ? BATTLE_CARDS[angle.persona].angle : '') + '</p>' +
+      (proof ? '<p class="section-label">Proof we can show</p><p class="briefing-text">' + proof.client + ' — ' + proof.outcome + '</p>' : '') +
+      '<div class="cta-row"><button class="btn primary" data-adopt-prospect="' + escapeAttr(company.name) + '">+ Add as client</button></div>' +
+    '</div>';
+  }
+
   /* Offer tracking board. Every offer sits in exactly one column, from the
      moment the AI surfaces it through to won or lost, so nothing stalls
      invisibly. "Approved" is the gate: the AI proposes, a salesperson accepts
@@ -2970,11 +3169,64 @@
       '<div class="section-head"><h2>' + (sectorDef ? sectorDef.icon : '') + ' ' + sectorKey + ' Clients</h2></div>' +
       '<p class="section-sub">Select a client to see its full signal feed and offers. Filter by tier to focus on your priority accounts.</p>' +
       tierFilterRow +
+      '<div class="badge-row" style="margin-bottom:16px"><button class="pill outline" data-scan-this-sector="' + escapeAttr(sectorKey) + '">🔍 Scan the market for more ' + sectorKey + ' companies</button></div>' +
       '<div class="grid-3">' + (cards || '<p class="empty-note">No clients at that tier in ' + sectorKey + '.</p>') + '</div>' +
       addClientPanel() +
       '<div class="section-head"><h2>🌐 ' + sectorKey + ' — Industry-Wide News</h2></div>' +
       '<p class="section-sub">Laws and regulations affecting the whole sector — not tied to any single client. Per-client news lives on each client’s own page.</p>' +
       '<div class="signal-col">' + itemsHtml + '</div>';
+  }
+
+  function renderMarketScan(){
+    var results = runMarketScan();
+
+    var sectorPills = '<button class="pill' + (state.scanSector === 'All' ? ' primary-btn' : ' outline') + '" data-scan-sector="All">All sectors</button>' +
+      SECTORS.map(function(s){
+        return '<button class="pill' + (state.scanSector === s.key ? ' primary-btn' : ' outline') + '" data-scan-sector="' + escapeAttr(s.key) + '">' + s.icon + ' ' + s.key + '</button>';
+      }).join('');
+
+    var countryPills = '<button class="country-pill' + (state.scanCountry === 'All' ? ' active' : '') + '" data-scan-country="All">🇪🇺 All Europe</button>' +
+      EU_COUNTRIES.map(function(c){
+        var n = MARKET_UNIVERSE.filter(function(x){
+          return x.country === c.code && (state.scanSector === 'All' || x.sector === state.scanSector);
+        }).length;
+        return '<button class="country-pill' + (state.scanCountry === c.code ? ' active' : '') + (n ? '' : ' empty') + '" data-scan-country="' + c.code + '">' +
+          c.flag + ' ' + c.name + '<span class="country-count">' + n + '</span></button>';
+      }).join('');
+
+    var countPills = [10, 20, 'All'].map(function(n){
+      return '<button class="pill' + (state.scanCount === n ? ' primary-btn' : ' outline') + '" data-scan-count="' + n + '">Top ' + n + '</button>';
+    }).join('');
+
+    var rows = results.map(function(c, i){
+      var country = countryDef(c.country);
+      var fit = prospectFit(c);
+      var tracked = isAlreadyTracked(c);
+      var open = state.scanBriefing === c.name;
+      return '<div class="prospect-card">' +
+        '<div class="prospect-head">' +
+          '<span class="prospect-rank">' + (i + 1) + '</span>' +
+          '<div class="prospect-id">' +
+            '<div class="prospect-name">' + c.name + (tracked ? ' <span class="tag-pill">already tracked</span>' : '') + '</div>' +
+            '<div class="prospect-meta">' + (country ? country.flag + ' ' + country.name : c.country) + ' &middot; ' + c.sector + ' &middot; ' + c.revenue + ' revenue</div>' +
+          '</div>' +
+          '<div class="prospect-fit"><div class="prospect-fit-num">' + fit + '</div><div class="prospect-fit-label">fit</div></div>' +
+          '<button class="btn small" data-scan-brief="' + escapeAttr(c.name) + '">' + (open ? 'Hide' : '📋 How to approach') + '</button>' +
+        '</div>' +
+        (open ? prospectBriefingHtml(c) : '') +
+      '</div>';
+    }).join('');
+
+    return header() + sectorNav() +
+      '<div class="section-head"><h2>🔍 Market Scan</h2></div>' +
+      '<p class="section-sub">Scan the European market for companies worth approaching — by sector, by country, or both. Ranked by how winnable they look for us, not just by size. Simulated for this demo; the real build would run this against a live company-data provider.</p>' +
+      '<div class="scan-controls">' +
+        '<div class="scan-group"><span class="scan-label">Sector</span><div class="badge-row">' + sectorPills + '</div></div>' +
+        '<div class="scan-group"><span class="scan-label">Country</span><div class="country-grid">' + countryPills + '</div></div>' +
+        '<div class="scan-group"><span class="scan-label">How many</span><div class="badge-row">' + countPills + '</div></div>' +
+      '</div>' +
+      '<p class="section-sub">' + results.length + ' compan' + (results.length === 1 ? 'y' : 'ies') + ' matched.</p>' +
+      (rows || '<p class="empty-note">Nothing matches that combination — try a different country or widen the sector.</p>');
   }
 
   function renderOfferBoard(){
@@ -3070,6 +3322,7 @@
     else if (state.view === 'templates') html = renderTemplates();
     else if (state.view === 'cases') html = renderCaseStudies();
     else if (state.view === 'offerboard') html = renderOfferBoard();
+    else if (state.view === 'marketscan') html = renderMarketScan();
     else if (state.view === 'followups') html = renderFollowups();
     else if (state.view === 'search') html = renderSearch();
     else if (state.view === 'sector') html = renderSectorLanding();
@@ -3393,6 +3646,66 @@
       showToast(relAccount.name + ' flagged as ' + relAccount.relationship + ' · tier now T' + relAccount.tier);
       return;
     }
+    var scanThisSector = e.target.closest('[data-scan-this-sector]');
+    if (scanThisSector){
+      state.scanSector = scanThisSector.getAttribute('data-scan-this-sector');
+      state.scanCountry = 'All';
+      state.scanBriefing = null;
+      state.selectedSector = 'MarketScan';
+      state.view = 'marketscan';
+      window.scrollTo(0,0);
+      render();
+      return;
+    }
+    var scanSectorBtn = e.target.closest('[data-scan-sector]');
+    if (scanSectorBtn){ state.scanSector = scanSectorBtn.getAttribute('data-scan-sector'); state.scanBriefing = null; render(); return; }
+    var scanCountryBtn = e.target.closest('[data-scan-country]');
+    if (scanCountryBtn){ state.scanCountry = scanCountryBtn.getAttribute('data-scan-country'); state.scanBriefing = null; render(); return; }
+    var scanCountBtn = e.target.closest('[data-scan-count]');
+    if (scanCountBtn){
+      var cv = scanCountBtn.getAttribute('data-scan-count');
+      state.scanCount = (cv === 'All') ? 'All' : parseInt(cv, 10);
+      render();
+      return;
+    }
+    var scanBrief = e.target.closest('[data-scan-brief]');
+    if (scanBrief){
+      var briefName = scanBrief.getAttribute('data-scan-brief');
+      state.scanBriefing = (state.scanBriefing === briefName) ? null : briefName;
+      render();
+      return;
+    }
+    var adoptProspect = e.target.closest('[data-adopt-prospect]');
+    if (adoptProspect){
+      var apName = adoptProspect.getAttribute('data-adopt-prospect');
+      var apCompany = MARKET_UNIVERSE.filter(function(c){ return c.name === apName; })[0];
+      if (!apCompany) return;
+      var apId = slugify(apName);
+      if (findAccount(apId)){ showToast(apName + ' is already an account'); return; }
+      var apSector = SECTORS.filter(function(s){ return s.key === apCompany.sector; })[0];
+      var apCountry = countryDef(apCompany.country);
+      var apTemplate = DISCOVERY_TEMPLATES[apCompany.sector] || {};
+      var newAccount = {
+        id: apId, name: apName, industry: apCompany.sector,
+        icon: apSector ? apSector.icon : '🏢', avatar: apName.slice(0,2).toUpperCase(),
+        hq: apCountry ? apCountry.name : apCompany.country,
+        revenue: apCompany.revenue + ' (est.)',
+        sector: apCompany.sector + ' · added from market scan',
+        stage: 'Cold', relationship: 'Potential Client', tierManual: false,
+        signalHistory: [0,0,0,0,0,0], activityLog: [],
+        techStack: [],
+        goal: DEFAULT_GOAL[apCompany.sector] || 'Win a reference AI or data-engineering engagement with this account.',
+        departments: (apTemplate.departments || []).map(function(d){ return { name: d.name, focus: d.focus, cloudProvider: '' }; }),
+        contacts: [], sources: [], signals: [], scenarios: []
+      };
+      newAccount.tier = computeTierFromRules(newAccount);
+      ACCOUNTS.push(newAccount);
+      state.scanBriefing = null;
+      navigate(apId, 'setup');
+      showToast(apName + ' added — add contacts and sources to start tracking it');
+      return;
+    }
+
     var moveOffer = e.target.closest('[data-move-offer]');
     if (moveOffer){
       var moAccount = findAccount(moveOffer.getAttribute('data-move-account'));

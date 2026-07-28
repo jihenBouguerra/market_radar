@@ -1491,6 +1491,9 @@
     pills += '<button class="sector-nav-pill' + (templatesActive ? ' active' : '') + '" data-select-sector="Templates">📄 Templates' + (TEMPLATES.length ? ' (' + TEMPLATES.length + ')' : '') + '</button>';
     var casesActive = state.selectedSector === 'CaseStudies';
     pills += '<button class="sector-nav-pill' + (casesActive ? ' active' : '') + '" data-select-sector="CaseStudies">🏆 Case Studies (' + CASE_STUDIES.length + ')</button>';
+    var followupsActive = state.selectedSector === 'Followups';
+    var overdueCount = openFollowUps().filter(function(r){ return r.status === 'overdue'; }).length;
+    pills += '<button class="sector-nav-pill' + (followupsActive ? ' active' : '') + '" data-select-sector="Followups">🔔 Follow-ups' + (overdueCount ? ' (' + overdueCount + ')' : '') + '</button>';
     return '<div class="sector-nav-row">' + pills + '</div>';
   }
 
@@ -1530,7 +1533,7 @@
     state.tierFilter = 'All';
     state.view = (key === 'Partners') ? 'partners' : (key === 'Pipeline') ? 'pipeline' : (key === 'Triggers') ? 'triggers' :
       (key === 'Recap') ? 'recap' : (key === 'Templates') ? 'templates' :
-      (key === 'CaseStudies') ? 'cases' : 'sector';
+      (key === 'CaseStudies') ? 'cases' : (key === 'Followups') ? 'followups' : 'sector';
     window.scrollTo(0,0);
     render();
   }
@@ -1621,6 +1624,43 @@
       if (typeof s.priority !== 'string') s.priority = 'Medium';
     });
   });
+  /* Follow-ups. A call or email with no reply is the most common way a deal
+     quietly dies, so any logged activity can carry a "follow up by" date and
+     surfaces as overdue once that date passes. */
+  function followUpStatus(entry){
+    if (!entry.followUpDate) return null;
+    if (entry.followUpDone) return 'done';
+    if (entry.followUpDate < todayStr()) return 'overdue';
+    if (entry.followUpDate === todayStr()) return 'today';
+    return 'upcoming';
+  }
+  var FOLLOWUP_LABEL = { overdue: 'Overdue', today: 'Due today', upcoming: 'Upcoming', done: 'Done' };
+  var FOLLOWUP_CLASS = { overdue: 'lost', today: 'warm', upcoming: 'in-conversation', done: 'won' };
+  function openFollowUps(){
+    var rows = [];
+    ACCOUNTS.forEach(function(a){
+      (a.activityLog || []).forEach(function(entry){
+        var st = followUpStatus(entry);
+        if (st && st !== 'done') rows.push({ account: a, entry: entry, status: st });
+      });
+    });
+    return rows.sort(function(x, y){ return x.entry.followUpDate < y.entry.followUpDate ? -1 : 1; });
+  }
+  // A few seeded so the view has something to show in the demo.
+  (function seedFollowUps(){
+    var seeds = [
+      { accountId: 'vw', type: 'Email', by: '2026-07-10' },
+      { accountId: 'rwe', type: 'Email', by: '2026-07-24' },
+      { accountId: 'bayer', type: 'Call', by: '2026-08-01' }
+    ];
+    seeds.forEach(function(seed){
+      var acct = findAccount(seed.accountId);
+      if (!acct) return;
+      var entry = (acct.activityLog || []).filter(function(e){ return e.type === seed.type; })[0];
+      if (entry && !entry.followUpDate) entry.followUpDate = seed.by;
+    });
+  })();
+
   /* Which cloud a given department actually runs on. Seeded from the account's
      tech stack where we know it, and editable by sales — they often learn this
      in a call long before it shows up anywhere public. */
@@ -2226,10 +2266,20 @@
       '</div>';
   }
 
+  function followUpBadgeHtml(entry, accountId){
+    var st = followUpStatus(entry);
+    if (!st) return '';
+    return '<div class="badge-row" style="margin-top:6px">' +
+      '<span class="pill stage-pill ' + FOLLOWUP_CLASS[st] + '">🔔 ' + entry.followUpDate + ' &middot; ' + FOLLOWUP_LABEL[st] + '</span>' +
+      (st !== 'done' ? '<button class="btn small" data-mark-followup-done="' + entry.date + '" data-followup-account="' + accountId + '">✓ Done</button>' : '') +
+    '</div>';
+  }
+
   function activityAddForm(){
     return '<div class="inline-form">' +
       '<div class="form-row"><select id="add-activity-type"><option>Call</option><option>Email</option><option>Meeting</option><option>Note</option></select></div>' +
       '<div class="form-row"><input id="add-activity-note" type="text" placeholder="What happened?"></div>' +
+      '<div class="form-row"><input id="add-activity-followup" type="date" title="Follow up by (optional)"></div>' +
       '<div class="form-actions"><button class="btn small" data-cancel-activity="1">Cancel</button><button class="btn small primary" data-save-activity="1">Log it</button></div>' +
     '</div>';
   }
@@ -2273,7 +2323,7 @@
 
     var sortedLog = (account.activityLog || []).slice().sort(function(a,b){ return a.date < b.date ? 1 : -1; });
     var logHtml = sortedLog.length ? sortedLog.map(function(a){
-      return '<div class="timeline-item"><div class="timeline-date">' + a.date + '</div><div><span class="evidence-type">' + a.type + '</span><p>' + a.note + '</p></div></div>';
+      return '<div class="timeline-item"><div class="timeline-date">' + a.date + '</div><div><span class="evidence-type">' + a.type + '</span><p>' + a.note + '</p>' + followUpBadgeHtml(a, account.id) + '</div></div>';
     }).join('') : '<p class="empty-note">No activity logged yet.</p>';
 
     return header() + accountSwitcher() + accountStrip(account, false) + viewTabs() +
@@ -2774,6 +2824,39 @@
       '<div class="signal-col">' + itemsHtml + '</div>';
   }
 
+  function renderFollowups(){
+    var rows = openFollowUps();
+
+    function rowHtml(r){
+      return '<div class="list-row">' +
+        '<div class="list-row-main">' +
+          '<div class="list-row-name">' + r.account.icon + ' ' + r.account.name + ' <span class="tier-pill">T' + r.account.tier + '</span></div>' +
+          '<div class="list-row-sub">' + r.entry.type + ' on ' + r.entry.date + ' &middot; ' + r.entry.note + '</div>' +
+        '</div>' +
+        '<div class="list-row-meta">' +
+          '<span class="pill stage-pill ' + FOLLOWUP_CLASS[r.status] + '">🔔 ' + r.entry.followUpDate + '</span><br>' +
+          '<button class="btn small" data-account="' + r.account.id + '">Open account →</button> ' +
+          '<button class="btn small" data-mark-followup-done="' + r.entry.date + '" data-followup-account="' + r.account.id + '">✓ Done</button>' +
+        '</div>' +
+      '</div>';
+    }
+
+    function section(title, status, emptyNote){
+      var list = rows.filter(function(r){ return r.status === status; });
+      return '<div class="setup-panel" style="margin-bottom:18px">' +
+        '<div class="setup-panel-head"><h3>' + title + (list.length ? ' (' + list.length + ')' : '') + '</h3></div>' +
+        (list.length ? list.map(rowHtml).join('') : '<p class="empty-note">' + emptyNote + '</p>') +
+      '</div>';
+    }
+
+    return header() + sectorNav() +
+      '<div class="section-head"><h2>🔔 Follow-Ups</h2></div>' +
+      '<p class="section-sub">Every call or email still waiting on a reply, across all accounts — so nothing goes quiet by accident. Set a “follow up by” date when logging activity on any account.</p>' +
+      section('🔴 Overdue — chase these', 'overdue', 'Nothing overdue. Good shape.') +
+      section('🟡 Due today', 'today', 'Nothing due today.') +
+      section('🔵 Coming up', 'upcoming', 'No follow-ups scheduled yet.');
+  }
+
   function render(){
     var html;
     if (state.view === 'partners') html = renderPartners();
@@ -2782,6 +2865,7 @@
     else if (state.view === 'recap') html = renderMonthlyRecap();
     else if (state.view === 'templates') html = renderTemplates();
     else if (state.view === 'cases') html = renderCaseStudies();
+    else if (state.view === 'followups') html = renderFollowups();
     else if (state.view === 'search') html = renderSearch();
     else if (state.view === 'sector') html = renderSectorLanding();
     else if (state.view === 'setup') html = renderSetup();
@@ -3104,6 +3188,18 @@
       showToast(relAccount.name + ' flagged as ' + relAccount.relationship + ' · tier now T' + relAccount.tier);
       return;
     }
+    var markFollowUpDone = e.target.closest('[data-mark-followup-done]');
+    if (markFollowUpDone){
+      var fuAccount = findAccount(markFollowUpDone.getAttribute('data-followup-account'));
+      var fuEntryDate = markFollowUpDone.getAttribute('data-mark-followup-done');
+      var fuEntry = fuAccount && (fuAccount.activityLog || []).filter(function(x){ return x.date === fuEntryDate && x.followUpDate; })[0];
+      if (fuEntry){
+        fuEntry.followUpDone = true;
+        render();
+        showToast('Follow-up closed for ' + fuAccount.name);
+      }
+      return;
+    }
     var cycleCloud = e.target.closest('[data-cycle-cloud]');
     if (cycleCloud){
       var ccDept = currentAccount().departments[parseInt(cycleCloud.getAttribute('data-cycle-cloud'), 10)];
@@ -3174,7 +3270,8 @@
       var note = (byId('add-activity-note').value || '').trim();
       if (!note){ showToast('Enter what happened first'); return; }
       var type = byId('add-activity-type').value || 'Note';
-      currentAccount().activityLog.push({ date: todayStr(), type: type, note: note });
+      var fuDate = (byId('add-activity-followup').value || '').trim();
+      currentAccount().activityLog.push({ date: todayStr(), type: type, note: note, followUpDate: fuDate || null, followUpDone: false });
       state.addingActivity = false;
       render();
       showToast('Activity logged');

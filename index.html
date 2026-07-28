@@ -223,6 +223,10 @@
   .sentiment-pill.skeptical { color: var(--danger); background: var(--danger-soft); border-color: transparent; }
 
   .relationship-pill { cursor: pointer; font-weight: 650; }
+  .tier-pill {
+    display: inline-block; font-size: 10.5px; font-weight: 800; letter-spacing: 0.03em;
+    color: var(--accent); background: var(--accent-soft); padding: 4px 10px; border-radius: var(--radius-pill);
+  }
   .relationship-pill.client { color: var(--good); background: var(--good-soft); border-color: transparent; }
   .relationship-pill.potential-client { color: var(--accent); background: var(--accent-soft); border-color: transparent; }
 
@@ -1314,6 +1318,7 @@
     selectedSector: 'Automotive',
     view: 'sector', // 'sector' | 'partners' | 'pipeline' | 'overview' | 'setup' | 'activity' | 'scenario' | 'signal'
     viewBeforeSearch: 'sector',
+    tierFilter: 'All',
     scenarioId: null,
     signalId: null,
     signalOrigin: { view: 'overview', scenarioId: null },
@@ -1483,6 +1488,7 @@
     state.selectedSector = key;
     state.addingClient = false;
     state.discoveredSetup = null;
+    state.tierFilter = 'All';
     state.view = (key === 'Partners') ? 'partners' : (key === 'Pipeline') ? 'pipeline' : (key === 'Triggers') ? 'triggers' :
       (key === 'Recap') ? 'recap' : (key === 'Templates') ? 'templates' :
       (key === 'CaseStudies') ? 'cases' : 'sector';
@@ -2616,14 +2622,26 @@
   function renderSectorLanding(){
     var sectorKey = state.selectedSector;
     var sectorDef = SECTORS.filter(function(s){ return s.key === sectorKey; })[0];
-    var clients = ACCOUNTS.filter(function(a){ return a.industry === sectorKey; });
+    var sectorClients = ACCOUNTS.filter(function(a){ return a.industry === sectorKey; });
+    var tiersPresent = [1,2,3,4,5,6].filter(function(t){
+      return sectorClients.some(function(a){ return a.tier === t; });
+    });
+    var clients = state.tierFilter === 'All' ? sectorClients :
+      sectorClients.filter(function(a){ return a.tier === state.tierFilter; });
+
+    var tierFilterRow = tiersPresent.length > 1 ? '<div class="badge-row" style="margin-bottom:16px">' +
+      '<button class="pill' + (state.tierFilter === 'All' ? ' primary-btn' : ' outline') + '" data-set-tierfilter="All">All tiers</button>' +
+      tiersPresent.map(function(t){
+        return '<button class="pill' + (state.tierFilter === t ? ' primary-btn' : ' outline') + '" data-set-tierfilter="' + t + '">T' + t + '</button>';
+      }).join('') +
+    '</div>' : '';
 
     var cards = clients.map(function(a){
       var newsCount = a.signals.filter(function(s){ return s.channel === 'news'; }).length;
       var socialCount = a.signals.filter(function(s){ return s.channel === 'social'; }).length;
       return '<div class="card" data-account="' + a.id + '">' +
         '<div class="card-title-row"><h3>' + a.icon + ' ' + a.name + '</h3><span class="pill stage-pill ' + stageClass(a.stage) + '">' + (a.stage || 'Cold') + '</span></div>' +
-        '<div class="badge-row"><span class="pill relationship-pill ' + relationshipClass(a.relationship) + '" style="cursor:default">' + (a.relationship || 'Potential Client') + '</span><span class="tag-pill">' + a.hq + '</span><span class="tag-pill">' + a.revenue + '</span></div>' +
+        '<div class="badge-row"><span class="tier-pill">T' + a.tier + '</span><span class="pill relationship-pill ' + relationshipClass(a.relationship) + '" style="cursor:default">' + (a.relationship || 'Potential Client') + '</span><span class="tag-pill">' + a.hq + '</span><span class="tag-pill">' + a.revenue + '</span></div>' +
         '<p class="card-desc">' + a.sector + '</p>' +
         '<div class="card-footer"><span class="foot-meta">' + a.scenarios.length + ' offers &middot; ' + (newsCount + socialCount) + ' signals</span><span class="foot-link">View account &rarr;</span></div>' +
       '</div>';
@@ -2639,8 +2657,9 @@
 
     return header() + sectorNav() +
       '<div class="section-head"><h2>' + (sectorDef ? sectorDef.icon : '') + ' ' + sectorKey + ' Clients</h2></div>' +
-      '<p class="section-sub">Select a client to see its full signal feed and offers.</p>' +
-      '<div class="grid-3">' + cards + '</div>' +
+      '<p class="section-sub">Select a client to see its full signal feed and offers. Filter by tier to focus on your priority accounts.</p>' +
+      tierFilterRow +
+      '<div class="grid-3">' + (cards || '<p class="empty-note">No clients at that tier in ' + sectorKey + '.</p>') + '</div>' +
       addClientPanel() +
       '<div class="section-head"><h2>🌐 ' + sectorKey + ' — Industry-Wide News</h2></div>' +
       '<p class="section-sub">Laws and regulations affecting the whole sector — not tied to any single client. Per-client news lives on each client’s own page.</p>' +
@@ -2966,6 +2985,13 @@
       refreshAutoTier(relAccount);
       render();
       showToast(relAccount.name + ' flagged as ' + relAccount.relationship + ' · tier now T' + relAccount.tier);
+      return;
+    }
+    var setTierFilter = e.target.closest('[data-set-tierfilter]');
+    if (setTierFilter){
+      var tfVal = setTierFilter.getAttribute('data-set-tierfilter');
+      state.tierFilter = (tfVal === 'All') ? 'All' : parseInt(tfVal, 10);
+      render();
       return;
     }
     var setTier = e.target.closest('[data-set-tier]');

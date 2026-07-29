@@ -362,6 +362,9 @@
     border-radius: 10px; padding: 10px 11px; margin-bottom: 9px;
   }
   .board-card.important { border-left-color: var(--warn); }
+  .board-card[draggable="true"] { cursor: grab; }
+  .board-card.dragging { opacity: 0.4; cursor: grabbing; }
+  .board-col.drop-target { border-color: var(--accent); background: var(--accent-soft); }
   .board-card-head { display: flex; align-items: flex-start; gap: 6px; }
   .board-card-title {
     flex: 1; text-align: left; background: none; border: none; padding: 0; cursor: pointer;
@@ -385,6 +388,21 @@
 
   .opp-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
   .opp-title-row .opp-title { flex: 1; min-width: 0; }
+  /* Styled file picker — the native "Choose File / No file chosen" control
+     can't be themed and looked pasted in from another era. */
+  .file-drop {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 16px; border: 1px dashed var(--border-strong); border-radius: 10px;
+    background: var(--panel); cursor: pointer; text-align: center;
+  }
+  .file-drop:hover { border-color: var(--accent); }
+  .file-drop.has-file { border-style: solid; border-color: var(--good); }
+  .file-drop input[type="file"] { display: none; }
+  .file-drop-icon { font-size: 18px; line-height: 1; }
+  .file-drop-text { font-size: 12.5px; font-weight: 650; color: var(--text); }
+  .file-drop.has-file .file-drop-text { color: var(--good); }
+  .file-drop-hint { font-size: 10.5px; color: var(--text-faint); }
+
   .inline-form textarea {
     flex: 1; min-width: 200px; background: var(--panel); border: 1px solid var(--border); color: var(--text);
     font-size: 12.5px; padding: 8px 10px; border-radius: 8px; font-family: var(--font); resize: vertical;
@@ -2988,12 +3006,18 @@
 
   function templateAddForm(){
     var catOpts = TEMPLATE_CATEGORIES.map(function(c){ return '<option value="' + c + '">' + c + '</option>'; }).join('');
-    var fileLabel = state.pendingTemplateFile ? ('Selected: ' + state.pendingTemplateFile.fileName) : 'No file selected yet';
+    var fileLabel = state.pendingTemplateFile ? state.pendingTemplateFile.fileName : 'Click to choose a file';
     return '<div class="inline-form">' +
       '<div class="form-row"><input id="tpl-name" type="text" placeholder="Template name (e.g. AI Governance Pilot — Standard Offer)"></div>' +
       '<div class="form-row"><select id="tpl-category">' + catOpts + '</select></div>' +
-      '<div class="form-row"><input id="tpl-file" type="file" accept=".pdf,.doc,.docx,.txt,.md"></div>' +
-      '<p class="empty-note">' + fileLabel + '</p>' +
+      '<div class="form-row">' +
+        '<label class="file-drop' + (state.pendingTemplateFile ? ' has-file' : '') + '">' +
+          '<input id="tpl-file" type="file" accept=".pdf,.doc,.docx,.txt,.md">' +
+          '<span class="file-drop-icon">' + (state.pendingTemplateFile ? '📄' : '📎') + '</span>' +
+          '<span class="file-drop-text">' + fileLabel + '</span>' +
+          '<span class="file-drop-hint">PDF, DOC, DOCX, TXT or MD</span>' +
+        '</label>' +
+      '</div>' +
       '<div class="form-row"><input id="tpl-notes" type="text" placeholder="Notes (when to use this, what it includes)"></div>' +
       '<div class="form-actions"><button class="btn small" data-cancel-template="1">Cancel</button><button class="btn small primary" data-save-template="1">Save template</button></div>' +
     '</div>';
@@ -3422,7 +3446,8 @@
 
       var cards = inStage.map(function(x){
         var stalled = offerIsStalled(x.account, x.sc);
-        return '<div class="board-card' + (x.sc.important ? ' important' : '') + '">' +
+        return '<div class="board-card' + (x.sc.important ? ' important' : '') + '" draggable="true"' +
+            ' data-drag-offer="' + x.sc.id + '" data-drag-account="' + x.account.id + '">' +
           '<div class="board-card-head">' +
             '<button class="board-card-title" data-scenario-account="' + x.account.id + '" data-scenario-card="' + x.sc.id + '">' + x.sc.title + '</button>' +
             '<button class="star-btn' + (x.sc.important ? ' on' : '') + '" data-toggle-important="' + x.sc.id + '" data-important-account="' + x.account.id + '" title="Favorite this offer">' + (x.sc.important ? '★' : '☆') + '</button>' +
@@ -3439,7 +3464,7 @@
         '</div>';
       }).join('');
 
-      return '<div class="board-col">' +
+      return '<div class="board-col" data-drop-stage="' + stage.key + '">' +
         '<div class="board-col-head">' +
           '<h4>' + stage.label + ' <span class="board-count">' + inStage.length + '</span></h4>' +
           '<div class="board-col-sub">' + stage.hint + '</div>' +
@@ -3453,7 +3478,7 @@
     // row below, and the two would behave differently (navigate away vs. filter
     // in place), which reads as broken rather than just repetitive.
     return '<div class="section-head"><h2>🗂 Offer Board</h2></div>' +
-      '<p class="section-sub">Every offer from the moment the AI surfaces it through to signed or lost. The AI proposes — a salesperson approves — so nothing becomes work until someone owns it. Use ← → to move an offer between columns.</p>' +
+      '<p class="section-sub">Every offer from the moment the AI surfaces it through to signed or lost. The AI proposes — a salesperson approves — so nothing becomes work until someone owns it. Drag a card to another column, or use ← →.</p>' +
       (state.addingOffer ? newOfferFormHtml() : '') +
       '<div class="badge-row" style="margin-bottom:8px">' +
         '<button class="pill' + (state.boardOnlyImportant ? ' primary-btn' : ' outline') + '" data-toggle-board-important="1">★ Favorites only</button>' +
@@ -3588,6 +3613,54 @@
       reader.readAsDataURL(file);
       return;
     }
+  });
+
+  /* Drag and drop on the Offer Board. Delegated like everything else, so it
+     survives the full re-render each state change causes. The ← → buttons stay
+     as the keyboard/touch-friendly path; this is just a faster mouse route. */
+  var draggingOffer = null;
+  document.addEventListener('dragstart', function(e){
+    var card = e.target.closest && e.target.closest('[data-drag-offer]');
+    if (!card) return;
+    draggingOffer = {
+      offerId: card.getAttribute('data-drag-offer'),
+      accountId: card.getAttribute('data-drag-account')
+    };
+    card.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    // Firefox needs data set for the drag to start at all.
+    e.dataTransfer.setData('text/plain', draggingOffer.offerId);
+  });
+  document.addEventListener('dragend', function(e){
+    var card = e.target.closest && e.target.closest('[data-drag-offer]');
+    if (card) card.classList.remove('dragging');
+    document.querySelectorAll('.board-col.drop-target').forEach(function(c){ c.classList.remove('drop-target'); });
+    draggingOffer = null;
+  });
+  document.addEventListener('dragover', function(e){
+    if (!draggingOffer) return;
+    var col = e.target.closest && e.target.closest('[data-drop-stage]');
+    if (!col) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (!col.classList.contains('drop-target')){
+      document.querySelectorAll('.board-col.drop-target').forEach(function(c){ c.classList.remove('drop-target'); });
+      col.classList.add('drop-target');
+    }
+  });
+  document.addEventListener('drop', function(e){
+    if (!draggingOffer) return;
+    var col = e.target.closest && e.target.closest('[data-drop-stage]');
+    if (!col) return;
+    e.preventDefault();
+    var newStage = col.getAttribute('data-drop-stage');
+    var dropAccount = findAccount(draggingOffer.accountId);
+    var dropScenario = dropAccount && findScenario(dropAccount, draggingOffer.offerId);
+    draggingOffer = null;
+    if (!dropScenario || dropScenario.boardStage === newStage){ render(); return; }
+    dropScenario.boardStage = newStage;
+    render();
+    showToast(dropScenario.title + ' → ' + offerStageDef(newStage).label);
   });
 
   document.addEventListener('click', function(e){

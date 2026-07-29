@@ -1579,6 +1579,7 @@
 
   function sideNav(){
     var overdueCount = openFollowUps().filter(function(r){ return r.status === 'overdue'; }).length;
+    var homeHtml = '<button class="side-link' + (state.view === 'sector' ? ' active' : '') + '" data-select-sector="' + escapeAttr(SECTORS[0].key) + '">🏠 Home</button>';
     var groups = [
       { title: 'Work', items: [
         { key: 'OfferBoard', icon: '🗂', label: 'Offer Board' },
@@ -1606,7 +1607,7 @@
         }).join('') +
       '</div>';
     }).join('');
-    return '<aside class="side-nav">' + html + '</aside>';
+    return '<aside class="side-nav">' + homeHtml + html + '</aside>';
   }
 
   function addClientPanel(){
@@ -3448,8 +3449,10 @@
       '</div>';
     }).join('');
 
-    return sectorNav() +
-      '<div class="section-head"><h2>🗂 Offer Board</h2></div>' +
+    // No top sectorNav here — it would duplicate the board's own sector filter
+    // row below, and the two would behave differently (navigate away vs. filter
+    // in place), which reads as broken rather than just repetitive.
+    return '<div class="section-head"><h2>🗂 Offer Board</h2></div>' +
       '<p class="section-sub">Every offer from the moment the AI surfaces it through to signed or lost. The AI proposes — a salesperson approves — so nothing becomes work until someone owns it. Use ← → to move an offer between columns.</p>' +
       (state.addingOffer ? newOfferFormHtml() : '') +
       '<div class="badge-row" style="margin-bottom:8px">' +

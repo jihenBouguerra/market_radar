@@ -1444,6 +1444,7 @@
     boardTierFilter: 'All',
     boardSectorFilter: 'All',
     addingOffer: false,
+    newOfferImportant: false,
     scanSector: 'All',
     scanCountry: 'All',
     scanCount: 10,
@@ -3390,9 +3391,9 @@
         '<input id="new-offer-dealvalue" type="number" step="5000" min="0" placeholder="Deal value ($)">' +
         '<input id="new-offer-confidence" type="number" step="5" min="1" max="100" placeholder="Confidence (%)">' +
       '</div>' +
-      '<label style="display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer">' +
-        '<input id="new-offer-important" type="checkbox" style="width:auto"> ★ Mark as favorite' +
-      '</label>' +
+      '<div class="badge-row" style="margin-bottom:4px">' +
+        '<button class="pill' + (state.newOfferImportant ? ' primary-btn' : ' outline') + '" data-toggle-new-offer-important="1">' + (state.newOfferImportant ? '★ Favorite' : '☆ Mark as favorite') + '</button>' +
+      '</div>' +
       '<div class="form-actions"><button class="btn small" data-cancel-new-offer="1">Cancel</button><button class="btn small primary" data-save-new-offer="1">Add offer</button></div>' +
     '</div>';
   }
@@ -3974,9 +3975,11 @@
       return;
     }
     var toggleNewOffer = e.target.closest('[data-toggle-new-offer]');
-    if (toggleNewOffer){ state.addingOffer = true; render(); return; }
+    if (toggleNewOffer){ state.addingOffer = true; state.newOfferImportant = false; render(); return; }
     var cancelNewOffer = e.target.closest('[data-cancel-new-offer]');
-    if (cancelNewOffer){ state.addingOffer = false; render(); return; }
+    if (cancelNewOffer){ state.addingOffer = false; state.newOfferImportant = false; render(); return; }
+    var toggleNewOfferImportant = e.target.closest('[data-toggle-new-offer-important]');
+    if (toggleNewOfferImportant){ state.newOfferImportant = !state.newOfferImportant; render(); return; }
     var saveNewOffer = e.target.closest('[data-save-new-offer]');
     if (saveNewOffer){
       var noTitle = (byId('new-offer-title').value || '').trim();
@@ -3998,9 +4001,10 @@
         nextStep: (byId('new-offer-nextstep').value || '').trim() || 'Follow up to scope the engagement.',
         dealValue: noDealValue || defaultDealValue({ id: noTitle, confidence: noConfidence }),
         boardStage: 'approved',
-        important: !!byId('new-offer-important').checked
+        important: state.newOfferImportant
       });
       state.addingOffer = false;
+      state.newOfferImportant = false;
       render();
       showToast(noTitle + ' added to ' + noAccount.name);
       return;

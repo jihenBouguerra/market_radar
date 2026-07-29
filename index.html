@@ -106,6 +106,13 @@
 
   * { box-sizing: border-box; }
   html, body { height: 100%; width: 100%; }
+  /* Themed scrollbars — the native default (light, blocky) clashed badly against
+     the dark theme, especially on the Offer Board's horizontal scroller. */
+  * { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+  ::-webkit-scrollbar { width: 9px; height: 9px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 999px; border: 2px solid transparent; background-clip: content-box; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); background-clip: content-box; }
   body {
     margin: 0;
     background: var(--bg);
@@ -264,9 +271,6 @@
     .side-link.active { border-left-color: transparent; border-bottom-color: var(--accent); }
   }
 
-  .tech-picker { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 2px 0 4px; }
-  .tech-picker-item { display: flex; align-items: center; gap: 5px; font-size: 12px; cursor: pointer; }
-  .tech-picker-item input { width: auto; }
 
   .detail-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 6px; }
   .detail-facts > div { display: flex; flex-direction: column; gap: 3px; }
@@ -296,6 +300,13 @@
   .country-pill:hover { border-color: var(--accent); }
   .country-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
   .country-pill.empty { opacity: 0.45; }
+  .scan-count-input {
+    width: 90px; background: var(--panel2); border: 1px solid var(--border); color: var(--text);
+    font-size: 13px; font-weight: 700; padding: 6px 12px; border-radius: var(--radius-pill);
+    font-family: var(--font);
+  }
+  .scan-count-input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .scan-count-input.active { border-color: var(--accent); color: var(--accent); }
   .country-count {
     font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: var(--radius-pill);
     background: var(--surface-3); color: var(--muted);
@@ -2704,10 +2715,10 @@
           '<input id="edit-client-revenue" type="text" placeholder="Revenue" value="' + escapeAttr(account.revenue) + '">' +
         '</div>' +
         '<div class="form-row"><input id="edit-client-descriptor" type="text" placeholder="Short descriptor" value="' + escapeAttr(account.sector) + '"></div>' +
-        '<p class="col-sub" style="margin:2px 0 0">Tech stack — cloud providers also come from the Departments diagram below (click a badge there for a single team); add any others here, multiple at once.</p>' +
-        '<div class="tech-picker">' + TECH_STACK_OPTIONS.map(function(t){
-          var checked = (account.techStackManual || []).indexOf(t) !== -1;
-          return '<label class="tech-picker-item"><input type="checkbox" data-tech-option="' + escapeAttr(t) + '"' + (checked ? ' checked' : '') + '> ' + t + '</label>';
+        '<p class="col-sub" style="margin:2px 0 0">Tech stack — cloud providers also come from the Departments diagram below (click a badge there for a single team); click any others here to add or remove them, multiple at once.</p>' +
+        '<div class="badge-row" style="margin-bottom:4px">' + TECH_STACK_OPTIONS.map(function(t){
+          var active = (account.techStackManual || []).indexOf(t) !== -1;
+          return '<button class="pill' + (active ? ' primary-btn' : ' outline') + '" data-toggle-tech-option="' + escapeAttr(t) + '">' + (active ? '✓ ' : '+ ') + t + '</button>';
         }).join('') + '</div>' +
         '<div class="form-row"><textarea id="edit-client-goal" rows="2" placeholder="What we\'re trying to achieve here">' + escapeAttr(account.goal) + '</textarea></div>' +
         '<div class="form-actions"><button class="btn small" data-cancel-client="1">Cancel</button><button class="btn small primary" data-save-client="1">Save details</button></div>' +
@@ -3326,9 +3337,11 @@
           c.flag + ' ' + c.name + '<span class="country-count">' + n + '</span></button>';
       }).join('');
 
+    var isCustomCount = [10, 20, 'All'].indexOf(state.scanCount) === -1;
     var countPills = [10, 20, 'All'].map(function(n){
       return '<button class="pill' + (state.scanCount === n ? ' primary-btn' : ' outline') + '" data-scan-count="' + n + '">Top ' + n + '</button>';
-    }).join('');
+    }).join('') +
+      '<input type="number" min="1" max="' + MARKET_UNIVERSE.length + '" id="scan-count-custom" class="scan-count-input' + (isCustomCount ? ' active' : '') + '" placeholder="Custom #" value="' + (isCustomCount ? state.scanCount : '') + '">';
 
     var rows = results.map(function(c, i){
       var country = countryDef(c.country);
@@ -3434,20 +3447,12 @@
       '</div>';
     }).join('');
 
-    var openItems = items.filter(function(x){ return x.sc.boardStage !== 'won' && x.sc.boardStage !== 'lost'; });
-    var stalledCount = openItems.filter(function(x){ return offerIsStalled(x.account, x.sc); }).length;
-    var awaitingApproval = items.filter(function(x){ return (x.sc.boardStage || 'suggested') === 'suggested'; }).length;
-    var signedCount = items.filter(function(x){ return x.sc.boardStage === 'won'; }).length;
-
     return sectorNav() +
       '<div class="section-head"><h2>🗂 Offer Board</h2></div>' +
       '<p class="section-sub">Every offer from the moment the AI surfaces it through to signed or lost. The AI proposes — a salesperson approves — so nothing becomes work until someone owns it. Use ← → to move an offer between columns.</p>' +
       (state.addingOffer ? newOfferFormHtml() : '') +
       '<div class="badge-row" style="margin-bottom:8px">' +
         '<button class="pill' + (state.boardOnlyImportant ? ' primary-btn' : ' outline') + '" data-toggle-board-important="1">★ Favorites only</button>' +
-        '<span class="tag-pill">' + awaitingApproval + ' awaiting approval</span>' +
-        '<span class="tag-pill" style="color:var(--good)">✓ ' + signedCount + ' signed</span>' +
-        (stalledCount ? '<span class="tag-pill" style="color:var(--danger)">⚠ ' + stalledCount + ' with no reply</span>' : '') +
         (!state.addingOffer ? '<button class="pill outline" data-toggle-new-offer="1">+ New offer</button>' : '') +
       '</div>' +
       '<div class="badge-row" style="margin-bottom:8px">' + sectorFilterRow + '</div>' +
@@ -3548,6 +3553,12 @@
   });
 
   document.addEventListener('change', function(e){
+    if (e.target.id === 'scan-count-custom'){
+      var customN = parseInt(e.target.value, 10);
+      if (customN > 0) state.scanCount = customN;
+      render();
+      return;
+    }
     var reassignPersona = e.target.closest && e.target.closest('[data-reassign-persona]');
     if (reassignPersona){
       var rpContact = currentAccount().contacts[parseInt(reassignPersona.getAttribute('data-reassign-persona'), 10)];
@@ -4131,8 +4142,6 @@
       ecAccount.sector = (byId('edit-client-descriptor').value || ecAccount.sector).trim();
       ecAccount.goal = (byId('edit-client-goal').value || ecAccount.goal).trim();
       ecAccount.tierNote = (byId('edit-client-tiernote').value || '').trim();
-      ecAccount.techStackManual = Array.from(document.querySelectorAll('[data-tech-option]:checked')).map(function(cb){ return cb.getAttribute('data-tech-option'); });
-      ecAccount.techStack = deriveTechStack(ecAccount);
       // Sector drives the icon, and either change can move the rule-based tier.
       var sectorDef2 = SECTORS.filter(function(x){ return x.key === newSector; })[0];
       if (sectorDef2) ecAccount.icon = sectorDef2.icon;
@@ -4144,6 +4153,18 @@
       return;
     }
 
+    var toggleTechOption = e.target.closest('[data-toggle-tech-option]');
+    if (toggleTechOption){
+      var ttoAccount = currentAccount();
+      var ttoValue = toggleTechOption.getAttribute('data-toggle-tech-option');
+      ttoAccount.techStackManual = ttoAccount.techStackManual || [];
+      var ttoIdx = ttoAccount.techStackManual.indexOf(ttoValue);
+      if (ttoIdx === -1) ttoAccount.techStackManual.push(ttoValue);
+      else ttoAccount.techStackManual.splice(ttoIdx, 1);
+      ttoAccount.techStack = deriveTechStack(ttoAccount);
+      render();
+      return;
+    }
     var editTierNote = e.target.closest('[data-edit-tier-note]');
     if (editTierNote){ state.editingTierNote = true; render(); return; }
     var cancelTierNote = e.target.closest('[data-cancel-tier-note]');

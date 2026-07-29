@@ -242,7 +242,7 @@
   .app-body { display: flex; gap: 16px; align-items: flex-start; }
   .app-content { flex: 1; min-width: 0; }
   .side-nav {
-    flex: 0 0 132px; position: sticky; top: 18px;
+    flex: 0 0 158px; position: sticky; top: 18px;
     display: flex; flex-direction: column; gap: 14px;
   }
   .side-group { display: flex; flex-direction: column; gap: 6px; }
@@ -251,11 +251,19 @@
     color: var(--text-faint); padding: 0 2px;
   }
   .side-link {
-    display: block; width: 100%; text-align: left;
+    display: flex; align-items: center; gap: 6px; width: 100%; text-align: left;
     background: none; border: none; border-left: 3px solid transparent; color: var(--text);
     padding: 8px 10px; border-radius: 0 8px 8px 0; font-size: 12.5px; font-weight: 600;
     font-family: var(--font); cursor: pointer; transition: background .15s, border-color .15s;
   }
+  /* Labels ellipsis rather than wrapping — a menu row that spills onto two or
+     three lines reads as broken, and the full text is in the title attribute. */
+  .side-label { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .side-count {
+    flex-shrink: 0; font-size: 9.5px; font-weight: 800; padding: 1px 6px;
+    border-radius: var(--radius-pill); background: var(--surface-3); color: var(--muted);
+  }
+  .side-link.active .side-count { background: var(--accent); color: #fff; }
   .side-link:hover { background: var(--panel2); }
   .side-link.active { background: var(--accent-soft); border-left-color: var(--accent); color: var(--accent); font-weight: 700; }
 
@@ -422,10 +430,13 @@
   .org-root { display: flex; justify-content: center; margin-bottom: 2px; }
   .org-root-box { background: var(--accent); color: #fff; font-weight: 700; font-size: 12.5px; padding: 8px 18px; border-radius: 10px; }
   .org-stem { width: 2px; height: 14px; background: var(--border-strong); margin: 0 auto; }
-  .org-branches { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; padding-top: 12px; border-top: 2px solid var(--border-strong); }
+  .org-branches { display: flex; flex-wrap: wrap; justify-content: center; align-items: stretch; gap: 14px; padding-top: 12px; border-top: 2px solid var(--border-strong); }
   .org-branch { display: flex; flex-direction: column; align-items: center; min-width: 150px; }
   .org-branch-drop { width: 2px; height: 12px; background: var(--border-strong); margin-bottom: -1px; }
-  .org-branch-box { background: var(--panel2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; text-align: center; min-width: 150px; max-width: 200px; }
+  /* flex:1 + margin-top:auto on the badge keeps every department box the same
+     height with its cloud badge on a common baseline, however long the focus text runs. */
+  .org-branch-box { flex: 1; display: flex; flex-direction: column; background: var(--panel2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; text-align: center; min-width: 150px; max-width: 200px; }
+  .org-branch-box .cloud-badge { margin-top: auto; align-self: center; }
   .org-branch-name { font-weight: 700; font-size: 12.5px; }
   .org-branch-focus { color: var(--muted); font-size: 10.5px; margin-top: 3px; }
 
@@ -473,7 +484,7 @@
   .ref-pill.no { color: var(--warn); background: var(--warn-soft); border-color: transparent; }
   .metric-line { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--good); margin: 6px 0; }
 
-  .econ-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0; }
+  .econ-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 10px 0; }
   .econ-cell { background: var(--panel2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
   .econ-cell .fact-label { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--text-faint); }
   .econ-cell .econ-value { font-family: var(--mono); font-size: 15px; font-weight: 800; margin-top: 2px; }
@@ -484,7 +495,7 @@
   .deadline-pill.overdue { color: var(--danger); background: var(--danger-soft); border-color: transparent; }
 
   /* Pipeline: horizontal bar lists */
-  .hbar-row { display: grid; grid-template-columns: 180px 1fr 110px; align-items: center; gap: 12px; padding: 8px 0; }
+  .hbar-row { display: grid; grid-template-columns: minmax(0, 180px) minmax(0, 1fr) minmax(0, 110px); align-items: center; gap: 12px; padding: 8px 0; }
   .hbar-label { font-size: 12.5px; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .hbar-track { height: 14px; background: var(--panel2); border-radius: var(--radius-pill); overflow: hidden; }
   .hbar-fill { height: 100%; border-radius: var(--radius-pill); }
@@ -521,13 +532,13 @@
   .view-tab.active { color: var(--text); border-bottom-color: var(--accent); }
 
   /* Two-column signal feed */
-  .signal-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 8px; }
+  .signal-columns { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; margin-bottom: 8px; }
   .signal-col { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 24px; }
   .signal-col-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 2px; }
   .signal-col-head h3 { margin: 0; font-size: 15px; }
   .signal-col .col-sub { color: var(--muted); font-size: 12px; margin: 2px 0 16px; }
 
-  .timeline-item { display: grid; grid-template-columns: 78px 1fr; gap: 14px; padding: 12px 0; }
+  .timeline-item { display: grid; grid-template-columns: 78px minmax(0, 1fr); gap: 14px; padding: 12px 0; }
   .timeline-item:not(:last-child) { border-bottom: 1px dashed var(--border); }
   .timeline-item.clickable { cursor: pointer; border-radius: 8px; margin: 0 -8px; padding: 12px 8px; }
   .timeline-item.clickable:hover { background: var(--panel2); }
@@ -589,19 +600,20 @@
   .signal-row { display: flex; align-items: center; gap: 6px; border-bottom: 1px dashed var(--border); }
   .signal-row:last-child { border-bottom: none; }
   .signal-row-main {
-    flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px;
+    flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px;
     background: none; border: none; padding: 9px 4px; cursor: pointer; text-align: left; font-family: var(--font);
   }
   .signal-row-main:hover .signal-row-text { color: var(--accent); }
-  .signal-row-main .timeline-date { flex-shrink: 0; font-size: 10.5px; color: var(--text-faint); font-family: var(--mono); width: 44px; }
+  .signal-row-main .timeline-date { flex-shrink: 0; font-size: 10.5px; color: var(--text-faint); font-family: var(--mono); width: 38px; }
   .signal-row-main .evidence-type { flex-shrink: 0; }
   .signal-row-text {
     flex: 1; min-width: 0; font-size: 12.5px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .signal-row-source { flex-shrink: 0; font-size: 10.5px; color: var(--text-faint); max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* Source is context, not the point — it shrinks first so the headline stays readable. */
+  .signal-row-source { flex: 0 1 auto; min-width: 0; font-size: 10.5px; color: var(--text-faint); max-width: 108px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   /* Detail / scenario view */
-  .detail-grid { display: grid; grid-template-columns: 1fr 1.05fr; gap: 20px; align-items: start; margin-top: 6px; }
+  .detail-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 20px; align-items: start; margin-top: 6px; }
   .panel { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 26px; }
   .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-faint); margin: 0 0 14px; }
 
@@ -1597,7 +1609,7 @@
 
   function sideNav(){
     var overdueCount = openFollowUps().filter(function(r){ return r.status === 'overdue'; }).length;
-    var homeHtml = '<button class="side-link' + (state.view === 'sector' ? ' active' : '') + '" data-select-sector="' + escapeAttr(SECTORS[0].key) + '">🏠 Home</button>';
+    var homeHtml = '<button class="side-link' + (state.view === 'sector' ? ' active' : '') + '" data-select-sector="' + escapeAttr(SECTORS[0].key) + '"><span class="side-label">🏠 Home</span></button>';
     var groups = [
       { title: 'Work', items: [
         { key: 'OfferBoard', icon: '🗂', label: 'Offer Board' },
@@ -1619,8 +1631,9 @@
       return '<div class="side-group"><div class="side-group-title">' + g.title + '</div>' +
         g.items.map(function(it){
           var active = state.selectedSector === it.key;
-          return '<button class="side-link' + (active ? ' active' : '') + '" data-select-sector="' + it.key + '">' +
-            it.icon + ' ' + it.label + (it.badge ? ' (' + it.badge + ')' : '') +
+          return '<button class="side-link' + (active ? ' active' : '') + '" data-select-sector="' + it.key + '" title="' + escapeAttr(it.label) + '">' +
+            '<span class="side-label">' + it.icon + ' ' + it.label + '</span>' +
+            (it.badge ? '<span class="side-count">' + it.badge + '</span>' : '') +
           '</button>';
         }).join('') +
       '</div>';
@@ -2823,7 +2836,7 @@
     }).join('') : '<p class="empty-note">No activity logged yet.</p>';
 
     return accountSwitcher() + accountStrip(account, false) + viewTabs() +
-      '<div class="setup-grid" style="grid-template-columns: 1fr 1.4fr;">' +
+      '<div class="setup-grid" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);">' +
         '<div class="setup-panel">' +
           '<div class="setup-panel-head"><h3>📈 Signal Momentum</h3></div>' +
           '<p class="col-sub">Signals ingested per month, last 6 months.</p>' +
